@@ -1518,6 +1518,8 @@ footer{
 /* ── REVEAL ── */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity 0.6s ease,transform 0.6s ease}
 .reveal.visible{opacity:1;transform:none}
+/* Fallback: if JS doesn't run, still show content */
+.no-js .reveal{opacity:1;transform:none}
 
 @media(prefers-reduced-motion:reduce){
   .reveal{opacity:1;transform:none;transition:none}
@@ -1562,7 +1564,7 @@ footer{
     </div>
 
     <h1 class="hero-h1">EL SISTEMA<br>QUE YA SABE<br><em>QUIÉN GANA</em></h1>
-    <p class="hero-h1-sub">MUNDIAL 2026 · 64 PARTIDOS · 40 DÍAS</p>
+    <p class="hero-h1-sub">MUNDIAL 2026<br>64 PARTIDOS · 40 DÍAS</p>
 
     <div class="hero-ticker">
       <div class="ticker-track" id="ticker">
@@ -2286,23 +2288,6 @@ function toggleFaq(btn){
   if(!open)item.classList.add('open');
 }
 
-/* Carousel */
-(function(){
-  const track=document.getElementById('testi-track');
-  const dotsEl=document.getElementById('dots');
-  const cards=track.querySelectorAll('.testi');
-  const W=294;
-  cards.forEach((_,i)=>{
-    const d=document.createElement('div');
-    d.className='dot'+(i===0?' active':'');
-    d.onclick=()=>track.scrollTo({left:i*W,behavior:'smooth'});
-    dotsEl.appendChild(d);
-  });
-  track.addEventListener('scroll',()=>{
-    const idx=Math.round(track.scrollLeft/W);
-    dotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
-  },{passive:true});
-})();
 
 /* Nav scroll effect */
 window.addEventListener('scroll',()=>{
@@ -2312,8 +2297,13 @@ window.addEventListener('scroll',()=>{
 /* Scroll reveal */
 const obs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
-},{threshold:0.08});
+},{threshold:0.01,rootMargin:'0px 0px -20px 0px'});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* Safety fallback — make everything visible after 2s no matter what */
+setTimeout(()=>{
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el=>el.classList.add('visible'));
+},2000);
 
 /* Animate acc bars */
 const accObs=new IntersectionObserver(entries=>{
