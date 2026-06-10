@@ -25,7 +25,10 @@ const TELEGRAM_GROUPS = {
 };
 
 // ── Middleware ──
-app.use(cors({ origin: process.env.SITE_URL || 'https://mvxpicks.com' }));
+app.use(cors({
+  origin: ['https://mvxpicks.com', 'https://www.mvxpicks.com', /\.vercel\.app$/],
+  credentials: true,
+}));
 app.use(express.json());
 
 // ═══════════════════════════════════════════════════════════════
