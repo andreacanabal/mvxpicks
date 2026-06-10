@@ -454,14 +454,23 @@ async function footballAPI(endpoint, params = {}) {
 }
 
 async function telegramSend(chatId, text) {
-  if (!TELEGRAM_BOT() || !chatId) return;
+  if (!TELEGRAM_BOT() || !chatId) {
+    console.warn(`[Telegram] Skipped — bot:${!!TELEGRAM_BOT()} chatId:${chatId}`);
+    return;
+  }
   try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT()}/sendMessage`, {
+    const r = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT()}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
     });
-  } catch (e) { console.error('[Telegram]', e.message); }
+    const data = await r.json();
+    if (!data.ok) {
+      console.error(`[Telegram] Error chatId ${chatId}:`, JSON.stringify(data));
+    } else {
+      console.log(`[Telegram] ✓ Enviado a ${chatId}`);
+    }
+  } catch (e) { console.error('[Telegram] Fetch error:', e.message); }
 }
 
 async function telegramSendAll(text) {
