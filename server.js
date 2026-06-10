@@ -5,8 +5,9 @@ import express from 'express';
 import cors    from 'cors';
 import Stripe  from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import fetch   from 'node-fetch';
 import crypto  from 'crypto';
+
+// Node 18+ tiene fetch nativo — no necesitamos node-fetch
 
 const app    = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-06-20' });
