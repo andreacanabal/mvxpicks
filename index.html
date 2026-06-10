@@ -1233,12 +1233,13 @@ footer {
 .field input:focus { border-color: var(--gold); }
 
 #card-element {
-  background: var(--black);
-  border: 1px solid var(--border);
+  background: #111111;
+  border: 1px solid #3a3a3a;
   border-radius: 4px;
-  padding: 12px 14px;
+  padding: 14px;
   margin-bottom: 14px;
   transition: border-color 0.2s;
+  min-height: 46px;
 }
 #card-element.focused { border-color: var(--gold); }
 
@@ -2226,17 +2227,52 @@ async function initStripe() {
       appearance: {
         theme: 'night',
         variables: {
-          colorPrimary: '#F5A623',
-          colorBackground: '#080808',
-          colorText: '#EDEAE4',
-          colorDanger: '#E53E3E',
-          fontFamily: 'Inter, sans-serif',
-          borderRadius: '4px',
-          spacingUnit: '4px',
+          colorPrimary:       '#F5A623',
+          colorBackground:    '#111111',
+          colorText:          '#EDEAE4',
+          colorTextSecondary: '#8A8680',
+          colorTextPlaceholder: '#4A4A4A',
+          colorDanger:        '#E53E3E',
+          colorIconTab:       '#F5A623',
+          fontFamily:         'Inter, sans-serif',
+          borderRadius:       '4px',
+          spacingUnit:        '4px',
+          fontSizeBase:       '15px',
+        },
+        rules: {
+          '.Input': {
+            backgroundColor: '#111111',
+            border: '1px solid #242424',
+            color: '#EDEAE4',
+            padding: '12px 14px',
+          },
+          '.Input:focus': {
+            border: '1px solid #F5A623',
+            boxShadow: 'none',
+          },
+          '.Label': {
+            color: '#8A8680',
+            fontSize: '10px',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+          },
         }
       }
     });
-    cardElement = elements.create('card');
+    cardElement = elements.create('card', {
+      style: {
+        base: {
+          color: '#EDEAE4',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '15px',
+          fontSmoothing: 'antialiased',
+          '::placeholder': { color: '#4A4A4A' },
+          iconColor: '#F5A623',
+        },
+        invalid: { color: '#E53E3E', iconColor: '#E53E3E' },
+      },
+      hidePostalCode: true,
+    });
     cardElement.mount('#card-element');
     cardElement.on('change', e => {
       document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
