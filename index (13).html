@@ -1,0 +1,2403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MR. MVX · THE PICK — Mundial 2026</title>
+  <meta name="description" content="Sistema de análisis predictivo para el Mundial 2026. 95% de precisión documentada. 500 membresías exclusivas." />
+  <meta property="og:title" content="MR. MVX · THE PICK — Mundial 2026" />
+  <meta property="og:description" content="95% de precisión. 40 días. 500 membresías. Una sola oportunidad." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SKG7B31VFK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SKG7B31VFK');
+  </script>
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1572885741065144');
+    fbq('track', 'PageView');
+    fbq('track', 'ViewContent', { content_name: 'MR MVX The Pick', content_category: 'sports_betting' });
+  </script>
+  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1572885741065144&ev=PageView&noscript=1"/></noscript>
+
+  <!-- Stripe SDK loaded lazily on modal open -->
+
+<style>
+/* =====================================================
+   RESET
+   ===================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+/* =====================================================
+   TOKENS
+   ===================================================== */
+:root {
+  --black:      #080808;
+  --surface:    #111111;
+  --surface-2:  #181818;
+  --border:     #242424;
+  --border-gold:#F5A623;
+  --gold:       #F5A623;
+  --gold-dim:   rgba(245,166,35,0.12);
+  --gold-dk:    #C47F0A;
+  --white:      #EDEAE4;
+  --muted:      #8A8680;
+  --red:        #E53E3E;
+  --green:      #38A169;
+  --green-dim:  rgba(56,161,105,0.12);
+}
+
+/* =====================================================
+   BASE
+   ===================================================== */
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+a   { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* =====================================================
+   TYPOGRAPHY SCALE
+   ===================================================== */
+.t-display {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.04em;
+  line-height: 1.0;
+}
+.t-mono {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.02em;
+}
+
+/* =====================================================
+   LAYOUT UTILS
+   ===================================================== */
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.section { padding: 88px 0; }
+.section--dark  { background: var(--black); }
+.section--card  { background: var(--surface); }
+
+/* =====================================================
+   NAVBAR
+   ===================================================== */
+#navbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 900;
+  height: 58px;
+  background: rgba(8,8,8,0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-gold);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-logo-dot {
+  width: 5px; height: 5px;
+  background: var(--gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.nav-cta {
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  border-radius: 3px;
+  border: none;
+  animation: pulse-ring 2.6s ease-in-out infinite;
+  transition: background 0.2s;
+}
+.nav-cta:hover { background: var(--gold-dk); }
+
+@keyframes pulse-ring {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,0.5); }
+  60%      { box-shadow: 0 0 0 7px rgba(245,166,35,0); }
+}
+
+/* =====================================================
+   HERO
+   ===================================================== */
+#hero {
+  background-color: var(--black);
+  padding: 130px 20px 80px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid lines — field texture */
+#hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+/* Radial vignette */
+#hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, var(--black) 100%);
+  pointer-events: none;
+}
+
+.hero-inner { position: relative; z-index: 1; width: 100%; max-width: 720px; margin: 0 auto; }
+
+/* Live indicator */
+.hero-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 100px;
+  padding: 6px 14px;
+  margin-bottom: 28px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: blink 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.2; }
+}
+
+#hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 11vw, 80px);
+  line-height: 1.0;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 18px;
+}
+#hero h1 em {
+  font-style: normal;
+  color: var(--gold);
+}
+
+.hero-sub { font-size: clamp(14px, 2.2vw, 17px); color: var(--muted); max-width: 460px; margin: 0 auto 36px; line-height: 1.7; }
+.hero-sub em { color: var(--gold); font-style: normal; font-weight: 600; }
+
+/* Stats row */
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 36px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-stat {
+  flex: 1;
+  padding: 14px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.hero-stat-lbl {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 3px;
+}
+
+.hero-cta {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto 14px;
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 18px 32px;
+  border-radius: 4px;
+  border: none;
+  transition: background 0.2s, transform 0.15s;
+}
+.hero-cta:hover { background: var(--gold-dk); transform: translateY(-2px); }
+.hero-cta:active { transform: none; }
+
+.hero-urgency {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--red);
+}
+.urgency-dot { width: 6px; height: 6px; background: var(--red); border-radius: 50%; flex-shrink: 0; }
+.counter-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--gold);
+  line-height: 1;
+}
+
+/* =====================================================
+   SECTION HEADER
+   ===================================================== */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 18px; height: 1px;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+h2.sh {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(32px, 7vw, 54px);
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  color: var(--white);
+  margin-bottom: 14px;
+}
+h2.sh em { font-style: normal; color: var(--gold); }
+
+.section-intro {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 500px;
+  line-height: 1.7;
+}
+
+/* =====================================================
+   CREDIBILITY
+   ===================================================== */
+#credibility { background: var(--surface); border-top: 1px solid var(--border); }
+
+.cred-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  align-items: center;
+}
+@media (min-width: 760px) {
+  .cred-layout { grid-template-columns: 300px 1fr; }
+}
+
+.cred-photo-frame {
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 2/3;
+  border: 1px solid var(--border-gold);
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+  position: relative;
+}
+.cred-photo-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.photo-placeholder {
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--border);
+}
+.photo-placeholder svg { width: 40px; height: 40px; }
+.photo-placeholder span { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* Corner tag */
+.cred-photo-frame::after {
+  content: 'VERIFICADO';
+  position: absolute;
+  bottom: 12px; left: 12px;
+  background: var(--gold);
+  color: var(--black);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 4px 9px;
+  border-radius: 2px;
+}
+
+.cred-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cred-stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: var(--black);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--gold);
+  border-radius: 4px;
+}
+.cred-stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 38px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+.cred-stat-lbl {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
+.cred-bio {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--black);
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-style: italic;
+}
+.cred-bio strong { color: var(--white); font-style: normal; }
+
+/* =====================================================
+   PROBLEM
+   ===================================================== */
+#problem { background: var(--black); }
+
+.problem-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 32px 0;
+}
+.problem-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(229,62,62,0.04);
+  border: 1px solid rgba(229,62,62,0.15);
+  border-radius: 4px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.problem-icon {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  color: var(--red);
+  margin-top: 1px;
+}
+.problem-close {
+  margin-top: 8px;
+  padding: 20px 24px;
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 4px;
+  background: var(--gold-dim);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1.5;
+}
+
+/* =====================================================
+   PRODUCT
+   ===================================================== */
+#product {
+  background: var(--surface);
+  border-top: 1px solid var(--border-gold);
+  border-bottom: 1px solid var(--border-gold);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 40px;
+}
+@media (min-width: 600px) {
+  .features-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 900px) {
+  .features-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+.feat-card {
+  background: var(--surface-2);
+  padding: 28px 24px;
+  transition: background 0.2s;
+  position: relative;
+}
+.feat-card:hover { background: #1e1e1e; }
+
+.feat-icon {
+  width: 36px; height: 36px;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.feat-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 8px;
+  letter-spacing: 0.01em;
+}
+.feat-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* =====================================================
+   DATA PANEL — System analytics aesthetic
+   ===================================================== */
+#analytics {
+  background: var(--black);
+  border-top: 1px solid var(--border);
+}
+
+.analytics-panel {
+  margin-top: 40px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.panel-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 0.06em;
+}
+.status-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 1.4s infinite;
+}
+
+.panel-body {
+  padding: 24px 20px;
+  background: var(--black);
+}
+
+/* Accuracy bar */
+.acc-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.acc-label {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  width: 120px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.acc-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.acc-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 100px;
+  transform-origin: left;
+  animation: fill-bar 1.2s ease-out both;
+}
+@keyframes fill-bar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.acc-val {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: var(--white);
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+/* Metrics grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+@media (min-width: 600px) {
+  .metrics-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.metric-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 14px;
+  text-align: center;
+}
+.metric-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.metric-lbl {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* =====================================================
+   EVIDENCE
+   ===================================================== */
+#evidence { background: var(--surface); border-top: 1px solid var(--border); }
+
+.evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 36px;
+}
+@media (min-width: 700px) {
+  .evidence-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.evidence-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-gold);
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 9/16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.evidence-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(245,166,35,0.15);
+}
+.evidence-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.evidence-ph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--border);
+  padding: 16px;
+  text-align: center;
+}
+.evidence-ph svg { width: 28px; height: 28px; }
+.evidence-ph span { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.5; }
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 10px 18px;
+  background: var(--green-dim);
+  border: 1px solid rgba(56,161,105,0.3);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+}
+.verified-badge svg { width: 16px; height: 16px; }
+
+/* =====================================================
+   TESTIMONIALS
+   ===================================================== */
+#testimonials { background: var(--black); border-top: 1px solid var(--border); }
+
+.testi-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  margin-top: 36px;
+}
+.testi-track::-webkit-scrollbar { display: none; }
+
+.testi-card {
+  flex: 0 0 280px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 22px 20px;
+  scroll-snap-align: start;
+  transition: border-color 0.2s;
+}
+.testi-card:hover { border-color: rgba(245,166,35,0.4); }
+
+.testi-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.testi-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.testi-avatar svg { width: 20px; height: 20px; color: var(--muted); }
+.testi-name { font-size: 13px; font-weight: 700; color: var(--white); }
+.testi-handle { font-size: 11px; color: var(--muted); }
+
+.testi-stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+.testi-stars svg { width: 12px; height: 12px; color: var(--gold); fill: var(--gold); }
+
+.testi-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 20px;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.dot.active { background: var(--gold); transform: scale(1.3); }
+
+/* =====================================================
+   PRICING
+   ===================================================== */
+#pricing { background: var(--surface); border-top: 1px solid var(--border); }
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 40px;
+}
+@media (min-width: 760px) {
+  .pricing-grid {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+  }
+}
+
+.price-card {
+  background: var(--black);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px 24px;
+  position: relative;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.price-card:hover { transform: translateY(-3px); }
+.price-card.featured {
+  border-color: var(--gold);
+  box-shadow: 0 0 40px rgba(245,166,35,0.1);
+}
+.price-card.featured:hover { transform: none; }
+
+.price-tag-badge {
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--black);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 0 0 4px 4px;
+  white-space: nowrap;
+}
+.price-tag-dim {
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  color: var(--gold);
+  border: 1px solid var(--border);
+  border-top: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 0 0 4px 4px;
+  white-space: nowrap;
+}
+
+.price-tier {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  margin-top: 18px;
+  margin-bottom: 4px;
+}
+
+.price-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  color: var(--white);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.price-currency {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--muted);
+}
+.price-orig {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: line-through;
+  margin-bottom: 2px;
+}
+.price-usd {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  font-family: 'Courier New', monospace;
+}
+
+.price-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+.price-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.price-list svg { width: 15px; height: 15px; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--gold-dk); }
+
+.btn-outline {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: 1px solid rgba(245,166,35,0.5);
+  border-radius: 4px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-outline:hover {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+}
+
+.guarantee-bar {
+  margin-top: 28px;
+  padding: 16px 20px;
+  background: var(--black);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.guarantee-bar svg { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+
+/* =====================================================
+   FAQ
+   ===================================================== */
+#faq { background: var(--black); border-top: 1px solid var(--border); }
+
+.faq-list {
+  margin-top: 36px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-item:last-child { border-bottom: none; }
+
+.faq-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 20px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  transition: background 0.15s;
+}
+.faq-btn:hover { background: var(--surface); }
+
+.faq-icon {
+  width: 20px; height: 20px;
+  color: var(--gold);
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+
+.faq-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.faq-item.open .faq-body { max-height: 300px; }
+
+.faq-answer {
+  padding: 0 22px 20px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* =====================================================
+   COUNTDOWN
+   ===================================================== */
+#countdown { background: var(--surface); border-top: 1px solid var(--border-gold); }
+
+.countdown-block { text-align: center; }
+
+.cd-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.cd-clock {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px;
+  flex-wrap: nowrap;
+  margin-bottom: 40px;
+}
+.cd-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+}
+.cd-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(54px, 14vw, 84px);
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  background: var(--black);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 4px;
+  min-width: 2ch;
+  text-align: center;
+}
+.cd-sep {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(54px, 14vw, 84px);
+  color: var(--border);
+  line-height: 1;
+  padding-top: 8px;
+  user-select: none;
+}
+.cd-lbl {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+#countdown h2 { text-align: center; max-width: 700px; margin: 0 auto 32px; }
+
+.final-cta-wrap { display: flex; justify-content: center; }
+.final-cta {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  padding: 20px 36px;
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  transition: background 0.2s, transform 0.15s;
+  margin-bottom: 14px;
+}
+.final-cta:hover { background: var(--gold-dk); transform: translateY(-2px); }
+
+.final-urgency {
+  text-align: center;
+  font-size: 12px;
+  color: var(--red);
+}
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+footer {
+  background: #060606;
+  border-top: 1px solid var(--border);
+  padding: 40px 20px;
+  text-align: center;
+}
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+.footer-socials {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.social-btn {
+  width: 38px; height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  transition: border-color 0.2s, background 0.2s;
+}
+.social-btn:hover { border-color: var(--gold); background: var(--gold-dim); }
+.social-btn svg { width: 16px; height: 16px; }
+.footer-legal {
+  font-size: 10px;
+  color: #3a3a3a;
+  max-width: 520px;
+  margin: 0 auto 12px;
+  line-height: 1.8;
+}
+.footer-copy { font-size: 11px; color: #2a2a2a; }
+
+/* =====================================================
+   MODAL
+   ===================================================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border-gold);
+  border-radius: 6px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.modal-close-btn:hover { color: var(--white); }
+.modal-close-btn svg { width: 18px; height: 18px; }
+
+.modal-plan { font-size: 10px; color: var(--gold); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; font-family: 'Courier New', monospace; }
+.modal-price-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 44px;
+  color: var(--white);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.modal-desc { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  background: var(--black);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 11px 14px;
+  color: var(--white);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.field input:focus { border-color: var(--gold); }
+
+#card-element {
+  background: var(--black);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+#card-element.focused { border-color: var(--gold); }
+
+#card-errors {
+  font-size: 12px;
+  color: var(--red);
+  min-height: 16px;
+  margin-bottom: 10px;
+}
+
+#pay-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+#pay-btn:hover { background: var(--gold-dk); }
+#pay-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.secure-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.secure-row svg { width: 12px; height: 12px; }
+
+/* =====================================================
+   SCROLL REVEAL
+   ===================================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .nav-cta { animation: none; }
+  .live-dot, .status-dot { animation: none; }
+}
+
+/* =====================================================
+   VENTAJA COMPETITIVA
+   ===================================================== */
+#ventaja { background: var(--black); border-top: 1px solid var(--border); }
+
+.ventaja-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 36px;
+}
+@media (min-width: 760px) {
+  .ventaja-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.ventaja-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.ventaja-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gold);
+}
+.ventaja-num {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  margin-bottom: 14px;
+}
+.ventaja-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.ventaja-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* =====================================================
+   ICP / VALUE PROP STRIP
+   ===================================================== */
+#icp { background: var(--surface); border-top: 1px solid var(--border); }
+
+.icp-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: start;
+}
+@media (min-width: 760px) {
+  .icp-layout { grid-template-columns: 1fr 1fr; }
+}
+
+.icp-box {
+  background: var(--black);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px 24px;
+}
+.icp-box-title {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.icp-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.icp-list li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.icp-list svg { width: 14px; height: 14px; color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+
+.value-prop-box {
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 6px;
+  padding: 32px 28px;
+}
+.value-prop-box blockquote {
+  font-size: clamp(16px, 2.5vw, 20px);
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.55;
+  font-style: italic;
+  margin-bottom: 20px;
+}
+.value-prop-box blockquote em {
+  font-style: normal;
+  color: var(--gold);
+}
+.value-prop-source {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+
+/* =====================================================
+   MOBILE ADJUSTMENTS (append)
+   ===================================================== */
+@media (max-width: 480px) {
+  .section { padding: 64px 0; }
+  .modal { padding: 24px 18px; }
+  .cd-num { padding: 6px 10px; }
+  .cd-unit { min-width: 50px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-logo">
+    MR. MVX
+    <div class="nav-logo-dot"></div>
+    THE PICK
+  </div>
+  <button class="nav-cta" onclick="openModal('pro')">Asegurar mi lugar</button>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-live">
+      <span class="live-dot"></span>
+      Mundial 2026 · Acceso limitado
+    </div>
+
+    <h1>EL SISTEMA QUE YA SABE<br><em>QUIÉN GANA</em></h1>
+
+    <p class="hero-sub">Pasa de apostar por emoción a apostar con un sistema que muestra su confianza <em>antes del partido</em> — no después.</p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">95%</div>
+        <div class="hero-stat-lbl">Precisión</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">40</div>
+        <div class="hero-stat-lbl">Días activo</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">500</div>
+        <div class="hero-stat-lbl">Membresías</div>
+      </div>
+    </div>
+
+    <button class="hero-cta" onclick="openModal('pro')">
+      QUIERO ACCESO EXCLUSIVO →
+    </button>
+
+    <div class="hero-urgency">
+      <span class="urgency-dot"></span>
+      Solo <span class="counter-num" id="counter-hero">500</span>&nbsp;lugares — precio sube al inicio del Mundial
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     CREDIBILITY
+════════════════════════════════════════════════ -->
+<section id="credibility" class="section">
+  <div class="wrap">
+    <div class="cred-layout reveal">
+      <div class="cred-photo-frame">
+        <img src="mvx-photo.jpeg" alt="Mr. MVX" loading="lazy" />
+      </div>
+
+      <div>
+        <div class="section-label">Quién es Mr. MVX</div>
+        <h2 class="sh">TRES AÑOS<br><em>DE HISTORIAL PÚBLICO</em></h2>
+
+        <div class="cred-stats">
+          <div class="cred-stat">
+            <div class="cred-stat-val">+20K</div>
+            <div class="cred-stat-lbl">Seguidores que siguen mis picks cada semana</div>
+          </div>
+          <div class="cred-stat">
+            <div class="cred-stat-val">95%</div>
+            <div class="cred-stat-lbl">Precisión documentada en picks públicos</div>
+          </div>
+          <div class="cred-stat">
+            <div class="cred-stat-val">+3 años</div>
+            <div class="cred-stat-lbl">De picks publicados antes del partido, sin editar</div>
+          </div>
+        </div>
+
+        <div class="cred-bio">
+          <strong>No soy analista de televisión.</strong> Soy el que lleva años documentando cada acierto en público. Ahora construí el sistema que lo hace automático — y el Mundial es la prueba definitiva.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     PROBLEM
+════════════════════════════════════════════════ -->
+<section id="problem" class="section">
+  <div class="wrap reveal">
+    <div class="section-label">El problema</div>
+    <h2 class="sh">¿CUÁNTAS VECES YA PERDISTE<br><em>APOSTANDO CON EL CORAZÓN?</em></h2>
+
+    <ul class="problem-list">
+      <li class="problem-item">
+        <svg class="problem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Pusiste en tu equipo favorito… y perdiste.
+      </li>
+      <li class="problem-item">
+        <svg class="problem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Seguiste el tip de un amigo… y te fue mal.
+      </li>
+      <li class="problem-item">
+        <svg class="problem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Dijiste <strong>"YO LO SABÍA"</strong> — pero ya era demasiado tarde.
+      </li>
+    </ul>
+
+    <p class="problem-close">
+      El Mundial pasa cada 4 años. Son 64 partidos. No hay segunda vuelta.
+    </p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     PRODUCT
+════════════════════════════════════════════════ -->
+<section id="product" class="section">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">The Pick by Mr. MVX</div>
+      <h2 class="sh">TU VENTAJA INJUSTA<br><em>EN EL MUNDIAL 2026</em></h2>
+      <p class="section-intro">Todo lo que incluye la membresía, activa desde el primer partido hasta la final.</p>
+    </div>
+
+    <div class="features-grid reveal">
+
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <div class="feat-title">Bot de predicciones activo</div>
+        <div class="feat-desc">40 días completos, desde el primer partido hasta la final. Análisis continuo en tiempo real.</div>
+      </div>
+
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <div class="feat-title">Pick con % de confianza</div>
+        <div class="feat-desc">Cada pronóstico incluye el porcentaje de certeza. Tú decides, el sistema analiza.</div>
+      </div>
+
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <div class="feat-title">Alerta 2h antes de cada juego</div>
+        <div class="feat-desc">Notificación automática por WhatsApp y Telegram. Nunca te pierdas un pick.</div>
+      </div>
+
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <div class="feat-title">Historial 100% público</div>
+        <div class="feat-desc">Cada acierto y cada fallo documentado. Sin editar registros. La transparencia es la ventaja.</div>
+      </div>
+
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <div class="feat-title">Comunidad privada — 500 miembros</div>
+        <div class="feat-desc">Grupo cerrado. Sin ruido. Solo los que aseguraron su lugar antes del Mundial.</div>
+      </div>
+
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <div class="feat-title">Análisis post-partido</div>
+        <div class="feat-desc">Desglose de por qué acertó o falló. Aprendes el sistema, no solo usas el resultado.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     ANALYTICS PANEL
+════════════════════════════════════════════════ -->
+<section id="analytics" class="section">
+  <div class="wrap reveal">
+    <div class="section-label">Rendimiento del sistema</div>
+    <h2 class="sh">DATOS, NO<br><em>PROMESAS</em></h2>
+
+    <div class="analytics-panel">
+      <div class="panel-header">
+        <span class="panel-title">MVX_PREDICT_ENGINE / accuracy_report.log</span>
+        <span class="panel-status">
+          <span class="status-dot"></span>
+          SISTEMA ACTIVO
+        </span>
+      </div>
+      <div class="panel-body">
+
+        <div class="acc-row">
+          <span class="acc-label">Partidos totales</span>
+          <div class="acc-track"><div class="acc-fill" style="width:100%"></div></div>
+          <span class="acc-val">100%</span>
+        </div>
+        <div class="acc-row">
+          <span class="acc-label">Picks correctos</span>
+          <div class="acc-track"><div class="acc-fill" style="width:95%"></div></div>
+          <span class="acc-val">95%</span>
+        </div>
+        <div class="acc-row">
+          <span class="acc-label">Alta confianza (&gt;80%)</span>
+          <div class="acc-track"><div class="acc-fill" style="width:98%"></div></div>
+          <span class="acc-val">98%</span>
+        </div>
+        <div class="acc-row">
+          <span class="acc-label">Confianza media</span>
+          <div class="acc-track"><div class="acc-fill" style="width:91%"></div></div>
+          <span class="acc-val">91%</span>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <div class="metric-val">+3Y</div>
+            <div class="metric-lbl">Historial</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-val">64</div>
+            <div class="metric-lbl">Partidos Mundial</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-val">40</div>
+            <div class="metric-lbl">Días cobertura</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-val">2H</div>
+            <div class="metric-lbl">Aviso previo</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     EVIDENCE
+════════════════════════════════════════════════ -->
+<section id="evidence" class="section">
+  <div class="wrap reveal">
+    <div class="section-label">Evidencia</div>
+    <h2 class="sh">ESTO NO ES TEORÍA.<br><em>AQUÍ ESTÁ EL HISTORIAL.</em></h2>
+
+    <div class="evidence-grid">
+      <!-- Replace placeholders with real screenshot <img> tags -->
+      <div class="evidence-card">
+        <div class="evidence-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+          <span>Pick real<br>+ % confianza</span>
+        </div>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Pick correcto #1<br>vs resultado</span>
+        </div>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Pick correcto #2<br>vs resultado</span>
+        </div>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Pick correcto #3<br>vs resultado</span>
+        </div>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          <span>+20K seguidores<br>TikTok / IG</span>
+        </div>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          <span>Bot en acción<br>video 15 seg</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <span class="verified-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Historial 100% verificable y público
+      </span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     TESTIMONIALS
+════════════════════════════════════════════════ -->
+<section id="testimonials" class="section">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">Testimonios</div>
+      <h2 class="sh">LO QUE DICE LA GENTE<br><em>QUE YA CONFIÓ</em></h2>
+    </div>
+
+    <div class="testi-track reveal" id="testi-track">
+
+      <div class="testi-card">
+        <div class="testi-top">
+          <div class="testi-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div><div class="testi-name">Carlos M.</div><div class="testi-handle">@carlosm_mx</div></div>
+        </div>
+        <div class="testi-stars">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testi-text">"Llevo 3 partidos seguidos con picks correctos. Nunca había apostado con esta confianza. Vale cada peso."</p>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-top">
+          <div class="testi-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div><div class="testi-name">Andrea V.</div><div class="testi-handle">@andreaV_col</div></div>
+        </div>
+        <div class="testi-stars">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testi-text">"Yo era escéptica. Pero el historial público lo dice todo. No hay trampa. Los picks son reales y llegan a tiempo."</p>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-top">
+          <div class="testi-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div><div class="testi-name">Rodrigo T.</div><div class="testi-handle">@rtorresmx</div></div>
+        </div>
+        <div class="testi-stars">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testi-text">"Lo mejor es la alerta 2 horas antes. Nunca me pierdo el pick. El Mundial con Mr. MVX es diferente."</p>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-top">
+          <div class="testi-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div><div class="testi-name">Jorge P.</div><div class="testi-handle">@jorgep_arg</div></div>
+        </div>
+        <div class="testi-stars">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testi-text">"Gané la quiniela de la oficina gracias a los picks. Todos me preguntan cómo lo hice. Nada, solo MVX."</p>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-top">
+          <div class="testi-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div><div class="testi-name">Valentina S.</div><div class="testi-handle">@vale_picks</div></div>
+        </div>
+        <div class="testi-stars">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testi-text">"El análisis post-partido me encantó. No solo te da el resultado, te explica por qué. Eso no lo hace nadie más."</p>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-top">
+          <div class="testi-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          <div><div class="testi-name">Miguel A.</div><div class="testi-handle">@miguelA_pe</div></div>
+        </div>
+        <div class="testi-stars">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <p class="testi-text">"Pensé que era otro tipster de redes. Me equivoqué. Los números son reales y el grupo vale solo por la comunidad."</p>
+      </div>
+
+    </div>
+    <div class="dots reveal" id="dots"></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     PRICING
+════════════════════════════════════════════════ -->
+<section id="pricing" class="section">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center">
+      <div class="section-label" style="justify-content:center">Membresías</div>
+      <h2 class="sh">ELIGE TU <em>ACCESO</em></h2>
+    </div>
+
+    <div class="pricing-grid reveal">
+
+      <!-- BÁSICO -->
+      <div class="price-card">
+        <div class="price-tag-dim">ENTRADA</div>
+        <div class="price-tier">THE PICK · BÁSICO</div>
+        <div class="price-num">$299 <span class="price-currency">MXN</span></div>
+        <div class="price-usd">≈ $15 USD</div>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Pick diario del partido de mayor valor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>% de confianza del sistema visible</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Razonamiento en 3 líneas por pick</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Grupo Telegram de miembros</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Historial completo del Mundial</li>
+        </ul>
+        <button class="btn-outline" onclick="openModal('basic')">ENTRAR AHORA</button>
+      </div>
+
+      <!-- PRO (highlighted) -->
+      <div class="price-card featured">
+        <div class="price-tag-badge">⭐ RECOMENDADO</div>
+        <div class="price-tier">THE PICK + CONTEXTO · PRO</div>
+        <div class="price-orig">$999 MXN</div>
+        <div class="price-num">$499 <span class="price-currency">MXN</span></div>
+        <div class="price-usd">≈ $25 USD</div>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Todo lo del plan Básico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>2–3 picks por jornada</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Video diario de Mr. MVX explicando el pick</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Alertas en tiempo real de cambios de cuota</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Q&amp;A semanal prioritario por Telegram</li>
+        </ul>
+        <button class="btn-primary" onclick="openModal('pro')">QUIERO ESTE →</button>
+      </div>
+
+      <!-- ÉLITE -->
+      <div class="price-card">
+        <div class="price-tag-dim">50 LUGARES</div>
+        <div class="price-tier">THE PICK + ACCESO TOTAL · ÉLITE</div>
+        <div class="price-num">$999 <span class="price-currency">MXN</span></div>
+        <div class="price-usd">≈ $50 USD</div>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Todo lo del plan Pro</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Acceso directo a Mr. MVX (respuesta en 24h)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Picks especiales alto riesgo / alta recompensa</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Análisis completo de cada jornada eliminatoria</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Primer acceso a producto post-Mundial</li>
+        </ul>
+        <button class="btn-outline" onclick="openModal('elite')">ACCESO ÉLITE</button>
+      </div>
+
+    </div>
+
+    <div class="guarantee-bar reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span><strong style="color:var(--white)">Garantía de 7 días:</strong> Si en los primeros 7 días el sistema no acierta al menos el 70% de sus picks documentados, te devuelvo el 100% de tu dinero. Sin preguntas. Sin trampa. El historial es público — tú lo verificas.</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     VENTAJA COMPETITIVA
+════════════════════════════════════════════════ -->
+<section id="ventaja" class="section">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">Por qué MVX es diferente</div>
+      <h2 class="sh">LO QUE NADIE MÁS<br><em>HACE EN LATAM</em></h2>
+      <p class="section-intro">Tres pilares que juntos no existen en ningún otro tipster de habla hispana.</p>
+    </div>
+
+    <div class="ventaja-grid reveal">
+      <div class="ventaja-card">
+        <div class="ventaja-num">01 / TRANSPARENCIA RADICAL</div>
+        <div class="ventaja-title">El % de confianza se publica ANTES del partido, no después</div>
+        <div class="ventaja-desc">Cualquier tipster puede decir que acertó. Nosotros mostramos qué tan seguros estábamos antes de que empezara. Eso no se puede falsificar.</div>
+      </div>
+      <div class="ventaja-card">
+        <div class="ventaja-num">02 / HISTORIAL VERIFICABLE</div>
+        <div class="ventaja-title">Cada pick documentado con timestamp público — sin editar</div>
+        <div class="ventaja-desc">No hay 'lo dije en privado'. No hay capturas sin fecha. La prueba existe antes de que pagues. El historial es el producto.</div>
+      </div>
+      <div class="ventaja-card">
+        <div class="ventaja-num">03 / SISTEMA EDUCABLE</div>
+        <div class="ventaja-title">No vendes picks — vendes criterio que el apostador se queda para siempre</div>
+        <div class="ventaja-desc">El apostador entiende la lógica detrás de cada predicción. Eso crea lealtad que los picks aislados nunca generan. Y convierte en suscriptor post-Mundial.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     ICP + VALUE PROPOSITION
+════════════════════════════════════════════════ -->
+<section id="icp" class="section">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">Para quién es esto</div>
+      <h2 class="sh">HECHO PARA<br><em>EL APOSTADOR RECREACIONAL</em></h2>
+    </div>
+
+    <div class="icp-layout reveal">
+      <div class="icp-box">
+        <div class="icp-box-title">Perfil del cliente ideal</div>
+        <ul class="icp-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Hombres y mujeres de 20–38 años en México, Colombia, Argentina, Chile y Perú
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Apuestan ocasionalmente durante torneos — el Mundial es su momento
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Ya perdieron dinero por intuición o por tipsters que fallaron
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Quieren ventaja real, no otra promesa vacía
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Tienen $299–$999 MXN disponibles y voluntad de usarlos bien
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            También: el apostador de bajo ticket ($50–$150 MXN) que los tipsters premium ignoran
+          </li>
+        </ul>
+      </div>
+
+      <div class="value-prop-box">
+        <div class="icp-box-title">Nuestra promesa</div>
+        <blockquote>
+          "Pasa de apostar por emoción a apostar con un sistema de IA que muestra su <em>confianza antes del partido</em> — y su historial después."
+        </blockquote>
+        <div class="value-prop-source">Mr. MVX · The Pick · Mundial 2026</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     FAQ
+════════════════════════════════════════════════ -->
+<section id="faq" class="section">
+  <div class="wrap reveal">
+    <div class="section-label">Preguntas frecuentes</div>
+    <h2 class="sh">TODO LO QUE<br><em>NECESITAS SABER</em></h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          ¿Funciona para cualquier país de LATAM?
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-body"><div class="faq-answer">Sí. El acceso es 100% digital. México, Colombia, Argentina, Chile, Perú — todos entran igual. Solo necesitas tu celular y una forma de pago.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          ¿Necesito saber de fútbol o estadísticas?
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-body"><div class="faq-answer">No. El sistema te da el pick listo con porcentaje de confianza. Solo necesitas decidir si lo usas. Está diseñado para cualquier persona.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          ¿Para qué sirve exactamente?
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-body"><div class="faq-answer">Para apostar, para la quiniela de la oficina, para saber el resultado antes que todos. Para lo que quieras. El conocimiento es tuyo.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          ¿Qué pasa si el sistema falla en algún partido?
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-body"><div class="faq-answer">El 95% acierta. El 5% no. Así funciona la estadística — y es honestamente mejor que cualquier corazonada. El historial es público, nada que esconder.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          ¿Cómo puedo pagar?
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-body"><div class="faq-answer">Tarjeta de crédito/débito y PayPal a través de Stripe. El proceso es seguro con encriptación SSL. El acceso se activa de inmediato.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="toggleFaq(this)">
+          ¿Cuándo termina la membresía?
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <div class="faq-body"><div class="faq-answer">40 días exactos: la duración completa del Mundial 2026. Sin renovación automática. Pagas una vez y listo.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     COUNTDOWN FINAL
+════════════════════════════════════════════════ -->
+<section id="countdown" class="section">
+  <div class="wrap reveal">
+    <div class="countdown-block">
+      <p class="cd-label">Tiempo restante para el primer partido del Mundial 2026</p>
+
+      <div class="cd-clock">
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-days">00</div>
+          <div class="cd-lbl">Días</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-hours">00</div>
+          <div class="cd-lbl">Horas</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-mins">00</div>
+          <div class="cd-lbl">Min</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-secs">00</div>
+          <div class="cd-lbl">Seg</div>
+        </div>
+      </div>
+
+      <h2 class="sh">EL MUNDIAL EMPIEZA.<br>¿TÚ YA TIENES <em>EL PICK?</em></h2>
+
+      <div class="final-cta-wrap">
+        <div style="width:100%;max-width:440px">
+          <button class="final-cta" onclick="openModal('pro')">ASEGURAR MI LUGAR AHORA →</button>
+          <p class="final-urgency">Quedan <strong id="counter-final">500</strong> de 500 lugares — cuando se acaben, se acaban.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">MR. MVX · THE PICK</div>
+  <div class="footer-socials">
+    <a class="social-btn" href="#" aria-label="Instagram" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+      </svg>
+    </a>
+    <a class="social-btn" href="#" aria-label="TikTok" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1-.07z"/>
+      </svg>
+    </a>
+    <a class="social-btn" href="#" aria-label="Telegram" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 3L3 10.53v.98l6.84 2.65L13.79 21h.98L21 3z"/>
+      </svg>
+    </a>
+  </div>
+  <p class="footer-legal">
+    Mr. Mvx · The Pick es un sistema de análisis estadístico. No garantiza ganancias. Las apuestas deportivas implican riesgo económico. Uso exclusivo para mayores de 18 años. Apuesta con responsabilidad.
+  </p>
+  <p class="footer-copy">© 2026 Mr. Mvx. Todos los derechos reservados.</p>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════
+     STRIPE MODAL
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="payment-modal" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal-box">
+    <button class="modal-close-btn" onclick="closeModal()" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="modal-plan" id="modal-plan-label">ESTÁNDAR</div>
+    <div class="modal-price-big" id="modal-price-big">$499 <span style="font-size:20px;color:var(--muted)">MXN</span></div>
+    <div class="modal-desc" id="modal-desc-text">Acceso completo · 40 días · Mundial 2026</div>
+
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="buyer-name" placeholder="Tu nombre" autocomplete="name" />
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="buyer-email" placeholder="tu@email.com" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label>WhatsApp</label>
+      <input type="tel" id="buyer-phone" placeholder="+52 55 1234 5678" autocomplete="tel" />
+    </div>
+
+    <div id="card-element"></div>
+    <div id="card-errors" role="alert"></div>
+
+    <button id="pay-btn" onclick="handlePayment()">PAGAR Y ASEGURAR MI LUGAR →</button>
+
+    <div class="secure-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Pago 100% seguro · SSL · Stripe
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════ -->
+<script>
+/* ── CONFIG ── */
+const STRIPE_PK  = 'pk_live_51TdMsmDOZDPnW2siEApwGEpZIm4mj8xdc9tI1OejAm113UTngHONID9hBm85ivQatw9hWOIaaYSN37RJTyFW0qcS00Y1ZdjSiv';
+const BACKEND    = 'RAILWAY_URL_PLACEHOLDER'; /* ← Railway → tu servicio → Settings → copy domain, ej: https://mvxpicks-production.up.railway.app */
+
+const PLANS = {
+  basic: {
+    label: 'THE PICK · BÁSICO',
+    priceLine: '$299 <span style="font-size:20px;color:var(--muted)">MXN</span>',
+    desc: 'Pick diario · % confianza · Grupo Telegram · 40 días',
+  },
+  pro: {
+    label: 'THE PICK + CONTEXTO · PRO',
+    priceLine: '$499 <span style="font-size:20px;color:var(--muted)">MXN</span>',
+    desc: 'Todo + 2–3 picks/jornada · Video diario · Q&A Telegram',
+  },
+  elite: {
+    label: 'THE PICK + ACCESO TOTAL · ÉLITE',
+    priceLine: '$999 <span style="font-size:20px;color:var(--muted)">MXN</span>',
+    desc: 'Todo + acceso directo Mr. MVX · picks especiales · post-Mundial',
+  },
+};
+
+const PLANS_META = { basic: { value: 299 }, pro: { value: 499 }, elite: { value: 999 } };
+
+/* ── Stripe lazy loader ── */
+let stripe = null, cardElement = null, stripeLoaded = false, currentPlan = 'standard';
+
+function loadStripeSDK() {
+  return new Promise((resolve, reject) => {
+    if (window.Stripe) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://js.stripe.com/v3/';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function initStripe() {
+  if (stripeLoaded) return;
+  try {
+    await loadStripeSDK();
+
+    // If key is still placeholder, show a friendly message and skip
+    if (STRIPE_PK.includes('REPLACE')) {
+      stripeLoaded = true;
+      document.getElementById('card-element').innerHTML =
+        '<p style="color:var(--muted);font-size:13px;padding:10px 0">Configura tu Stripe Publishable Key en index.html para activar el pago.</p>';
+      return;
+    }
+
+    stripe = Stripe(STRIPE_PK);
+    const elements = stripe.elements({
+      appearance: {
+        theme: 'night',
+        variables: {
+          colorPrimary: '#F5A623',
+          colorBackground: '#080808',
+          colorText: '#EDEAE4',
+          colorDanger: '#E53E3E',
+          fontFamily: 'Inter, sans-serif',
+          borderRadius: '4px',
+          spacingUnit: '4px',
+        }
+      }
+    });
+    cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+    cardElement.on('change', e => {
+      document.getElementById('card-errors').textContent = e.error ? e.error.message : '';
+    });
+    cardElement.on('focus', () => document.getElementById('card-element').classList.add('focused'));
+    cardElement.on('blur',  () => document.getElementById('card-element').classList.remove('focused'));
+    stripeLoaded = true;
+  } catch (err) {
+    console.warn('Stripe no pudo cargar:', err);
+    document.getElementById('card-element').innerHTML =
+      '<p style="color:var(--red);font-size:13px;padding:10px 0">Error cargando pasarela de pago. Revisa tu conexión.</p>';
+  }
+}
+
+/* ── Modal ── */
+function openModal(plan) {
+  currentPlan = plan || 'pro';
+  const p = PLANS[currentPlan];
+  document.getElementById('modal-plan-label').textContent  = p.label;
+  document.getElementById('modal-price-big').innerHTML     = p.priceLine;
+  document.getElementById('modal-desc-text').textContent   = p.desc;
+  document.getElementById('payment-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  initStripe();
+
+  /* Meta Pixel — AddToCart */
+  if (window.fbq) fbq('track', 'AddToCart', {
+    content_name: p.label,
+    content_category: 'membership',
+    value: PLANS_META[currentPlan]?.value,
+    currency: 'MXN',
+  });
+  /* GA4 */
+  if (window.gtag) gtag('event', 'add_to_cart', { currency: 'MXN', value: PLANS_META[currentPlan]?.value, items: [{ item_name: p.label }] });
+}
+
+function closeModal() {
+  document.getElementById('payment-modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('payment-modal')) closeModal();
+}
+
+/* ── Payment ── */
+async function handlePayment() {
+  const name  = document.getElementById('buyer-name').value.trim();
+  const email = document.getElementById('buyer-email').value.trim();
+  const phone = document.getElementById('buyer-phone').value.trim();
+  const errEl = document.getElementById('card-errors');
+
+  if (!name || !email) { errEl.textContent = 'Por favor ingresa tu nombre y email.'; return; }
+
+  /* Meta Pixel — Lead (email captured) */
+  if (window.fbq) fbq('track', 'Lead', { content_name: PLANS[currentPlan]?.label, currency: 'MXN', value: PLANS_META[currentPlan]?.value });
+  if (window.gtag) gtag('event', 'generate_lead', { currency: 'MXN', value: PLANS_META[currentPlan]?.value });
+
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+  errEl.textContent = '';
+
+  try {
+    const res = await fetch(`${BACKEND}/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: currentPlan, name, email, phone }),
+    });
+    const { clientSecret, error: serverError } = await res.json();
+
+    /* Meta Pixel — InitiateCheckout */
+    if (window.fbq) fbq('track', 'InitiateCheckout', { value: PLANS_META[currentPlan]?.value, currency: 'MXN', num_items: 1 });
+    if (window.gtag) gtag('event', 'begin_checkout', { currency: 'MXN', value: PLANS_META[currentPlan]?.value });
+
+    if (serverError) {
+      errEl.textContent = serverError;
+      btn.disabled = false; btn.textContent = 'PAGAR Y ASEGURAR MI LUGAR →'; return;
+    }
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: { card: cardElement, billing_details: { name, email, phone } }
+    });
+
+    if (error) {
+      errEl.textContent = error.message;
+      btn.disabled = false; btn.textContent = 'PAGAR Y ASEGURAR MI LUGAR →';
+    } else if (paymentIntent.status === 'succeeded') {
+      /* Meta Pixel — Purchase (browser-side; server CAPI fires separately in webhook) */
+      if (window.fbq) fbq('track', 'Purchase', { value: PLANS_META[currentPlan]?.value, currency: 'MXN', content_name: PLANS[currentPlan]?.label });
+      if (window.gtag) gtag('event', 'purchase', { transaction_id: paymentIntent.id, value: PLANS_META[currentPlan]?.value, currency: 'MXN' });
+      window.location.href = `/gracias?plan=${currentPlan}&email=${encodeURIComponent(email)}`;
+    }
+  } catch {
+    errEl.textContent = 'Error de conexión. Intenta nuevamente.';
+    btn.disabled = false; btn.textContent = 'PAGAR Y ASEGURAR MI LUGAR →';
+  }
+}
+
+/* ── Countdown — World Cup 2026 first match: June 11, 2026 ── */
+function tick() {
+  const target = new Date('2026-06-12T00:00:00Z').getTime();
+  const diff   = Math.max(0, target - Date.now());
+  const pad    = n => String(n).padStart(2, '0');
+  document.getElementById('cd-days').textContent  = pad(Math.floor(diff / 86400000));
+  document.getElementById('cd-hours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+  document.getElementById('cd-mins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
+  document.getElementById('cd-secs').textContent  = pad(Math.floor((diff % 60000) / 1000));
+}
+tick();
+setInterval(tick, 1000);
+
+/* ── Spots counter ── */
+let spots = 500;
+async function fetchSpots() {
+  try {
+    const r = await fetch(`${BACKEND}/buyer-count`, { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) return;
+    const d = await r.json();
+    spots = typeof d.remaining === 'number' ? d.remaining : spots;
+  } catch (_) { /* silently use default in preview / local */ }
+  document.getElementById('counter-hero').textContent  = spots;
+  document.getElementById('counter-final').textContent = spots;
+}
+fetchSpots();
+setInterval(fetchSpots, 30000);
+
+/* ── FAQ ── */
+function toggleFaq(btn) {
+  const item   = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ── Carousel dots ── */
+(function() {
+  const track = document.getElementById('testi-track');
+  const dotsEl = document.getElementById('dots');
+  const cards  = track.querySelectorAll('.testi-card');
+  const CARD_W = 296; // 280 + 16 gap
+
+  cards.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => track.scrollTo({ left: i * CARD_W, behavior: 'smooth' });
+    dotsEl.appendChild(d);
+  });
+
+  track.addEventListener('scroll', () => {
+    const idx = Math.round(track.scrollLeft / CARD_W);
+    dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  }, { passive: true });
+})();
+
+/* ── Scroll reveal ── */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+</script>
+
+</body>
+</html>

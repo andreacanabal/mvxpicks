@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¡Bienvenido! — Mr. MVX · The Pick</title>
+  <meta name="robots" content="noindex" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SKG7B31VFK"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-SKG7B31VFK');</script>
+
+  <!-- Meta Pixel — Purchase event fired server-side in webhook; this is browser confirmation -->
+  <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1572885741065144');</script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:#080808;color:#EDEAE4;font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;-webkit-font-smoothing:antialiased}
+    .card{background:#111;border:1px solid #F5A623;border-radius:10px;padding:44px 36px;max-width:500px;width:100%;text-align:center;box-shadow:0 0 60px rgba(245,166,35,0.08)}
+    .check-circle{width:56px;height:56px;border-radius:50%;background:rgba(56,161,105,0.12);border:1px solid rgba(56,161,105,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+    .check-circle svg{width:26px;height:26px;color:#38A169}
+    h1{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#F5A623;letter-spacing:0.04em;margin-bottom:10px}
+    .plan-badge{display:inline-block;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.3);color:#F5A623;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 14px;border-radius:100px;margin-bottom:20px}
+    .sub{font-size:15px;color:#8A8680;line-height:1.65;margin-bottom:28px}
+    .steps{background:#080808;border:1px solid #242424;border-radius:6px;padding:20px;margin-bottom:28px;text-align:left}
+    .step{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+    .step:last-child{margin-bottom:0}
+    .step-num{width:24px;height:24px;border-radius:50%;background:#F5A623;color:#080808;font-family:'Bebas Neue',sans-serif;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .step-text{font-size:13px;line-height:1.6;color:#EDEAE4}
+    .step-text strong{color:#F5A623}
+    .btn{display:block;width:100%;background:#F5A623;color:#080808;font-weight:700;font-size:14px;letter-spacing:0.06em;text-transform:uppercase;padding:17px;border-radius:4px;text-decoration:none;transition:background 0.2s;margin-bottom:12px}
+    .btn:hover{background:#C47F0A}
+    .btn-out{display:block;width:100%;background:transparent;color:#F5A623;font-weight:700;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;padding:14px;border-radius:4px;border:1px solid rgba(245,166,35,0.4);text-decoration:none;transition:background 0.2s}
+    .btn-out:hover{background:rgba(245,166,35,0.08)}
+    .note{font-size:11px;color:#3a3a3a;margin-top:20px;line-height:1.7}
+    .loading{color:#8A8680;font-size:14px;padding:20px 0}
+    @media(max-width:480px){.card{padding:32px 20px}}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="check-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h1>¡ESTÁS DENTRO!</h1>
+  <div class="plan-badge" id="plan-badge">Cargando...</div>
+  <p class="sub">Tu membresía está activa para el Mundial 2026 completo. Revisa tu email — te mandamos la confirmación con todos los detalles.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text"><strong>Revisa tu email</strong> — llegó la confirmación con tu acceso y el link al grupo.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text"><strong>Únete al grupo privado</strong> con el botón de abajo. Solo los miembros pueden entrar.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text"><strong>Activa las notificaciones</strong> del grupo — los picks llegan 2h antes de cada partido automáticamente.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text"><strong>Listo.</strong> El sistema trabaja. Tú solo decides qué hacer con el pick.</div>
+    </div>
+  </div>
+
+  <div id="cta-area" class="loading">Verificando tu acceso...</div>
+
+  <p class="note">¿No recibiste el email? Revisa spam o escríbenos a hola@mvxpicks.com</p>
+</div>
+
+<script>
+const BACKEND = 'RAILWAY_URL_PLACEHOLDER'; /* ← mismo valor que pusiste en index.html */
+
+const PLAN_LABELS = {
+  basic: 'The Pick · Básico',
+  pro:   'The Pick + Contexto · Pro',
+  elite: 'The Pick + Acceso Total · Élite',
+};
+
+const PLAN_TELEGRAM_FALLBACK = {
+  basic: '#',
+  pro:   '#',
+  elite: '#',
+};
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const paymentIntentId = params.get('payment_intent') || params.get('session_id');
+  const planParam       = params.get('plan') || 'pro';
+  const emailParam      = params.get('email') || '';
+
+  const ctaArea  = document.getElementById('cta-area');
+  const planBadge = document.getElementById('plan-badge');
+
+  /* Try to verify with backend */
+  let plan = planParam;
+  let telegramLink = PLAN_TELEGRAM_FALLBACK[plan] || '#';
+
+  if (paymentIntentId) {
+    try {
+      const r = await fetch(`${BACKEND}/verify-session?session_id=${paymentIntentId}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (r.ok) {
+        const d = await r.json();
+        if (d.success) {
+          plan = d.plan || plan;
+          telegramLink = d.telegram_link || telegramLink;
+        }
+      }
+    } catch (_) { /* use fallback */ }
+  }
+
+  planBadge.textContent = PLAN_LABELS[plan] || plan;
+
+  ctaArea.innerHTML = `
+    <a class="btn" href="${telegramLink}" target="_blank" rel="noopener">
+      → UNIRME AL GRUPO AHORA
+    </a>
+    <a class="btn-out" href="https://mvxpicks.com">Volver al inicio</a>
+  `;
+
+  /* GA4 + Pixel confirmation (browser-side, deduplicated by server CAPI) */
+  if (window.gtag) gtag('event', 'purchase_confirmed', { plan });
+  if (window.fbq) fbq('track', 'CompleteRegistration', { content_name: PLAN_LABELS[plan] });
+}
+
+init();
+</script>
+</body>
+</html>

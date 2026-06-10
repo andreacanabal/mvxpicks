@@ -1,0 +1,21 @@
+{
+  "name": "mrmvx-the-pick",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.0",
+    "cors": "^2.8.5",
+    "stripe": "^14.0.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "node-fetch": "^3.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
