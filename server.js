@@ -26,11 +26,20 @@ const PLANS = {
 };
 
 const TELEGRAM_BOT = () => process.env.TELEGRAM_BOT_TOKEN;
+
+// Chat IDs para enviar mensajes
 const GROUPS = () => ({
   basic: process.env.TELEGRAM_GROUP_BASIC,
   pro:   process.env.TELEGRAM_GROUP_PRO,
   elite: process.env.TELEGRAM_GROUP_ELITE,
 });
+
+// Links de invitación para dar acceso a compradores
+const INVITE_LINKS = {
+  basic: 'https://t.me/+9uhkYl7bqFAzY2I5',
+  pro:   'https://t.me/+SddOV0ouYUZhODFh',
+  elite: 'https://t.me/+L038Yj6AQ3I5NDQx',
+};
 
 // ── Middleware ──
 app.use(cors({
@@ -100,7 +109,7 @@ app.get('/verify-session', async (req, res) => {
     if (pi.status !== 'succeeded') return res.status(400).json({ error: 'Pago no completado', status: pi.status });
     const plan = pi.metadata?.plan || 'pro';
     processSuccessfulPayment(pi).catch(e => console.error('[verify process]', e.message));
-    res.json({ success: true, plan, email: pi.receipt_email, name: pi.metadata?.buyer_name, telegram_link: GROUPS()[plan] || '', amount: pi.amount, currency: pi.currency });
+    res.json({ success: true, plan, email: pi.receipt_email, name: pi.metadata?.buyer_name, telegram_link: INVITE_LINKS[plan] || INVITE_LINKS.pro, amount: pi.amount, currency: pi.currency });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -482,7 +491,7 @@ async function telegramSendAll(text) {
 async function processSuccessfulPayment(pi) {
   const plan  = pi.metadata?.plan || 'pro';
   const email = pi.receipt_email;
-  const name  = pi.metadata?.buyer_name || '';
+  const name  = pi.metadata?.buyer_name || 'MVX Member';
   const phone = pi.metadata?.buyer_phone || '';
   if (!email) return;
 
@@ -496,14 +505,23 @@ async function processSuccessfulPayment(pi) {
 
   if (dbErr) { console.error('[processPayment] DB:', dbErr.message); return; }
 
-  await sb.rpc('decrement_spots').catch(() => {});
+  // Decrement spots — manual update instead of rpc to avoid errors
+  try {
+    const { data: cfg } = await sb.from('config').select('spots_sold').eq('id', 1).single();
+    if (cfg) {
+      await sb.from('config').update({ spots_sold: (cfg.spots_sold || 0) + 1 }).eq('id', 1);
+    }
+  } catch (e) { console.warn('[spots]', e.message); }
 
   await addToBrevoList({
-    email, firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' '),
-    plan, orderValue: pi.amount / 100,
-    telegramLink: GROUPS()[plan] || '',
+    email,
+    firstName: name.split(' ')[0],
+    lastName: name.split(' ').slice(1).join(' '),
+    plan,
+    orderValue: pi.amount / 100,
+    telegramLink: INVITE_LINKS[plan] || INVITE_LINKS.pro,
     listId: parseInt(process.env.BREVO_BUYERS_LIST_ID || '7'),
-  }).catch(() => {});
+  }).catch(e => console.error('[Brevo buyer]', e.message));
 
   await removeFromBrevoList(email, parseInt(process.env.BREVO_LEADS_LIST_ID || '6')).catch(() => {});
 
