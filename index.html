@@ -195,13 +195,17 @@ body::before{
 #video-intro{padding:64px 0;background:#060606;border-top:1px solid var(--border)}
 .video-inner{max-width:720px;margin:0 auto;padding:0 20px;text-align:center}
 .video-wrapper{
-  position:relative;width:100%;border:1px solid var(--border);border-radius:4px;overflow:hidden;
+  position:relative;
+  width:100%;
+  max-width:340px;
+  margin:0 auto;
+  padding-bottom:calc(177.78% * min(1, 340/100vw));
+  padding-bottom:177.78%;
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
   background:var(--surface);
 }
-/* Desktop 16:9 */
-.video-wrapper{padding-bottom:56.25%}
-/* Mobile 9:16 portrait */
-@media(max-width:480px){.video-wrapper{padding-bottom:177.78%}}
 .video-wrapper iframe,.video-wrapper video{position:absolute;inset:0;width:100%;height:100%}
 .video-placeholder{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
@@ -425,7 +429,7 @@ footer{background:#040404;border-top:1px solid var(--border);padding:40px 20px;t
 <!-- 1. NAVBAR -->
 <nav id="nav">
   <div class="nav-brand">MVX PICKS</div>
-  <button class="nav-cta" onclick="openModal('pro')">Asegurar mi lugar</button>
+  <button class="nav-cta" onclick="const el=document.getElementById('pricing');window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-64,behavior:'smooth'})">Asegurar mi lugar</button>
 </nav>
 
 <!-- 2. HERO -->
@@ -524,14 +528,14 @@ footer{background:#040404;border-top:1px solid var(--border);padding:40px 20px;t
   <div class="video-inner reveal">
     <div class="s-label" style="justify-content:center;display:inline-flex;margin-bottom:12px">Quién está detrás del sistema</div>
     <div class="video-wrapper">
-      <!-- Reemplaza el src con tu URL de YouTube: https://www.youtube.com/embed/VIDEO_ID -->
-      <!-- O usa un <video> nativo con src="tu-video.mp4" -->
-      <div class="video-placeholder">
-        <div class="video-play-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        </div>
-        <span class="video-placeholder-text">Video próximamente</span>
-      </div>
+      <iframe
+        src="https://www.youtube.com/embed/CCUhM8k31LI?rel=0&modestbranding=1&playsinline=1"
+        title="MVX Picks — Quién está detrás del sistema"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
     </div>
     <p class="video-tagline">3 años documentando en público. Ahora automatizado.</p>
   </div>
@@ -855,9 +859,9 @@ const STRIPE_PK = 'pk_live_51TdMsmDOZDPnW2siEApwGEpZIm4mj8xdc9tI1OejAm113UTngHON
 const BACKEND   = 'https://mvxpicks-production.up.railway.app';
 
 const PLANS = {
-  basic: { label:'THE PICK · BÁSICO',    priceLine:'$299 <span style="font-size:20px;color:var(--muted)">MXN</span>', desc:'Pick diario · % confianza · Grupo Telegram · 40 días' },
-  pro:   { label:'THE PICK · PRO',        priceLine:'$499 <span style="font-size:20px;color:var(--muted)">MXN</span>', desc:'Todo + 2–3 picks/jornada · Video diario · Q&A Telegram' },
-  elite: { label:'THE PICK · ÉLITE',      priceLine:'$999 <span style="font-size:20px;color:var(--muted)">MXN</span>', desc:'Todo + acceso directo al analista · picks especiales' },
+  basic: { label:'THE PICK · BÁSICO',    priceLine:'$299 <span style="font-size:20px;color:var(--muted)">MXN</span>', desc:'1 pick diario · 95% de precisión · 40 días' },
+  pro:   { label:'THE PICK · PRO',        priceLine:'$499 <span style="font-size:20px;color:var(--muted)">MXN</span>', desc:'3 picks diarios · 95% de precisión · 40 días' },
+  elite: { label:'THE PICK · ÉLITE',      priceLine:'$999 <span style="font-size:20px;color:var(--muted)">MXN</span>', desc:'Picks ilimitados · 95% de precisión · 40 días' },
 };
 const PLANS_META = { basic:{value:299}, pro:{value:499}, elite:{value:999} };
 
