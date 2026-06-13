@@ -115,7 +115,21 @@ app.get('/verify-session', async (req, res) => {
 
 // ═══════════════════════════════════════════════════════════════
 // ENDPOINT — Trigger manual de picks (protegido con secret)
-// GET /run-picks?secret=CRON_SECRET
+// GET /live-picks — devuelve picks recientes para la landing
+app.get('/live-picks', async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  try {
+    const { data, error } = await sb
+      .from('picks_history')
+      .select('fixture_id,date,home_team,away_team,prediction,confidence,result,correct,league_round')
+      .order('date', { ascending: false })
+      .limit(10);
+    if (error) throw error;
+    res.json({ picks: data || [] });
+  } catch (err) {
+    res.json({ picks: [] });
+  }
+});
 // ═══════════════════════════════════════════════════════════════
 app.get('/run-picks', async (req, res) => {
   if (req.query.secret !== process.env.CRON_SECRET) {
