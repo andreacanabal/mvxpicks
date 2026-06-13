@@ -331,41 +331,188 @@ function buildReasoning(pred, odds, homeTeam, awayTeam, homePct, drawPct, awayPc
 async function sendPicksTelegram(picks) {
   if (!TELEGRAM_BOT()) return;
   const groups = GROUPS();
+
+  // Mensaje hype de apertura del día — solo si hay partidos
+  await telegramSendAll(formatHypeMessage(picks));
+  await sleep(2000);
+
+  // Picks por plan
   for (const [plan, chatId] of Object.entries(groups)) {
     if (!chatId) continue;
     const picksToSend = plan === 'basic' ? [picks[0]] : picks;
     await telegramSend(chatId, formatPicksMessage(picksToSend, plan));
   }
-}
 
-function formatPicksMessage(picks, plan) {
-  const dateStr = new Date().toLocaleDateString('es-MX', {
-    weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Mexico_City',
-  }).toUpperCase();
-  const planLabel = { basic: 'BÁSICO', pro: 'PRO', elite: 'ÉLITE' }[plan] || plan.toUpperCase();
-
-  let msg = `🔮 *MR. MVX · THE PICK — ${dateStr}*\n📦 Plan ${planLabel}\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-  for (const p of picks) {
-    const t = new Date(p.date).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' });
-    msg += `⚽ *${p.home_team} vs ${p.away_team}*\n`;
-    msg += `🕐 ${t} hrs (México) · ${p.league_round}\n`;
-    msg += `🎯 Pick: *${p.prediction}*\n`;
-    msg += `📊 Confianza: *${p.confidence}%*\n`;
-    if (p.reasoning?.length) {
-      msg += `💡 Por qué:\n`;
-      p.reasoning.forEach(r => { msg += `   • ${r}\n`; });
-    }
-    if (p.advice) msg += `📝 ${p.advice}\n`;
-    msg += `\n`;
-  }
-
-  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `_% publicado ANTES del partido · mvxpicks.com_`;
-  return msg;
+  // Programar recordatorios 2h antes de cada partido
+  scheduleReminders(picks);
 }
 
 async function savePicksSupabase(picks) {
+  const rows = picks.map(p => ({
+    fixture_id: p.fixture_id, date: p.date,
+    home_team: p.home_team, away_team: p.away_team,
+    prediction: p.prediction, confidence: p.confidence,
+    reasoning: p.reasoning, league_round: p.league_round,
+    timestamp_published: p.timestamp_published,
+    result: null, correct: null,
+  }));
+  const { error } = await sb.from('picks_history').upsert(rows, { onConflict: 'fixture_id' });
+  if (error) console.error('[Supabase picks]', error.message);
+}
+
+// ── MENSAJE HYPE DE APERTURA ──
+function formatHypeMessage(picks) {
+  const dateStr = new Date().toLocaleDateString('es-MX', {
+    weekday: 'long', day: 'numeric', month: 'long',
+    timeZone: 'America/Mexico_City',
+  }).toUpperCase();
+
+  const totalPartidos = picks.length;
+  const highConf = picks.filter(p => p.confidence >= 80).length;
+
+  let msg = `⚡ *BUENOS DÍAS — ${dateStr}*\n\n`;
+  msg += `El sistema procesó los partidos de hoy.\n\n`;
+  msg += `📅 *${totalPartidos} partido${totalPartidos > 1 ? 's' : ''} hoy*\n`;
+  if (highConf > 0) {
+    msg += `🎯 *${highConf} pick${highConf > 1 ? 's' : ''} con confianza alta (+80%)*\n`;
+  }
+  msg += `\nLos picks completos llegan en un momento.\n`;
+  msg += `_Publicados antes del partido. Sin editar._`;
+  return msg;
+}
+
+// ── PICKS DEL DÍA ──
+function formatPicksMessage(picks, plan) {
+  const dateStr = new Date().toLocaleDateString('es-MX', {
+    weekday: 'long', day: 'numeric', month: 'long',
+    timeZone: 'America/Mexico_City',
+  }).toUpperCase();
+
+  const planLabel = { basic: 'BÁSICO', pro: 'PRO', elite: 'ÉLITE' }[plan] || plan.toUpperCase();
+  const confBar = (pct) => {
+    const filled = Math.round(pct / 10);
+    return '█'.repeat(filled) + '░'.repeat(10 - filled) + ` ${pct}%`;
+  };
+
+  let msg = `🔮 *THE PICK — ${dateStr}*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  for (const p of picks) {
+    const t = new Date(p.date).toLocaleTimeString('es-MX', {
+      hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City',
+    });
+
+    // Nivel de confianza en texto
+    const confLabel = p.confidence >= 85 ? '🔥 MUY ALTA'
+                    : p.confidence >= 75 ? '✅ ALTA'
+                    : p.confidence >= 65 ? '⚠️ MEDIA'
+                    : '📊 MODERADA';
+
+    msg += `⚽ *${p.home_team} vs ${p.away_team}*\n`;
+    msg += `🕐 Hoy a las *${t} hrs* (México)\n\n`;
+    msg += `🎯 *PICK: ${p.prediction}*\n`;
+    msg += `${confBar(p.confidence)} — ${confLabel}\n\n`;
+
+    // Razonamiento limpio — solo líneas con información real
+    const cleanReasons = (p.reasoning || []).filter(r =>
+      !r.includes('0%/0%') &&
+      !r.includes('No predictions') &&
+      !r.includes('undefined') &&
+      r.trim().length > 5
+    );
+
+    if (cleanReasons.length > 0) {
+      msg += `💡 *Por qué:*\n`;
+      cleanReasons.forEach(r => { msg += `  · ${r}\n`; });
+      msg += `\n`;
+    }
+
+    msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  }
+
+  msg += `_% publicado ANTES del partido · Sin editar_\n`;
+  msg += `_mvxpicks.com_`;
+  return msg;
+}
+
+// ── RECORDATORIOS 2H ANTES ──
+function scheduleReminders(picks) {
+  for (const pick of picks) {
+    const kickoff = new Date(pick.date).getTime();
+    const reminderTime = kickoff - (2 * 60 * 60 * 1000); // 2h antes
+    const msUntil = reminderTime - Date.now();
+
+    if (msUntil > 0 && msUntil < 24 * 60 * 60 * 1000) {
+      setTimeout(async () => {
+        const t = new Date(pick.date).toLocaleTimeString('es-MX', {
+          hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City',
+        });
+        const msg = `⏰ *RECORDATORIO — 2 HORAS*\n\n`
+          + `⚽ *${pick.home_team} vs ${pick.away_team}*\n`
+          + `🕐 Arranca a las *${t} hrs* (México)\n\n`
+          + `🎯 Pick: *${pick.prediction}*\n`
+          + `📊 Confianza: *${pick.confidence}%*\n\n`
+          + `_Ya tienes la información. Tú decides._`;
+        await telegramSendAll(msg);
+        console.log(`[Reminder] ✓ Enviado — ${pick.home_team} vs ${pick.away_team}`);
+      }, msUntil);
+      console.log(`[Reminder] Programado en ${(msUntil / 3600000).toFixed(1)}h — ${pick.home_team} vs ${pick.away_team}`);
+    }
+  }
+}
+
+// ── RESUMEN DE RESULTADOS (mejorado) ──
+async function sendResultsRecap(updated, correct) {
+  if (!TELEGRAM_BOT()) return;
+
+  const accuracy = updated > 0 ? Math.round((correct / updated) * 100) : 0;
+  const failed = updated - correct;
+
+  const { data: allTime } = await sb
+    .from('picks_history').select('correct').not('correct', 'is', null)
+    .catch(() => ({ data: null }));
+
+  const totalAll   = allTime?.length || updated;
+  const correctAll = allTime?.filter(p => p.correct).length || correct;
+  const accAll     = Math.round((correctAll / totalAll) * 100);
+
+  let msg = `📊 *RESUMEN DEL DÍA — THE PICK*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `*Partidos de hoy:*\n`;
+  msg += `✅ Acertados: *${correct}*\n`;
+  if (failed > 0) msg += `❌ Fallidos: *${failed}*\n`;
+  msg += `📈 Precisión hoy: *${accuracy}%*\n\n`;
+  msg += `*Historial total del torneo:*\n`;
+  msg += `🎯 ${correctAll}/${totalAll} picks correctos — *${accAll}% precisión*\n\n`;
+
+  if (accuracy === 100) {
+    msg += `🔥 *Día perfecto. Todos los picks acertados.*\n\n`;
+  } else if (accuracy >= 80) {
+    msg += `💪 *Muy buen día. El sistema sigue funcionando.*\n\n`;
+  } else if (accuracy >= 60) {
+    msg += `📊 *Día normal. El historial habla por sí solo.*\n\n`;
+  }
+
+  msg += `_mvxpicks.com_`;
+  await telegramSendAll(msg);
+}
+
+// ── MENSAJE DE PICK ACERTADO (para enviar cuando se confirma resultado) ──
+async function sendWinMessage(pick, result) {
+  if (!TELEGRAM_BOT()) return;
+
+  const msg = `✅ *PICK ACERTADO*\n\n`
+    + `⚽ *${pick.home_team} vs ${pick.away_team}*\n`
+    + `🏆 Resultado: *${result.home_goals}-${result.away_goals}*\n`
+    + `🎯 Pick publicado: *${pick.prediction}*\n`
+    + `📊 Confianza del sistema: *${pick.confidence}%*\n\n`
+    + `_El historial no miente. Siguiente partido, siguiente pick._\n`
+    + `_mvxpicks.com_`;
+
+  await telegramSendAll(msg);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
   const rows = picks.map(p => ({
     fixture_id: p.fixture_id, date: p.date,
     home_team: p.home_team, away_team: p.away_team,
@@ -402,7 +549,12 @@ async function runCheckResults() {
       result: `${result.home_goals}-${result.away_goals}`, correct: isCorrect,
     }).eq('fixture_id', pick.fixture_id);
 
-    if (isCorrect) correct++;
+    if (isCorrect) {
+      correct++;
+      // Mensaje inmediato de pick acertado
+      await sendWinMessage(pick, result).catch(() => {});
+      await sleep(1500);
+    }
     updated++;
   }
 
@@ -532,18 +684,31 @@ async function processSuccessfulPayment(pi) {
   console.log(`[processPayment] ✓ ${email} — ${plan} — $${pi.amount / 100} MXN`);
 }
 
+const PLAN_LABELS = { basic: 'basic', pro: 'pro', elite: 'elite' };
+
 async function addToBrevoList({ email, firstName, lastName, plan, orderValue, telegramLink, listId }) {
   const r = await fetch('https://api.brevo.com/v3/contacts', {
     method: 'POST',
     headers: { 'api-key': process.env.BREVO_API_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       email,
-      attributes: { FIRSTNAME: firstName || '', LASTNAME: lastName || '', PLAN: plan || '', ORDER_VALUE: orderValue || 0, TELEGRAM_LINK: telegramLink || '', SOURCE: 'mrmvx_mundial26' },
+      attributes: {
+        FIRSTNAME:     firstName    || '',
+        LASTNAME:      lastName     || '',
+        PLAN:          PLAN_LABELS[plan] || plan || '',
+        TELEGRAM_LINK: telegramLink || '',
+        ORDER_VALUE:   orderValue   || 0,
+        SOURCE:        'MVX Picks — Confirmed Purchase',
+      },
       listIds: [listId],
       updateEnabled: true,
     }),
   });
-  if (!r.ok && r.status !== 204) throw new Error(`Brevo ${r.status}`);
+  if (!r.ok && r.status !== 204) {
+    const t = await r.text();
+    throw new Error(`Brevo ${r.status}: ${t}`);
+  }
+  console.log(`[Brevo] ✓ ${email} → lista ${listId} — plan: ${PLAN_LABELS[plan] || plan}`);
 }
 
 async function removeFromBrevoList(email, listId) {
