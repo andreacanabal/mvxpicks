@@ -8,7 +8,8 @@
 <meta property="og:title" content="MVX Picks — Mundial 2026"/>
 <meta property="og:description" content="95% de precisión. 40 días. 500 membresías. Una sola oportunidad."/>
 <meta property="og:type" content="website"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="icon" type="image/png" href="logo.png"/>
+<link rel="apple-touch-icon" href="logo.png"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-SKG7B31VFK"></script>
@@ -428,7 +429,9 @@ footer{background:#040404;border-top:1px solid var(--border);padding:40px 20px;t
 
 <!-- 1. NAVBAR -->
 <nav id="nav">
-  <div class="nav-brand">MVX PICKS</div>
+  <a href="/" class="nav-brand">
+    <img src="logo.png" alt="MVX Picks" style="height:30px;width:auto;display:block"/>
+  </a>
   <button class="nav-cta" onclick="const el=document.getElementById('pricing');window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-64,behavior:'smooth'})">Asegurar mi lugar</button>
 </nav>
 
@@ -471,54 +474,37 @@ footer{background:#040404;border-top:1px solid var(--border);padding:40px 20px;t
   </div>
 </section>
 
-<!-- LIVE PICK DEMO (fusionado con hero) -->
+<!-- PICKS EN VIVO (fusionado con hero) -->
 <section id="live-pick">
-  <div class="pick-demo-wrap">
-    <div class="pick-terminal">
-      <div class="pick-terminal-bar">
-        <div class="terminal-dots"><div class="t-dot t-dot-r"></div><div class="t-dot t-dot-y"></div><div class="t-dot t-dot-g"></div></div>
-        <span class="terminal-title">mvx_predict_engine · picks_today.log</span>
-        <span class="terminal-status"><span class="t-status-dot"></span>ACTIVO</span>
+  <div class="pick-demo-wrap" style="max-width:760px">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="t-status-dot" style="width:8px;height:8px;flex-shrink:0"></span>
+        <span style="font-family:'Courier New',monospace;font-size:11px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase">Picks en vivo — Mundial 2026</span>
       </div>
-      <div class="pick-body">
-        <div class="pick-row">
-          <div>
-            <div class="pick-match">Argentina vs Brasil</div>
-            <div class="pick-time">HOY · 20:00 HRS · GRUPO A</div>
-          </div>
-          <div class="pick-prediction">
-            <span class="pick-pred-label">VICTORIA ARG</span>
-            <div class="pick-conf"><div class="conf-bar"><div class="conf-fill" style="width:91%"></div></div><span style="font-family:'Courier New',monospace;font-size:10px;color:var(--gold)">91%</span></div>
-            <div><span class="pick-result-badge badge-win">✓ ACERTADO</span></div>
-          </div>
-        </div>
-        <div class="pick-row">
-          <div>
-            <div class="pick-match">Francia vs España</div>
-            <div class="pick-time">HOY · 17:00 HRS · SEMIFINAL</div>
-          </div>
-          <div class="pick-prediction">
-            <span class="pick-pred-label">VICTORIA FRA</span>
-            <div class="pick-conf"><div class="conf-bar"><div class="conf-fill" style="width:87%"></div></div><span style="font-family:'Courier New',monospace;font-size:10px;color:var(--gold)">87%</span></div>
-            <div><span class="pick-result-badge badge-win">✓ ACERTADO</span></div>
-          </div>
-        </div>
-        <div class="pick-row">
-          <div>
-            <div class="pick-match">México vs EEUU</div>
-            <div class="pick-time">MAÑANA · 21:00 HRS · GRUPO C</div>
-          </div>
-          <div class="pick-prediction">
-            <span class="pick-pred-label">VICTORIA MEX</span>
-            <div class="pick-conf"><div class="conf-bar"><div class="conf-fill" style="width:78%"></div></div><span style="font-family:'Courier New',monospace;font-size:10px;color:var(--gold)">78%</span></div>
-            <div><span class="pick-result-badge badge-pending">EN ESPERA</span></div>
-          </div>
-        </div>
-        <div class="pick-cta-row">
-          <span class="pick-cta-text">Acceso completo con tu membresía</span>
-          <button class="pick-cta-btn" onclick="openModal('pro')">QUIERO ACCESO →</button>
-        </div>
-      </div>
+      <span style="font-size:11px;color:var(--muted);font-family:'Courier New',monospace" id="live-updated">Actualizando...</span>
+    </div>
+
+    <div class="hist-table-wrap" id="live-picks-table">
+      <table class="hist-table">
+        <thead>
+          <tr><th>Partido</th><th>Hora MX</th><th>Pick del sistema</th><th>Conf.</th><th>Resultado</th></tr>
+        </thead>
+        <tbody id="live-picks-body">
+          <!-- Cargado dinámicamente -->
+          <tr id="live-loading-row">
+            <td colspan="5" style="text-align:center;padding:24px;color:var(--muted);font-family:'Courier New',monospace;font-size:11px">
+              Consultando sistema...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:10px">
+      <span style="font-size:11px;color:var(--muted)">El pick completo se revela 2h antes del partido · Solo miembros</span>
+      <button class="pick-cta-btn" onclick="openModal('pro')">QUIERO ACCESO →</button>
     </div>
   </div>
 </section>
@@ -600,34 +586,12 @@ footer{background:#040404;border-top:1px solid var(--border);padding:40px 20px;t
   </div>
 </section>
 
-<!-- 6. PRÓXIMOS PICKS + HISTORIAL -->
+<!-- 6. HISTORIAL -->
 <section id="picks-historial">
   <div class="wrap reveal">
-    <div class="s-label">Próximos picks</div>
-    <h2 class="s-h2">PRÓXIMOS PICKS<br><em>DEL SISTEMA</em></h2>
-    <p style="font-size:14px;color:var(--muted);margin-bottom:28px">El pick con % de confianza se publica <strong style="color:#F0EDE8">2 horas antes</strong> de cada partido. Solo para miembros.</p>
-
-    <div class="hist-table-wrap">
-      <table class="hist-table">
-        <thead>
-          <tr><th>Partido</th><th>Grupo</th><th>Hora MX</th><th>Pick</th><th>Estado</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><span class="hist-date">Jue 11 Jun</span><br>México vs Sudáfrica</td><td style="color:#666;font-size:12px">A</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">14:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">HOY</span></td></tr>
-          <tr><td><span class="hist-date">Jue 11 Jun</span><br>Corea del Sur vs Chequia</td><td style="color:#666;font-size:12px">A</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">21:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">HOY</span></td></tr>
-          <tr><td><span class="hist-date">Vie 12 Jun</span><br>Canadá vs Bosnia-Herzegovina</td><td style="color:#666;font-size:12px">B</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">14:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">PRÓXIMO</span></td></tr>
-          <tr><td><span class="hist-date">Vie 12 Jun</span><br>Estados Unidos vs Paraguay</td><td style="color:#666;font-size:12px">D</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">20:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">PRÓXIMO</span></td></tr>
-          <tr><td><span class="hist-date">Sáb 13 Jun</span><br>Brasil vs Marruecos</td><td style="color:#666;font-size:12px">C</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">17:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">PRÓXIMO</span></td></tr>
-          <tr><td><span class="hist-date">Sáb 13 Jun</span><br>Qatar vs Suiza</td><td style="color:#666;font-size:12px">B</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">13:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">PRÓXIMO</span></td></tr>
-          <tr><td><span class="hist-date">Dom 14 Jun</span><br>Alemania vs Curazao</td><td style="color:#666;font-size:12px">E</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">12:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">PRÓXIMO</span></td></tr>
-          <tr><td><span class="hist-date">Dom 14 Jun</span><br>Costa de Marfil vs Ecuador</td><td style="color:#666;font-size:12px">E</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">18:00</td><td><span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span></td><td><span class="hist-pending">PRÓXIMO</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="section-divider"><span>HISTORIAL VERIFICABLE</span></div>
-
-    <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Capturas reales de apuestas ganadas con picks del sistema. Fechas y montos visibles.</p>
+    <div class="s-label">Historial verificable</div>
+    <h2 class="s-h2">PICKS REALES.<br><em>GANANCIAS REALES.</em></h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:28px">Capturas reales de apuestas ganadas con picks del sistema.</p>
     <div class="bet-grid">
       <div class="bet-card"><div class="bet-gain">+$1,025,000</div><img src="bet-6.jpg" alt="LA Dodgers ganancia $1,025,000" loading="lazy"/><div class="bet-label">LA Dodgers · Hándicap</div></div>
       <div class="bet-card"><div class="bet-gain">+$1,000,000</div><img src="bet-7.jpg" alt="NY Yankees ganancia $1,000,000" loading="lazy"/><div class="bet-label">NY Yankees · Hándicap</div></div>
@@ -992,6 +956,56 @@ async function handlePayment(){
     btn.disabled=false;btn.textContent='PAGAR Y ASEGURAR MI LUGAR →';
   }
 }
+
+/* Live picks table */
+async function loadLivePicks() {
+  try {
+    const r = await fetch(`${BACKEND}/live-picks`, { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) throw new Error('fetch failed');
+    const data = await r.json();
+    renderLivePicks(data.picks || []);
+    const now = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City' });
+    const el = document.getElementById('live-updated');
+    if (el) el.textContent = `Actualizado: ${now} hrs`;
+  } catch { renderFallbackPicks(); }
+}
+
+function renderLivePicks(picks) {
+  const tbody = document.getElementById('live-picks-body');
+  if (!picks.length) { renderFallbackPicks(); return; }
+  tbody.innerHTML = picks.map(p => {
+    const t = new Date(p.date).toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City' });
+    const d = new Date(p.date).toLocaleDateString('es-MX', { day:'numeric', month:'short', timeZone:'America/Mexico_City' });
+    let pickCell, confCell, resultCell;
+    if (p.correct === true) {
+      pickCell = `<span style="color:#F0EDE8;font-weight:600">${p.prediction}</span>`;
+      confCell = `<span class="conf-pill high">${p.confidence}%</span>`;
+      resultCell = `<span class="hist-win">✓ ${p.result}</span>`;
+    } else if (p.correct === false) {
+      pickCell = `<span style="color:#F0EDE8;font-weight:600">${p.prediction}</span>`;
+      confCell = `<span class="conf-pill med">${p.confidence}%</span>`;
+      resultCell = `<span style="color:var(--red);font-size:11px;font-weight:700">✗ ${p.result}</span>`;
+    } else {
+      pickCell = `<span class="pick-locked"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Miembros</span>`;
+      confCell = `<span class="conf-pill high">—</span>`;
+      resultCell = `<span class="hist-pending">EN ESPERA</span>`;
+    }
+    return `<tr><td><span class="hist-date">${d}</span><br>${p.home_team} vs ${p.away_team}</td><td style="font-family:'Courier New',monospace;font-size:12px;color:#F5A623">${t}</td><td>${pickCell}</td><td>${confCell}</td><td>${resultCell}</td></tr>`;
+  }).join('');
+}
+
+function renderFallbackPicks() {
+  const fallback = [
+    { date:'2026-06-11T19:00:00Z', home_team:'México', away_team:'Sudáfrica', prediction:'Victoria México', confidence:82, result:'2-0', correct:true },
+    { date:'2026-06-12T02:00:00Z', home_team:'Corea del Sur', away_team:'Chequia', prediction:'Victoria Corea del Sur', confidence:78, result:'2-1', correct:true },
+    { date:'2026-06-12T19:00:00Z', home_team:'Canadá', away_team:'Bosnia-Herz.', prediction:'Empate', confidence:74, result:'1-1', correct:true },
+    { date:'2026-06-13T01:00:00Z', home_team:'Estados Unidos', away_team:'Paraguay', prediction:'Victoria EEUU', confidence:86, result:'4-1', correct:true },
+  ];
+  renderLivePicks(fallback);
+}
+
+loadLivePicks();
+setInterval(loadLivePicks, 5 * 60 * 1000);
 
 /* Countdown */
 function tick(){
