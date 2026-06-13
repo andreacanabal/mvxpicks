@@ -513,17 +513,6 @@ async function sendWinMessage(pick, result) {
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-  const rows = picks.map(p => ({
-    fixture_id: p.fixture_id, date: p.date,
-    home_team: p.home_team, away_team: p.away_team,
-    prediction: p.prediction, confidence: p.confidence,
-    reasoning: p.reasoning, league_round: p.league_round,
-    timestamp_published: p.timestamp_published,
-    result: null, correct: null,
-  }));
-  const { error } = await sb.from('picks_history').upsert(rows, { onConflict: 'fixture_id' });
-  if (error) console.error('[Supabase picks]', error.message);
-}
 
 // ═══════════════════════════════════════════════════════════════
 // VERIFICADOR DE RESULTADOS
@@ -591,14 +580,6 @@ async function updateAccuracyStats() {
   const accuracy = Math.round((totalCorrect / data.length) * 100);
   await sb.from('config').upsert({ id: 1, accuracy_pct: accuracy, total_picks: data.length, correct_picks: totalCorrect });
   console.log(`[Accuracy] ${accuracy}% (${totalCorrect}/${data.length})`);
-}
-
-async function sendResultsRecap(updated, correct) {
-  if (!TELEGRAM_BOT()) return;
-  const accuracy = updated > 0 ? Math.round((correct / updated) * 100) : 0;
-  const emoji = accuracy >= 80 ? '🔥' : '✅';
-  const msg = `${emoji} *MR. MVX · RESULTADOS DEL DÍA*\n\n✅ Correctos: ${correct}/${updated}\n📈 Precisión: ${accuracy}%\n\n_mvxpicks.com_`;
-  await telegramSendAll(msg);
 }
 
 // ═══════════════════════════════════════════════════════════════
