@@ -247,7 +247,7 @@ async function runDailyPicks() {
 }
 
 async function getFixturesToday() {
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' }); // YYYY-MM-DD
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
   const data = await footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: today, status: 'NS' });
   return data?.response || [];
 }
@@ -258,89 +258,88 @@ async function generatePick(fixture) {
   const awayTeam  = fixture.teams.away.name;
 
   try {
-    const predData = await footballAPI('/predictions', { fixture: fixtureId });
+    // 1. Odds como predictor principal
+    const oddsData = await footballAPI('/odds', { fixture: fixtureId }).catch(() => null);
+    const odds = extractBestOdds(oddsData);
+
+    if (odds) {
+      // Probabilidad implícita normalizada
+      const rawHome = 1 / odds.home;
+      const rawDraw = 1 / odds.draw;
+      const rawAway = 1 / odds.away;
+      const total   = rawHome + rawDraw + rawAway;
+      const pHome   = Math.round((rawHome / total) * 100);
+      const pDraw   = Math.round((rawDraw / total) * 100);
+      const pAway   = Math.round((rawAway / total) * 100);
+      const best    = Math.max(pHome, pDraw, pAway);
+
+      let prediction, confidence, rawOdd;
+      if (best === pHome) {
+        prediction = `VICTORIA ${homeTeam.toUpperCase()}`; confidence = Math.min(95, pHome); rawOdd = odds.home;
+      } else if (best === pAway) {
+        prediction = `VICTORIA ${awayTeam.toUpperCase()}`; confidence = Math.min(95, pAway); rawOdd = odds.away;
+      } else {
+        prediction = 'EMPATE'; confidence = Math.min(85, pDraw); rawOdd = odds.draw;
+      }
+
+      const reasoning = [
+        `Probabilidad de mercado: ${homeTeam} ${pHome}% · Empate ${pDraw}% · ${awayTeam} ${pAway}%`,
+        `Cuota promedio del pick: ${rawOdd} (múltiples casas)`,
+        rawOdd <= 1.6 ? `Favorito claro — bajo riesgo` : rawOdd <= 2.5 ? `Cuota competitiva — buen valor` : `Cuota alta — mayor retorno potencial`,
+      ];
+
+      return { fixture_id: fixtureId, date: fixture.fixture.date, home_team: homeTeam, away_team: awayTeam, prediction, confidence, odds_pick: rawOdd, reasoning, league_round: fixture.league.round, timestamp_published: new Date().toISOString(), result: null, correct: null };
+    }
+
+    // 2. Fallback: predicciones de API-Football
+    const predData = await footballAPI('/predictions', { fixture: fixtureId }).catch(() => null);
     const pred = predData?.response?.[0];
     if (!pred) return null;
 
-    const winner      = pred.predictions?.winner;
-    const percentages = pred.predictions?.percent || {};
-    const homePct     = parseInt(percentages.home) || 33;
-    const drawPct     = parseInt(percentages.draw) || 33;
-    const awayPct     = parseInt(percentages.away) || 34;
+    const winner  = pred.predictions?.winner;
+    const pcts    = pred.predictions?.percent || {};
+    const homePct = parseInt(pcts.home) || 33;
+    const drawPct = parseInt(pcts.draw) || 33;
+    const awayPct = parseInt(pcts.away) || 34;
 
-    let prediction, rawConf;
+    let prediction, confidence;
     if (winner?.id === fixture.teams.home.id) {
-      prediction = `VICTORIA ${homeTeam.toUpperCase()}`; rawConf = homePct;
+      prediction = `VICTORIA ${homeTeam.toUpperCase()}`; confidence = Math.min(90, homePct);
     } else if (winner?.id === fixture.teams.away.id) {
-      prediction = `VICTORIA ${awayTeam.toUpperCase()}`; rawConf = awayPct;
+      prediction = `VICTORIA ${awayTeam.toUpperCase()}`; confidence = Math.min(90, awayPct);
     } else {
-      prediction = 'EMPATE'; rawConf = drawPct;
+      prediction = 'EMPATE'; confidence = Math.min(80, drawPct);
     }
 
-    const confidence = Math.min(97, Math.max(65, Math.round(rawConf * 1.2)));
-    const oddsData   = await footballAPI('/odds', { fixture: fixtureId, bookmaker: 8 }).catch(() => null);
-    const odds       = extractOdds(oddsData);
-    const reasoning  = buildReasoning(pred, odds, homeTeam, awayTeam, homePct, drawPct, awayPct);
+    return { fixture_id: fixtureId, date: fixture.fixture.date, home_team: homeTeam, away_team: awayTeam, prediction, confidence, reasoning: [`Sistema estadístico: ${homeTeam} ${homePct}% · Empate ${drawPct}% · ${awayTeam} ${awayPct}%`], league_round: fixture.league.round, timestamp_published: new Date().toISOString(), result: null, correct: null };
 
-    return {
-      fixture_id: fixtureId,
-      date: fixture.fixture.date,
-      home_team: homeTeam,
-      away_team: awayTeam,
-      prediction,
-      confidence,
-      reasoning,
-      league_round: fixture.league.round,
-      advice: pred.predictions?.advice || '',
-      timestamp_published: new Date().toISOString(),
-      result: null,
-      correct: null,
-    };
   } catch (err) {
     console.error(`[generatePick] ${fixtureId}:`, err.message);
     return null;
   }
 }
 
-function extractOdds(data) {
+function extractBestOdds(data) {
   try {
-    const bets = data?.response?.[0]?.bookmakers?.[0]?.bets?.[0]?.values;
-    if (!bets) return null;
-    return {
-      home: parseFloat(bets.find(b => b.value === 'Home')?.odd || 0),
-      draw: parseFloat(bets.find(b => b.value === 'Draw')?.odd || 0),
-      away: parseFloat(bets.find(b => b.value === 'Away')?.odd || 0),
-    };
+    const bookmakers = data?.response?.[0]?.bookmakers;
+    if (!bookmakers?.length) return null;
+    let sumHome = 0, sumDraw = 0, sumAway = 0, count = 0;
+    for (const bm of bookmakers) {
+      const bet = bm.bets?.find(b => b.name === 'Match Winner');
+      if (!bet) continue;
+      const h = parseFloat(bet.values?.find(v => v.value === 'Home')?.odd || 0);
+      const d = parseFloat(bet.values?.find(v => v.value === 'Draw')?.odd || 0);
+      const a = parseFloat(bet.values?.find(v => v.value === 'Away')?.odd || 0);
+      if (h > 0 && d > 0 && a > 0) { sumHome += h; sumDraw += d; sumAway += a; count++; }
+    }
+    if (count === 0) return null;
+    return { home: Math.round(sumHome/count*100)/100, draw: Math.round(sumDraw/count*100)/100, away: Math.round(sumAway/count*100)/100 };
   } catch { return null; }
 }
 
-function buildReasoning(pred, odds, homeTeam, awayTeam, homePct, drawPct, awayPct) {
-  const reasons = [];
-  const comp = pred.comparison || {};
+function extractOdds(data) { return extractBestOdds(data); }
 
-  if (comp.form) {
-    const hf = parseInt(comp.form.home) || 50;
-    const af = parseInt(comp.form.away) || 50;
-    if (hf > af + 10) reasons.push(`${homeTeam} llega con mejor forma reciente (${comp.form.home} vs ${comp.form.away})`);
-    else if (af > hf + 10) reasons.push(`${awayTeam} llega con mejor forma reciente (${comp.form.away} vs ${comp.form.home})`);
-  }
 
-  if (comp.att && comp.def) {
-    reasons.push(`Ataque/Defensa: ${homeTeam} ${comp.att.home}/${comp.def.home} — ${awayTeam} ${comp.att.away}/${comp.def.away}`);
-  }
-
-  if (odds?.home > 0) {
-    const min = Math.min(odds.home, odds.draw, odds.away);
-    if (odds.home === min) reasons.push(`Mercado favorece a ${homeTeam} (cuota ${odds.home})`);
-    else if (odds.away === min) reasons.push(`Mercado favorece a ${awayTeam} (cuota ${odds.away})`);
-  }
-
-  if (!reasons.length) {
-    reasons.push(`Probabilidad del sistema: ${homeTeam} ${homePct}% / Empate ${drawPct}% / ${awayTeam} ${awayPct}%`);
-  }
-
-  return reasons.slice(0, 3);
-}
 
 async function sendPicksTelegram(picks) {
   if (!TELEGRAM_BOT()) return;
@@ -355,6 +354,15 @@ async function sendPicksTelegram(picks) {
     if (!chatId) continue;
     const picksToSend = plan === 'basic' ? [picks[0]] : picks;
     await telegramSend(chatId, formatPicksMessage(picksToSend, plan));
+    await sleep(1000);
+  }
+
+  // Parlay del día — solo Pro y Élite — picks con confianza >= 70%
+  const parlayPicks = picks.filter(p => p.confidence >= 70).slice(0, 3);
+  if (parlayPicks.length >= 2) {
+    const parlayMsg = formatParlayMessage(parlayPicks);
+    await telegramSend(groups.pro,   parlayMsg);
+    await telegramSend(groups.elite, parlayMsg);
   }
 
   // Programar recordatorios 2h antes de cada partido
@@ -372,6 +380,27 @@ async function savePicksSupabase(picks) {
   }));
   const { error } = await sb.from('picks_history').upsert(rows, { onConflict: 'fixture_id' });
   if (error) console.error('[Supabase picks]', error.message);
+}
+
+// ── PARLAY DEL DÍA ──
+function formatParlayMessage(picks) {
+  const parlayOdds = picks.reduce((acc, p) => acc * (p.odds_pick || 1.5), 1);
+  const roundedOdds = Math.round(parlayOdds * 100) / 100;
+
+  let msg = `🎯 *PARLAY SUGERIDO DEL DÍA*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `Combinación de los picks con mayor confianza:\n\n`;
+
+  picks.forEach((p, i) => {
+    msg += `${i + 1}. ⚽ *${p.home_team} vs ${p.away_team}*\n`;
+    msg += `   Pick: *${p.prediction}* · ${p.confidence}%\n\n`;
+  });
+
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📊 Cuota combinada estimada: *${roundedOdds}x*\n\n`;
+  msg += `_El parlay es de alto riesgo. Apuesta solo lo que puedes perder._\n`;
+  msg += `_mvxpicks.com_`;
+  return msg;
 }
 
 // ── MENSAJE HYPE DE APERTURA ──
