@@ -261,6 +261,7 @@ async function generatePick(fixture) {
     // 1. Odds como predictor principal
     const oddsData = await footballAPI('/odds', { fixture: fixtureId }).catch(() => null);
     const odds = extractBestOdds(oddsData);
+    console.log(`[generatePick] ${homeTeam} vs ${awayTeam} — odds: ${odds ? `${odds.home}/${odds.draw}/${odds.away}` : 'NO DISPONIBLES'}`);
 
     if (odds) {
       // Probabilidad implícita normalizada
