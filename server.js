@@ -210,10 +210,21 @@ function scheduleDaily(hourMexico, minuteMexico, fn, label) {
 // Programar picks diarios a las 8:00 AM México
 scheduleDaily(8, 0, runDailyPicks, 'PICKS DIARIOS');
 
-// Programar verificación de resultados a las 11:00 PM México
+// Verificación de resultados a las 11:00 PM México
 scheduleDaily(23, 0, runCheckResults, 'CHECK RESULTADOS');
 
-console.log('[scheduler] Picks programados: 8:00 AM México · Resultados: 11:00 PM México');
+// Verificar resultados cada 30 minutos entre 12PM y 11PM México
+// Para detectar picks ganados inmediatamente al terminar los partidos
+setInterval(async () => {
+  const mxHour = parseInt(new Date().toLocaleString('en-US', {
+    hour: 'numeric', hour12: false, timeZone: 'America/Mexico_City'
+  }));
+  if (mxHour >= 12 && mxHour <= 23) {
+    await runCheckResults().catch(e => console.error('[autocheck]', e.message));
+  }
+}, 30 * 60 * 1000); // cada 30 minutos
+
+console.log('[scheduler] Picks programados: 8:00 AM México · Resultados: cada 30min (12PM-11PM) + 11:00 PM México');
 
 // ═══════════════════════════════════════════════════════════════
 // MOTOR DE PICKS DIARIOS
@@ -248,8 +259,12 @@ async function runDailyPicks() {
 
 async function getFixturesToday() {
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
-  const data = await footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: today, status: 'NS' });
-  return data?.response || [];
+  // Sin filtro de status — obtener TODOS los partidos del día
+  const data = await footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: today });
+  const all = data?.response || [];
+  // Solo excluir los que ya terminaron (FT) si ya tienen resultado guardado
+  // Incluir: NS (no empezado), 1H, HT, 2H, ET, BT, P (en juego o por jugar)
+  return all.filter(f => !['FT','AET','PEN','AWD','WO'].includes(f.fixture.status.short));
 }
 
 async function generatePick(fixture) {
@@ -353,7 +368,9 @@ async function sendPicksTelegram(picks) {
   // Picks por plan
   for (const [plan, chatId] of Object.entries(groups)) {
     if (!chatId) continue;
-    const picksToSend = plan === 'basic' ? [picks[0]] : picks;
+    const picksToSend = plan === 'basic' ? [picks[0]]
+                      : plan === 'pro'   ? picks.slice(0, 3)
+                      : picks; // elite: TODOS
     await telegramSend(chatId, formatPicksMessage(picksToSend, plan));
     await sleep(1000);
   }
