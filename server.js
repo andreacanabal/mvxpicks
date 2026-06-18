@@ -265,16 +265,21 @@ async function getFixturesToday() {
   utcTomorrow.setUTCDate(utcTomorrow.getUTCDate() + 1);
   const utcTomorrowStr = utcTomorrow.toISOString().split('T')[0];
 
-  const [res1, res2] = await Promise.all([
+  const utcDayAfter = new Date();
+  utcDayAfter.setUTCDate(utcDayAfter.getUTCDate() + 2);
+  const utcDayAfterStr = utcDayAfter.toISOString().split('T')[0];
+
+  const [res1, res2, res3] = await Promise.all([
     footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: mxToday }),
     footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: utcTomorrowStr }),
+    footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: utcDayAfterStr }),
   ]);
 
-  const all = [...(res1?.response || []), ...(res2?.response || [])];
+  const all = [...(res1?.response || []), ...(res2?.response || []), ...(res3?.response || [])];
 
   // Filtrar: solo partidos que ocurren en las próximas 24h en hora México
   const now = Date.now();
-  const in24h = now + 24 * 60 * 60 * 1000;
+  const in24h = now + 30 * 60 * 60 * 1000; // 30h para capturar partidos nocturnos
 
   return all.filter(f => {
     const kickoff = new Date(f.fixture.date).getTime();
