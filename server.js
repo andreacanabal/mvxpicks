@@ -258,13 +258,30 @@ async function runDailyPicks() {
 }
 
 async function getFixturesToday() {
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
-  // Sin filtro de status — obtener TODOS los partidos del día
-  const data = await footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: today });
-  const all = data?.response || [];
-  // Solo excluir los que ya terminaron (FT) si ya tienen resultado guardado
-  // Incluir: NS (no empezado), 1H, HT, 2H, ET, BT, P (en juego o por jugar)
-  return all.filter(f => !['FT','AET','PEN','AWD','WO'].includes(f.fixture.status.short));
+  const mxToday = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+
+  // También pedir el día siguiente en UTC para capturar partidos nocturnos
+  const utcTomorrow = new Date();
+  utcTomorrow.setUTCDate(utcTomorrow.getUTCDate() + 1);
+  const utcTomorrowStr = utcTomorrow.toISOString().split('T')[0];
+
+  const [res1, res2] = await Promise.all([
+    footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: mxToday }),
+    footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: utcTomorrowStr }),
+  ]);
+
+  const all = [...(res1?.response || []), ...(res2?.response || [])];
+
+  // Filtrar: solo partidos que ocurren en las próximas 24h en hora México
+  const now = Date.now();
+  const in24h = now + 24 * 60 * 60 * 1000;
+
+  return all.filter(f => {
+    const kickoff = new Date(f.fixture.date).getTime();
+    const status  = f.fixture.status.short;
+    const finished = ['FT','AET','PEN','AWD','WO'].includes(status);
+    return !finished && kickoff >= now - 3600000 && kickoff <= in24h;
+  });
 }
 
 async function generatePick(fixture) {
