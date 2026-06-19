@@ -258,34 +258,27 @@ async function runDailyPicks() {
 }
 
 async function getFixturesToday() {
+  // Fecha de HOY en hora México — formato YYYY-MM-DD
   const mxToday = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
 
-  // También pedir el día siguiente en UTC para capturar partidos nocturnos
-  const utcTomorrow = new Date();
-  utcTomorrow.setUTCDate(utcTomorrow.getUTCDate() + 1);
-  const utcTomorrowStr = utcTomorrow.toISOString().split('T')[0];
+  // Pedir hoy + mañana + pasado en UTC para no perder partidos nocturnos
+  const dates = [0, 1, 2].map(d => {
+    const dt = new Date();
+    dt.setUTCDate(dt.getUTCDate() + d);
+    return dt.toISOString().split('T')[0];
+  });
 
-  const utcDayAfter = new Date();
-  utcDayAfter.setUTCDate(utcDayAfter.getUTCDate() + 2);
-  const utcDayAfterStr = utcDayAfter.toISOString().split('T')[0];
+  const results = await Promise.all(
+    dates.map(date => footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date }))
+  );
 
-  const [res1, res2, res3] = await Promise.all([
-    footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: mxToday }),
-    footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: utcTomorrowStr }),
-    footballAPI('/fixtures', { league: WC_LEAGUE_ID, season: WC_SEASON, date: utcDayAfterStr }),
-  ]);
-
-  const all = [...(res1?.response || []), ...(res2?.response || []), ...(res3?.response || [])];
-
-  // Filtrar: solo partidos que ocurren en las próximas 24h en hora México
-  const now = Date.now();
-  const in24h = now + 30 * 60 * 60 * 1000; // 30h para capturar partidos nocturnos
+  const all = results.flatMap(r => r?.response || []);
+  const finished = ['FT','AET','PEN','AWD','WO'];
 
   return all.filter(f => {
-    const kickoff = new Date(f.fixture.date).getTime();
-    const status  = f.fixture.status.short;
-    const finished = ['FT','AET','PEN','AWD','WO'].includes(status);
-    return !finished && kickoff >= now - 3600000 && kickoff <= in24h;
+    // Convertir kickoff a fecha en hora México
+    const kickoffMX = new Date(f.fixture.date).toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+    return kickoffMX === mxToday && !finished.includes(f.fixture.status.short);
   });
 }
 
