@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MVX Picks — Mi Dashboard</title>
+<link rel="icon" type="image/png" href="logo.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+:root{
+  --black:#080810;--surface:#12121f;--surface2:#1a1a2e;
+  --border:#ffffff0f;--border2:#ffffff18;
+  --blue:#0047FF;--blue2:#0035cc;--blue-dim:rgba(0,71,255,0.08);
+  --red:#FF1B1B;--red-dim:rgba(255,27,27,0.1);
+  --white:#F8F8FF;--muted:#8888aa;--muted2:#444460;--green:#00D68F;
+}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;min-height:100dvh;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,71,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,71,255,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+/* HEADER */
+.dash-header{
+  position:sticky;top:0;z-index:100;
+  height:60px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:rgba(8,8,16,0.95);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);
+}
+.dash-header img{height:26px;width:auto}
+.dash-header-right{display:flex;align-items:center;gap:12px}
+.user-name{font-size:13px;color:var(--muted)}
+.btn-logout{font-size:12px;color:var(--muted);padding:6px 12px;border:1px solid var(--border2);border-radius:6px;transition:all 0.2s}
+.btn-logout:hover{color:var(--red);border-color:var(--red)}
+
+/* LAYOUT */
+.dash-main{max-width:1060px;margin:0 auto;padding:28px 16px 80px;position:relative;z-index:1}
+
+/* WELCOME */
+.dash-welcome{margin-bottom:24px}
+.dash-welcome h1{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;margin-bottom:4px}
+.dash-welcome p{font-size:13px;color:var(--muted)}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+@media(min-width:640px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:10px;padding:18px 16px;
+}
+.stat-card.highlight{border-color:rgba(0,71,255,0.3);background:var(--surface2)}
+.stat-icon{font-size:20px;margin-bottom:8px}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1;margin-bottom:4px}
+.stat-value.green{color:var(--green)}
+.stat-value.blue{color:var(--blue)}
+.stat-value.red{color:var(--red)}
+.stat-label{font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+
+/* CARDS */
+.dash-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:10px;overflow:hidden;margin-bottom:16px;
+}
+.dash-card-header{
+  padding:16px 18px;background:var(--surface2);
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;
+}
+.dash-card-title{font-size:13px;font-weight:600;color:var(--white)}
+.dash-card-body{padding:18px}
+
+/* HISTORY TABLE */
+.history-table{width:100%;border-collapse:collapse;font-size:13px}
+.history-table th{padding:9px 12px;text-align:left;font-size:9px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-family:'Courier New',monospace}
+.history-table td{padding:12px;border-top:1px solid var(--border);color:var(--white);vertical-align:middle}
+.badge-win{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(0,214,143,0.1);color:var(--green);border:1px solid rgba(0,214,143,0.2)}
+.badge-loss{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:var(--red-dim);color:var(--red);border:1px solid rgba(255,27,27,0.2)}
+.badge-pending{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(0,71,255,0.2)}
+
+/* ACTIONS */
+.actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.action-btn{
+  padding:14px 16px;border-radius:8px;
+  font-size:13px;font-weight:600;letter-spacing:0.04em;text-align:center;
+  cursor:pointer;transition:all 0.2s;border:none;
+}
+.action-btn.primary{background:var(--blue);color:#fff}
+.action-btn.primary:hover{background:var(--blue2)}
+.action-btn.secondary{background:transparent;color:var(--white);border:1px solid var(--border2)}
+.action-btn.secondary:hover{border-color:rgba(255,27,27,0.4);color:var(--red)}
+.action-btn.danger{background:transparent;color:var(--red);border:1px solid rgba(255,27,27,0.3)}
+.action-btn.danger:hover{background:var(--red-dim)}
+
+/* MODAL RETIRO */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9000;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(8px)}
+@media(min-width:500px){.modal-bg{align-items:center;padding:20px}}
+.modal-bg.active{display:flex}
+.modal-box{
+  background:var(--surface);border:1px solid rgba(255,27,27,0.3);
+  border-radius:12px 12px 0 0;padding:28px 20px 32px;
+  width:100%;max-width:440px;position:relative;max-height:95dvh;overflow-y:auto;
+}
+@media(min-width:500px){.modal-box{border-radius:10px;padding:32px 28px}}
+.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:100px;margin:0 auto 20px;display:block}
+@media(min-width:500px){.modal-handle{display:none}}
+.modal-close{position:absolute;top:14px;right:14px;color:var(--muted);padding:4px;transition:color 0.15s}
+.modal-close:hover{color:var(--white)}
+.modal-close svg{width:18px;height:18px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:26px;margin-bottom:4px}
+.modal-desc{font-size:12px;color:var(--muted);margin-bottom:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px}
+.field input{width:100%;background:var(--black);border:1px solid var(--border2);border-radius:8px;padding:13px 14px;color:var(--white);font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+.field input:focus{border-color:var(--red)}
+.field input::placeholder{color:var(--muted2)}
+.btn-danger{width:100%;padding:15px;background:var(--red);color:#fff;font-weight:700;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer;transition:background 0.2s}
+.btn-danger:hover{background:#cc0000}
+
+/* POPUP CONFIRMACION */
+.popup-confirm{
+  display:none;position:fixed;inset:0;z-index:10000;
+  align-items:center;justify-content:center;padding:20px;
+  background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);
+}
+.popup-confirm.active{display:flex}
+.popup-box{
+  background:var(--surface);border:1px solid rgba(0,214,143,0.3);
+  border-radius:12px;padding:40px 32px;max-width:380px;width:100%;text-align:center;
+}
+.popup-icon{font-size:48px;margin-bottom:16px}
+.popup-title{font-family:'Bebas Neue',sans-serif;font-size:28px;margin-bottom:8px;color:var(--green)}
+.popup-desc{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:24px}
+.popup-close{padding:12px 28px;background:var(--blue);color:#fff;font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer;transition:background 0.2s}
+.popup-close:hover{background:var(--blue2)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty p{font-size:13px;line-height:1.6}
+
+/* INVESTOR LEVEL */
+.level-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:100px;
+  font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;
+}
+.level-starter{background:rgba(136,136,170,0.1);color:var(--muted);border:1px solid rgba(136,136,170,0.2)}
+.level-pro{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(0,71,255,0.25)}
+.level-elite{background:rgba(245,166,35,0.1);color:#F5A623;border:1px solid rgba(245,166,35,0.25)}
+</style>
+</head>
+<body>
+
+<header class="dash-header">
+  <a href="/"><img src="logo.png" alt="MVX Picks"/></a>
+  <div class="dash-header-right">
+    <span class="user-name" id="user-name-header">Cargando...</span>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </div>
+</header>
+
+<main class="dash-main">
+  <!-- WELCOME -->
+  <div class="dash-welcome">
+    <h1>BIENVENIDO, <span id="dash-name" style="color:var(--blue)">INVERSOR</span></h1>
+    <p id="dash-level-wrap">Cargando tu cuenta...</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card highlight">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value blue" id="stat-invested">$0</div>
+      <div class="stat-label">Capital invertido</div>
+    </div>
+    <div class="stat-card highlight">
+      <div class="stat-icon">📈</div>
+      <div class="stat-value green" id="stat-returns">+$0</div>
+      <div class="stat-label">Ganancias totales</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💎</div>
+      <div class="stat-value" id="stat-balance" style="color:var(--white)">$0</div>
+      <div class="stat-label">Balance actual</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-value" id="stat-roi" style="color:var(--white)">0%</div>
+      <div class="stat-label">ROI total</div>
+    </div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <span class="dash-card-title">Gestionar inversión</span>
+    </div>
+    <div class="dash-card-body">
+      <div class="actions-grid">
+        <button class="action-btn primary" onclick="window.location.href='/'">+ AGREGAR INVERSIÓN</button>
+        <button class="action-btn danger" onclick="openRetiroModal()">RETIRAR FONDOS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORIAL DE RENDIMIENTOS -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <span class="dash-card-title">Historial de rendimientos</span>
+      <span id="accuracy-badge" style="font-size:11px;color:var(--green);font-family:'Courier New',monospace">Cargando...</span>
+    </div>
+    <div class="dash-card-body" style="padding:0">
+      <div id="returns-body">
+        <div class="empty"><div class="empty-icon">📊</div><p>Cargando historial de picks...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PICKS DEL DÍA -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <span class="dash-card-title">Picks de hoy</span>
+      <span style="font-size:11px;color:var(--muted);font-family:'Courier New',monospace" id="picks-updated">Cargando...</span>
+    </div>
+    <div class="dash-card-body" style="padding:0">
+      <table class="history-table" style="width:100%">
+        <thead><tr><th>Partido</th><th>Pick</th><th>Conf.</th><th>Resultado</th></tr></thead>
+        <tbody id="picks-body"><tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted);font-size:12px">Consultando sistema...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TELEGRAM -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <span class="dash-card-title">Comunidad Élite</span>
+    </div>
+    <div class="dash-card-body" style="text-align:center">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Accede al grupo privado donde se publican todos los picks en tiempo real</p>
+      <a href="https://t.me/+L038Yj6AQ3I5NDQx" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;text-decoration:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 3L3 10.53v.98l6.84 2.65L13.79 21h.98L21 3z"/></svg>
+        UNIRME AL GRUPO ÉLITE
+      </a>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL RETIRO -->
+<div class="modal-bg" id="retiro-modal" onclick="if(event.target===this)closeRetiroModal()">
+  <div class="modal-box">
+    <span class="modal-handle"></span>
+    <button class="modal-close" onclick="closeRetiroModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="modal-title">RETIRAR FONDOS</div>
+    <div class="modal-desc" id="retiro-balance-info">Balance disponible: $0 MXN</div>
+
+    <div class="field"><label>Monto a retirar (MXN)</label><input type="number" id="retiro-amount" placeholder="Ingresa el monto" min="100"/></div>
+    <div class="field"><label>Banco</label><input type="text" id="retiro-bank" placeholder="BBVA, Banamex, HSBC..." autocomplete="off"/></div>
+    <div class="field"><label>CLABE (18 dígitos)</label><input type="text" id="retiro-clabe" placeholder="000000000000000000" maxlength="18" inputmode="numeric"/></div>
+    <div class="field"><label>Titular de la cuenta</label><input type="text" id="retiro-holder" placeholder="Nombre completo del titular" autocomplete="name"/></div>
+    <div id="retiro-error" style="font-size:12px;color:var(--red);min-height:14px;margin-bottom:10px"></div>
+    <button class="btn-danger" onclick="handleRetiro()">SOLICITAR RETIRO →</button>
+  </div>
+</div>
+
+<!-- POPUP CONFIRMACIÓN -->
+<div class="popup-confirm" id="popup-confirm">
+  <div class="popup-box">
+    <div class="popup-icon">✅</div>
+    <div class="popup-title">SOLICITUD ENVIADA</div>
+    <div class="popup-desc">Tu solicitud de retiro fue recibida. Procesamos en las próximas <strong>24 horas</strong>. Recibirás una confirmación cuando el dinero esté en camino.</div>
+    <button class="popup-close" onclick="document.getElementById('popup-confirm').classList.remove('active')">ENTENDIDO</button>
+  </div>
+</div>
+
+<script>
+const BACKEND = 'https://mvxpicks-production.up.railway.app';
+
+// Auth check
+const token = localStorage.getItem('mvx_token');
+if (!token) window.location.href = '/login';
+
+let userData = JSON.parse(localStorage.getItem('mvx_user') || '{}');
+let dashData = null;
+
+function logout() {
+  localStorage.removeItem('mvx_token');
+  localStorage.removeItem('mvx_user');
+  window.location.href = '/';
+}
+
+function getLevel(invested) {
+  if (invested >= 10000) return { label: '👑 ÉLITE', cls: 'level-elite' };
+  if (invested >= 2000)  return { label: '🔥 PRO',   cls: 'level-pro' };
+  return { label: '⚡ STARTER', cls: 'level-starter' };
+}
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-MX'); }
+
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${BACKEND}/dashboard`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.status === 401) { logout(); return; }
+    dashData = await res.json();
+    renderDashboard(dashData);
+  } catch {
+    // Use cached user data as fallback
+    renderDashboard({ user: userData, picks: [], returns: [] });
+  }
+}
+
+function renderDashboard(data) {
+  const user = data.user || userData;
+  const invested = user.total_invested || 0;
+  const returns  = user.total_returns  || 0;
+  const balance  = invested + returns;
+  const roi      = invested > 0 ? ((returns / invested) * 100).toFixed(1) : '0.0';
+
+  // Header
+  document.getElementById('user-name-header').textContent = (user.name || 'Inversor').split(' ')[0];
+  document.getElementById('dash-name').textContent = (user.name || 'INVERSOR').split(' ')[0].toUpperCase();
+
+  // Level
+  const level = getLevel(invested);
+  document.getElementById('dash-level-wrap').innerHTML =
+    `<span class="level-badge ${level.cls}">${level.label}</span> &nbsp;Miembro desde ${new Date(user.created_at || Date.now()).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}`;
+
+  // Stats
+  document.getElementById('stat-invested').textContent = fmt(invested);
+  document.getElementById('stat-returns').textContent  = (returns >= 0 ? '+' : '') + fmt(returns);
+  document.getElementById('stat-balance').textContent  = fmt(balance);
+  document.getElementById('stat-roi').textContent      = (roi >= 0 ? '+' : '') + roi + '%';
+  document.getElementById('stat-returns').className    = 'stat-value ' + (returns >= 0 ? 'green' : 'red');
+
+  // Retiro modal
+  document.getElementById('retiro-balance-info').textContent = `Balance disponible: ${fmt(balance)} MXN`;
+
+  // Returns history
+  renderReturnsHistory(data.picks || []);
+
+  // Today's picks
+  loadTodayPicks();
+}
+
+function renderReturnsHistory(picks) {
+  const el = document.getElementById('returns-body');
+  if (!picks.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🚀</div><p>Tu inversión está activa.<br>Los rendimientos aparecerán aquí cuando los picks del día se resuelvan.</p></div>';
+    return;
+  }
+  const correct = picks.filter(p => p.correct === true).length;
+  const total   = picks.filter(p => p.correct !== null).length;
+  if (total > 0) document.getElementById('accuracy-badge').textContent = `${correct}/${total} picks · ${Math.round(correct/total*100)}% precisión`;
+
+  el.innerHTML = `<table class="history-table" style="width:100%">
+    <thead><tr><th>Partido</th><th>Pick</th><th>Resultado</th><th>Tu ganancia</th></tr></thead>
+    <tbody>${picks.map(p => {
+      const date = new Date(p.date).toLocaleDateString('es-MX', { day:'numeric', month:'short', timeZone:'America/Mexico_City' });
+      const inv  = (dashData?.user?.total_invested || 0);
+      const gain = p.correct === true  ? fmt(Math.round(inv * 0.03))
+                 : p.correct === false ? fmt(-Math.round(inv * 0.01))
+                 : '—';
+      const badge = p.correct === true  ? `<span class="badge-win">✓ ${p.result || 'ACERTADO'}</span>`
+                  : p.correct === false ? `<span class="badge-loss">✗ ${p.result || 'FALLÓ'}</span>`
+                  : `<span class="badge-pending">EN ESPERA</span>`;
+      const gainColor = p.correct === true ? 'var(--green)' : p.correct === false ? 'var(--red)' : 'var(--muted)';
+      return `<tr>
+        <td><span style="font-size:10px;color:var(--muted);display:block;font-family:'Courier New',monospace">${date}</span>${p.home_team} vs ${p.away_team}</td>
+        <td style="font-size:12px">${p.prediction || '—'}</td>
+        <td>${badge}</td>
+        <td style="font-family:'Courier New',monospace;font-size:12px;color:${gainColor}">${gain}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+async function loadTodayPicks() {
+  try {
+    const r = await fetch(`${BACKEND}/live-picks`, { signal: AbortSignal.timeout(6000) });
+    const data = await r.json();
+    const picks = data.picks || [];
+    const now = new Date().toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City' });
+    document.getElementById('picks-updated').textContent = `Actualizado: ${now}`;
+    document.getElementById('picks-body').innerHTML = picks.length
+      ? picks.map(p => {
+          const t = new Date(p.date).toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City' });
+          const badge = p.correct === true  ? `<span class="badge-win">✓ ${p.result}</span>`
+                      : p.correct === false ? `<span class="badge-loss">✗ ${p.result}</span>`
+                      : `<span class="badge-pending">EN ESPERA</span>`;
+          return `<tr>
+            <td>${p.home_team} vs ${p.away_team}<br><span style="font-size:10px;color:var(--muted);font-family:'Courier New',monospace">${t} hrs</span></td>
+            <td style="font-size:12px;font-weight:500">${p.prediction || '—'}</td>
+            <td style="font-family:'Courier New',monospace;font-size:11px;color:#0047FF">${p.confidence ? p.confidence+'%' : '—'}</td>
+            <td>${badge}</td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No hay partidos disponibles hoy</td></tr>';
+  } catch {
+    document.getElementById('picks-body').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted);font-size:12px">Error al cargar picks</td></tr>';
+  }
+}
+
+/* RETIRO */
+function openRetiroModal() { document.getElementById('retiro-modal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeRetiroModal() { document.getElementById('retiro-modal').classList.remove('active'); document.body.style.overflow = ''; }
+
+async function handleRetiro() {
+  const amount = parseFloat(document.getElementById('retiro-amount').value);
+  const bank   = document.getElementById('retiro-bank').value.trim();
+  const clabe  = document.getElementById('retiro-clabe').value.trim();
+  const holder = document.getElementById('retiro-holder').value.trim();
+  const errEl  = document.getElementById('retiro-error');
+
+  if (!amount || amount < 100) { errEl.textContent = 'El monto mínimo de retiro es $100 MXN.'; return; }
+  if (!bank || !clabe || !holder) { errEl.textContent = 'Completa todos los datos bancarios.'; return; }
+  if (clabe.length !== 18) { errEl.textContent = 'La CLABE debe tener exactamente 18 dígitos.'; return; }
+
+  try {
+    const res = await fetch(`${BACKEND}/withdraw`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ amount, bank_name: bank, clabe, account_holder: holder }),
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Error procesando solicitud.'; return; }
+    closeRetiroModal();
+    document.getElementById('popup-confirm').classList.add('active');
+    // Clear fields
+    ['retiro-amount','retiro-bank','retiro-clabe','retiro-holder'].forEach(id => document.getElementById(id).value = '');
+    errEl.textContent = '';
+  } catch { errEl.textContent = 'Error de conexión. Intenta nuevamente.'; }
+}
+
+// Load on init
+loadDashboard();
+</script>
+</body>
+</html>

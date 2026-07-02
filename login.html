@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MVX Picks — Iniciar sesión</title>
+<link rel="icon" type="image/png" href="logo.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+:root{
+  --black:#080810;--surface:#12121f;--surface2:#1a1a2e;
+  --border:#ffffff0f;--border2:#ffffff18;
+  --blue:#0047FF;--blue2:#0035cc;--blue-dim:rgba(0,71,255,0.08);
+  --red:#FF1B1B;--white:#F8F8FF;--muted:#8888aa;--green:#00D68F;
+}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;min-height:100dvh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,71,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,71,255,0.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+/* HEADER */
+.auth-header{
+  position:fixed;top:0;left:0;right:0;
+  height:60px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:rgba(8,8,16,0.92);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);z-index:100;
+}
+.auth-header img{height:26px;width:auto}
+.auth-header a{font-size:13px;color:var(--muted);transition:color 0.2s}
+.auth-header a:hover{color:var(--white)}
+
+/* MAIN */
+.auth-main{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:80px 20px 40px;position:relative;z-index:1;
+}
+.auth-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:12px;padding:36px 32px;width:100%;max-width:420px;
+  position:relative;
+}
+.auth-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);
+  border-radius:12px 12px 0 0;
+}
+.auth-logo{display:flex;justify-content:center;margin-bottom:24px}
+.auth-logo img{height:32px;width:auto}
+.auth-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;text-align:center;margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px}
+
+/* TABS */
+.auth-tabs{display:flex;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:24px}
+.auth-tab{
+  flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;
+  border-radius:6px;cursor:pointer;color:var(--muted);transition:all 0.2s;
+}
+.auth-tab.active{background:var(--blue);color:#fff}
+
+/* FIELDS */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px}
+.field input{
+  width:100%;background:var(--black);border:1px solid var(--border2);
+  border-radius:8px;padding:13px 14px;color:var(--white);
+  font-size:15px;font-family:inherit;outline:none;
+  transition:border-color 0.2s;-webkit-appearance:none;
+}
+.field input:focus{border-color:var(--blue)}
+.field input::placeholder{color:var(--muted)}
+
+/* BUTTONS */
+.btn-primary{
+  width:100%;padding:15px;background:var(--blue);color:#fff;
+  font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;
+  border:none;border-radius:8px;cursor:pointer;
+  transition:background 0.2s;margin-top:4px;
+}
+.btn-primary:hover{background:var(--blue2)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+
+/* ERROR / SUCCESS */
+#auth-error{font-size:12px;color:var(--red);text-align:center;min-height:16px;margin-bottom:10px}
+#auth-success{font-size:12px;color:var(--green);text-align:center;min-height:16px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header class="auth-header">
+  <a href="/"><img src="logo.png" alt="MVX Picks"/></a>
+  <a href="/">← Volver al inicio</a>
+</header>
+
+<main class="auth-main">
+  <div class="auth-card">
+    <div class="auth-logo"><img src="logo.png" alt="MVX Picks"/></div>
+    <h1 class="auth-title">MI CUENTA</h1>
+    <p class="auth-sub">Accede a tu dashboard de inversiones</p>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email" inputmode="email"/></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/></div>
+      <div id="auth-error"></div>
+      <button class="btn-primary" onclick="handleLogin()">ENTRAR A MI CUENTA →</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-register" style="display:none">
+      <div class="field"><label>Nombre completo</label><input type="text" id="reg-name" placeholder="Tu nombre" autocomplete="name"/></div>
+      <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email" inputmode="email"/></div>
+      <div class="field"><label>WhatsApp</label><input type="tel" id="reg-phone" placeholder="+52 55 1234 5678" autocomplete="tel" inputmode="tel"/></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"/></div>
+      <div id="auth-error"></div>
+      <button class="btn-primary" onclick="handleRegister()">CREAR CUENTA →</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const BACKEND = 'https://mvxpicks-production.up.railway.app';
+
+// Check if already logged in
+const token = localStorage.getItem('mvx_token');
+if (token) window.location.href = '/dashboard';
+
+// Check if coming from purchase
+const params = new URLSearchParams(window.location.search);
+if (params.get('invested')) {
+  switchTab('register');
+  document.getElementById('reg-email').value = params.get('email') || '';
+  showSuccess('¡Pago exitoso! Crea tu cuenta para ver tu dashboard.');
+}
+
+function switchTab(tab) {
+  document.getElementById('form-login').style.display    = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  clearMessages();
+}
+
+function showError(msg) {
+  document.querySelectorAll('#auth-error').forEach(el => el.textContent = msg);
+  document.querySelectorAll('#auth-success').forEach(el => el.textContent = '');
+}
+function showSuccess(msg) {
+  document.querySelectorAll('#auth-success').forEach(el => el.textContent = msg);
+  document.querySelectorAll('#auth-error').forEach(el => el.textContent = '');
+}
+function clearMessages() {
+  document.querySelectorAll('#auth-error,#auth-success').forEach(el => el.textContent = '');
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showError('Completa todos los campos.'); return; }
+
+  try {
+    const res = await fetch(`${BACKEND}/auth/login`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass }),
+    });
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'Email o contraseña incorrectos.'); return; }
+    localStorage.setItem('mvx_token', data.token);
+    localStorage.setItem('mvx_user', JSON.stringify(data.user));
+    window.location.href = '/dashboard';
+  } catch { showError('Error de conexión. Intenta nuevamente.'); }
+}
+
+async function handleRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  if (!name || !email || !pass) { showError('Completa todos los campos.'); return; }
+  if (pass.length < 8) { showError('La contraseña debe tener al menos 8 caracteres.'); return; }
+
+  try {
+    const res = await fetch(`${BACKEND}/auth/register`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, password: pass,
+        invested: parseInt(params.get('invested') || '0'),
+        payment_intent: params.get('pi') || '',
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'Error al crear cuenta.'); return; }
+    localStorage.setItem('mvx_token', data.token);
+    localStorage.setItem('mvx_user', JSON.stringify(data.user));
+    window.location.href = '/dashboard';
+  } catch { showError('Error de conexión. Intenta nuevamente.'); }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('form-login').style.display !== 'none') handleLogin();
+    else handleRegister();
+  }
+});
+</script>
+</body>
+</html>
