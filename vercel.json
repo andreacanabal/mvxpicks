@@ -1,7 +1,9 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/gracias", "dest": "/gracias.html" },
-    { "src": "/(.*)",    "dest": "/$1" }
+    { "src": "/login",     "dest": "/login.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/gracias",   "dest": "/gracias.html" },
+    { "src": "/(.*)",      "dest": "/$1" }
   ]
 }
