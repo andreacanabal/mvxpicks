@@ -1,23 +1,25 @@
 // server.js — Mr. MVX · The Pick · Mundial 2026
-// Railway Node.js — backend completo + picks automáticos integrados
+// Railway Node.js — backend completo + picks automáticos + auth + inversiones
 
 import express from 'express';
 import cors    from 'cors';
 import Stripe  from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import crypto  from 'crypto';
-
-// Node 18+ tiene fetch nativo — no necesitamos node-fetch
+import { createHmac, timingSafeEqual } from 'crypto';
 
 const app    = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-06-20' });
 const sb     = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
-// ── Constantes ──
 const FOOTBALL_API_KEY  = process.env.FOOTBALL_API_KEY;
 const FOOTBALL_API_HOST = 'v3.football.api-sports.io';
 const WC_LEAGUE_ID      = 1;
 const WC_SEASON         = 2026;
+const JWT_SECRET        = process.env.JWT_SECRET || 'mvxpicks_jwt_2026';
+
+// Rendimiento estimado por pick ganado (% del capital)
+const RETURN_PER_WIN = 0.035; // 3.5% por pick ganado
 
 const PLANS = {
   basic: { amount: 29900, currency: 'mxn', name: 'The Pick · Básico — Mundial 2026' },
@@ -128,6 +130,234 @@ app.get('/live-picks', async (req, res) => {
     res.json({ picks: data || [] });
   } catch (err) {
     res.json({ picks: [] });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH — Registro y login
+// ═══════════════════════════════════════════════════════════════
+
+function hashPassword(pass) {
+  return crypto.createHmac('sha256', JWT_SECRET).update(pass).digest('hex');
+}
+
+function generateToken(userId) {
+  const payload = Buffer.from(JSON.stringify({ userId, exp: Date.now() + 30 * 24 * 60 * 60 * 1000 })).toString('base64');
+  const sig = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex');
+  return `${payload}.${sig}`;
+}
+
+function verifyToken(token) {
+  try {
+    const [payload, sig] = token.split('.');
+    const expected = crypto.createHmac('sha256', JWT_SECRET).update(payload).digest('hex');
+    if (sig !== expected) return null;
+    const data = JSON.parse(Buffer.from(payload, 'base64').toString());
+    if (data.exp < Date.now()) return null;
+    return data;
+  } catch { return null; }
+}
+
+async function authMiddleware(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autorizado' });
+  const data = verifyToken(token);
+  if (!data) return res.status(401).json({ error: 'Sesión expirada' });
+  req.userId = data.userId;
+  next();
+}
+
+app.post('/auth/register', async (req, res) => {
+  const { name, email, phone, password } = req.body || {};
+  if (!name || !email || !password) return res.status(400).json({ error: 'Nombre, email y contraseña requeridos' });
+  if (password.length < 8) return res.status(400).json({ error: 'Contraseña mínimo 8 caracteres' });
+  try {
+    const { data: existing } = await sb.from('users').select('id').eq('email', email).maybeSingle();
+    if (existing) return res.status(400).json({ error: 'Este email ya tiene una cuenta' });
+    const { data: user, error } = await sb.from('users').insert({
+      name, email, phone: phone || '',
+      password_hash: hashPassword(password),
+    }).select().single();
+    if (error) throw error;
+    const token = generateToken(user.id);
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+  } catch (err) {
+    console.error('[register]', err.message);
+    res.status(500).json({ error: 'Error creando cuenta' });
+  }
+});
+
+app.post('/auth/login', async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Email y contraseña requeridos' });
+  try {
+    const { data: user } = await sb.from('users').select('*').eq('email', email).maybeSingle();
+    if (!user || user.password_hash !== hashPassword(password)) {
+      return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+    }
+    const token = generateToken(user.id);
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+  } catch (err) {
+    res.status(500).json({ error: 'Error iniciando sesión' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD — Datos del usuario
+// ═══════════════════════════════════════════════════════════════
+app.get('/dashboard', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Inversiones activas
+    const { data: investments } = await sb
+      .from('investments').select('*').eq('user_id', userId).eq('status', 'active');
+
+    const totalInvested = investments?.reduce((a, i) => a + parseFloat(i.amount), 0) || 0;
+
+    // Rendimientos
+    const investIds = investments?.map(i => i.id) || [];
+    let totalReturns = 0, picksWon = 0, picksTotal = 0, weeklyData = [];
+
+    if (investIds.length > 0) {
+      const { data: returns } = await sb
+        .from('daily_returns')
+        .select('*')
+        .in('investment_id', investIds)
+        .order('date', { ascending: false })
+        .limit(50);
+
+      totalReturns = returns?.reduce((a, r) => a + parseFloat(r.return_amount), 0) || 0;
+      picksWon     = returns?.reduce((a, r) => a + (r.picks_won || 0), 0) || 0;
+      picksTotal   = returns?.reduce((a, r) => a + (r.picks_total || 0), 0) || 0;
+
+      // Últimos 7 días para el chart
+      const days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      weeklyData = (returns?.slice(0, 7) || []).reverse().map((r, i) => ({
+        label: i === (returns?.length < 7 ? returns.length - 1 : 6) ? 'Hoy' : days[new Date(r.date).getDay()],
+        pct:   parseFloat(r.return_pct) || 0,
+        today: i === (Math.min(returns?.length, 7) - 1),
+      }));
+    }
+
+    // Historial de operaciones
+    const { data: history } = await sb
+      .from('daily_returns').select('*')
+      .in('investment_id', investIds.length > 0 ? investIds : ['00000000-0000-0000-0000-000000000000'])
+      .order('date', { ascending: false }).limit(10);
+
+    const historyFormatted = (history || []).map(r => ({
+      type:   r.picks_won > 0 ? 'won' : 'pending',
+      desc:   `${r.picks_won}/${r.picks_total} picks acertados`,
+      date:   new Date(r.date).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }),
+      amount: `+$${parseFloat(r.return_amount).toLocaleString('es-MX')} MXN`,
+    }));
+
+    res.json({
+      total_invested: totalInvested,
+      total_returns:  totalReturns,
+      picks_won:      picksWon,
+      picks_total:    picksTotal,
+      history:        historyFormatted,
+      weekly:         weeklyData,
+    });
+
+  } catch (err) {
+    console.error('[dashboard]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// INVEST — Crear inversión con Stripe
+// ═══════════════════════════════════════════════════════════════
+app.post('/invest', authMiddleware, async (req, res) => {
+  const { amount, currency = 'MXN', email, name } = req.body || {};
+  if (!amount || amount < 500 || amount > 50000) {
+    return res.status(400).json({ error: 'Monto inválido. Mínimo $500 · Máximo $50,000 MXN' });
+  }
+  try {
+    const amountCents = Math.round(parseFloat(amount) * 100);
+    const customer = await stripe.customers.list({ email, limit: 1 });
+    const cust = customer.data.length > 0
+      ? customer.data[0]
+      : await stripe.customers.create({ email, name, metadata: { user_id: req.userId } });
+
+    const pi = await stripe.paymentIntents.create({
+      amount:        amountCents,
+      currency:      'mxn',
+      customer:      cust.id,
+      receipt_email: email,
+      description:   `MVX Picks — Inversión $${amount} MXN`,
+      metadata:      { type: 'investment', user_id: req.userId, amount: amount.toString(), source: 'mvx_invest' },
+      automatic_payment_methods: { enabled: true },
+    });
+
+    res.json({ clientSecret: pi.client_secret, paymentIntentId: pi.id });
+  } catch (err) {
+    console.error('[invest]', err.message);
+    res.status(500).json({ error: 'Error procesando inversión' });
+  }
+});
+
+// POST /confirm-investment — confirmar después del pago exitoso
+app.post('/confirm-investment', authMiddleware, async (req, res) => {
+  const { payment_intent_id, amount } = req.body || {};
+  try {
+    const pi = await stripe.paymentIntents.retrieve(payment_intent_id);
+    if (pi.status !== 'succeeded') return res.status(400).json({ error: 'Pago no completado' });
+
+    const { data: inv, error } = await sb.from('investments').insert({
+      user_id: req.userId,
+      amount: parseFloat(amount),
+      currency: 'MXN',
+      status: 'active',
+      stripe_payment_intent: payment_intent_id,
+    }).select().single();
+
+    if (error) throw error;
+
+    // Notificar al Admin por Telegram
+    const { data: user } = await sb.from('users').select('name,email').eq('id', req.userId).single();
+    await notifyAdminInvestment({ name: user?.name, email: user?.email, amount, plan: 'Inversión' });
+
+    res.json({ ok: true, investment_id: inv.id });
+  } catch (err) {
+    console.error('[confirm-investment]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// WITHDRAW — Solicitud de retiro
+// ═══════════════════════════════════════════════════════════════
+app.post('/withdraw', authMiddleware, async (req, res) => {
+  const { amount, bank_name, clabe, account_holder } = req.body || {};
+  if (!amount || amount < 100) return res.status(400).json({ error: 'Monto mínimo $100 MXN' });
+  if (!clabe || clabe.length !== 18) return res.status(400).json({ error: 'CLABE inválida' });
+  if (!account_holder) return res.status(400).json({ error: 'Nombre del titular requerido' });
+
+  try {
+    const { data: user } = await sb.from('users').select('name,email').eq('id', req.userId).single();
+
+    const { data: wd, error } = await sb.from('withdrawals').insert({
+      user_id:        req.userId,
+      amount:         parseFloat(amount),
+      bank_name:      bank_name || '',
+      clabe,
+      account_holder,
+      status:         'pending',
+    }).select().single();
+
+    if (error) throw error;
+
+    // Notificar al grupo de Retiros en Telegram
+    await notifyWithdrawal({ name: user?.name, email: user?.email, amount, bank_name, clabe, account_holder });
+
+    res.json({ ok: true, withdrawal_id: wd.id });
+  } catch (err) {
+    console.error('[withdraw]', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 // ═══════════════════════════════════════════════════════════════
@@ -626,6 +856,8 @@ async function runCheckResults() {
   if (updated > 0) {
     await updateAccuracyStats();
     await sendResultsRecap(updated, correct);
+    // Actualizar rendimientos de inversores
+    await updateInvestorReturns(correct, updated);
   }
 
   console.log(`[CheckResults] ✓ ${correct}/${updated} correctos`);
@@ -797,6 +1029,53 @@ async function notifyAdmin({ name, email, plan, amount }) {
   const labels = { basic: 'Básico', pro: 'Pro', elite: 'Élite' };
   const msg = `💰 *NUEVO MIEMBRO — Mr. MVX*\n\n👤 ${name}\n📧 ${email}\n📦 Plan: ${labels[plan] || plan}\n💵 $${(amount / 100).toFixed(0)} MXN`;
   await telegramSend(process.env.TELEGRAM_ADMIN_CHAT_ID, msg);
+}
+
+async function notifyAdminInvestment({ name, email, amount }) {
+  if (!TELEGRAM_BOT() || !process.env.TELEGRAM_ADMIN_CHAT_ID) return;
+  const msg = `💰 *NUEVA INVERSIÓN — MVX Picks*\n\n👤 ${name}\n📧 ${email}\n💵 $${parseFloat(amount).toLocaleString('es-MX')} MXN\n🕐 ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' })}`;
+  await telegramSend(process.env.TELEGRAM_ADMIN_CHAT_ID, msg);
+}
+
+async function notifyWithdrawal({ name, email, amount, bank_name, clabe, account_holder }) {
+  const chatId = process.env.TELEGRAM_RETIROS_CHAT_ID || process.env.TELEGRAM_ADMIN_CHAT_ID;
+  if (!TELEGRAM_BOT() || !chatId) return;
+  const msg = `💸 *SOLICITUD DE RETIRO — MVX Picks*\n\n` +
+    `👤 ${name}\n📧 ${email}\n` +
+    `💰 Monto: *$${parseFloat(amount).toLocaleString('es-MX')} MXN*\n` +
+    `🏦 Banco: ${bank_name}\n` +
+    `🔢 CLABE: \`${clabe}\`\n` +
+    `👤 Titular: ${account_holder}\n` +
+    `🕐 ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' })}`;
+  await telegramSend(chatId, msg);
+}
+
+// Actualizar rendimientos de todos los inversores cuando un pick gana
+async function updateInvestorReturns(picksWon, picksTotal) {
+  if (picksWon === 0 || picksTotal === 0) return;
+  try {
+    const { data: investments } = await sb.from('investments').select('*').eq('status', 'active');
+    if (!investments?.length) return;
+
+    const returnPct    = picksWon * RETURN_PER_WIN * 100; // % del día
+    const today        = new Date().toISOString().split('T')[0];
+
+    for (const inv of investments) {
+      const returnAmount = parseFloat(inv.amount) * (picksWon * RETURN_PER_WIN);
+      await sb.from('daily_returns').upsert({
+        investment_id:     inv.id,
+        date:              today,
+        picks_won:         picksWon,
+        picks_total:       picksTotal,
+        return_pct:        returnPct,
+        return_amount:     returnAmount,
+        cumulative_amount: returnAmount,
+      }, { onConflict: 'investment_id,date' });
+    }
+    console.log(`[returns] ✓ Actualizados ${investments.length} inversores — +${returnPct.toFixed(1)}%`);
+  } catch (err) {
+    console.error('[returns]', err.message);
+  }
 }
 
 // ── Start ──
