@@ -54,6 +54,20 @@ app.use(express.json());
 // ENDPOINTS — Pagos y utilidades
 // ═══════════════════════════════════════════════════════════════
 
+// GET /setup-bot-webhook?secret=X — registrar webhook manualmente
+app.get('/setup-bot-webhook', async (req, res) => {
+  if (req.query.secret !== (process.env.CRON_SECRET || 'mvxpicks2026')) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  await setupInvestBotWebhook();
+  // Verificar estado
+  const token = INVEST_BOT();
+  if (!token) return res.json({ error: 'No token' });
+  const r = await fetch(`https://api.telegram.org/bot${token}/getWebhookInfo`);
+  const d = await r.json();
+  res.json({ ok: true, webhook: d.result });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'mrmvx-the-pick', ts: new Date().toISOString() });
 });
@@ -80,23 +94,67 @@ app.post('/capture-lead', async (req, res) => {
 });
 
 app.post('/create-checkout-session', async (req, res) => {
-  const { plan, name, email, phone } = req.body || {};
-  if (!plan || !PLANS[plan]) return res.status(400).json({ error: 'Plan no válido' });
-  if (!email || !name)       return res.status(400).json({ error: 'Nombre y email requeridos' });
-  const cfg = PLANS[plan];
+  const { plan, name, email, phone, amount, payment_method } = req.body || {};
+  if (!email || !name) return res.status(400).json({ error: 'Nombre y email requeridos' });
+
+  // Usar monto dinámico si viene del frontend, si no usar el plan
+  const cfg = PLANS[plan] || PLANS['elite'];
+  const finalAmount = amount ? Math.round(amount * 100) : cfg.amount; // Stripe maneja centavos
+
+  const useOxxo = payment_method === 'oxxo';
+
   try {
     const existing = await stripe.customers.list({ email, limit: 1 });
     const customer = existing.data.length > 0
       ? existing.data[0]
-      : await stripe.customers.create({ email, name, phone: phone || undefined, metadata: { plan, source: 'mrmvx_mundial26' } });
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: cfg.amount, currency: cfg.currency, customer: customer.id,
-      description: cfg.name, receipt_email: email,
-      metadata: { plan, buyer_name: name, buyer_phone: phone || '', source: 'mrmvx_mundial26' },
-      automatic_payment_methods: { enabled: true },
+      : await stripe.customers.create({
+          email, name,
+          phone: phone || undefined,
+          metadata: { plan: plan || 'elite', source: 'mrmvx_mundial26' },
+        });
+
+    const piParams = {
+      amount:        finalAmount,
+      currency:      'mxn',
+      customer:      customer.id,
+      description:   `MVX Picks — Inversión $${(finalAmount/100).toLocaleString('es-MX')} MXN`,
+      receipt_email: email,
+      metadata: {
+        plan:         plan || 'elite',
+        buyer_name:   name,
+        buyer_phone:  phone || '',
+        source:       'mrmvx_mundial26',
+      },
+    };
+
+    if (useOxxo) {
+      // OXXO: método de pago exclusivo, genera voucher automáticamente
+      // Stripe envía email con instrucciones + recordatorios automáticos
+      piParams.payment_method_types = ['oxxo'];
+      piParams.payment_method_options = {
+        oxxo: {
+          expires_after_days: 3, // voucher válido 3 días (máx permitido por Stripe)
+        },
+      };
+    } else {
+      // Tarjeta: acepta todos los métodos automáticos
+      piParams.automatic_payment_methods = { enabled: true };
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create(piParams);
+
+    addToBrevoList({
+      email,
+      firstName: name.split(' ')[0],
+      lastName:  name.split(' ').slice(1).join(' '),
+      plan:      plan || 'elite',
+      listId:    parseInt(process.env.BREVO_LEADS_LIST_ID || '6'),
+    }).catch(() => {});
+
+    res.json({
+      clientSecret:   paymentIntent.client_secret,
+      paymentMethod:  useOxxo ? 'oxxo' : 'card',
     });
-    addToBrevoList({ email, firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' '), plan, listId: parseInt(process.env.BREVO_LEADS_LIST_ID || '6') }).catch(() => {});
-    res.json({ clientSecret: paymentIntent.client_secret });
   } catch (err) {
     console.error('[checkout]', err.message);
     res.status(500).json({ error: 'Error procesando el pago. Intenta de nuevo.' });
@@ -630,23 +688,34 @@ async function sendPicksTelegram(picks) {
   if (!TELEGRAM_BOT()) return;
   const groups = GROUPS();
 
-  // 1. Mensaje de buenos días
+  // Separar picks por confianza
+  // Elite público ve solo picks de confianza >= 60 (se ven más convincentes)
+  // Grupos backup reciben TODOS los picks
+  const picksElite  = picks.filter(p => p.confidence >= 60);
+  const picksBackup = picks; // todos
+
+  // 1. Buenos días — todos los grupos
   await telegramSend(groups.elite, formatGoodMorning(picks));
   await sleep(2000);
 
-  // 2. Picks censurados → solo grupo élite (el grupo público)
-  await telegramSend(groups.elite, formatPicksCensored(picks));
+  // 2. Picks censurados → Elite (solo alta confianza)
+  if (picksElite.length > 0) {
+    await telegramSend(groups.elite, formatPicksCensored(picksElite));
+  } else {
+    // Si todos tienen confianza baja, enviar igual pero con nota
+    await telegramSend(groups.elite, formatPicksCensored(picks));
+  }
   await sleep(1500);
 
-  // 3. Picks completos → básico y pro (grupos de backup)
+  // 3. Picks completos → básico y pro (todos los picks)
   for (const plan of ['basic', 'pro']) {
     if (groups[plan]) {
-      await telegramSend(groups[plan], formatPicksFull(picks));
+      await telegramSend(groups[plan], formatPicksFull(picksBackup));
       await sleep(1000);
     }
   }
 
-  // 4. Recordatorios 2h antes
+  // 4. Recordatorios 2h antes — para todos los picks
   scheduleReminders(picks);
 }
 
@@ -1123,14 +1192,31 @@ async function setupInvestBotWebhook() {
   const token = INVEST_BOT();
   if (!token) { console.warn('[invest_bot] No token configured'); return; }
   const webhookUrl = `${process.env.SITE_URL || 'https://mvxpicks-production.up.railway.app'}/invest-bot-webhook`;
-  try {
-    const r = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: webhookUrl, allowed_updates: ['message', 'callback_query'] }),
-    });
-    const d = await r.json();
-    console.log('[invest_bot] Webhook:', d.ok ? '✓ Configurado → ' + webhookUrl : d.description);
-  } catch (e) { console.error('[invest_bot] Webhook error:', e.message); }
+
+  // Intentar hasta 5 veces con 5 segundos entre intentos
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      const r = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: webhookUrl,
+          allowed_updates: ['message', 'callback_query'],
+          drop_pending_updates: true,
+        }),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        console.log(`[invest_bot] ✓ Webhook registrado → ${webhookUrl}`);
+        return;
+      } else {
+        console.warn(`[invest_bot] Intento ${attempt} fallido:`, d.description);
+      }
+    } catch (e) {
+      console.warn(`[invest_bot] Intento ${attempt} error:`, e.message);
+    }
+    if (attempt < 5) await new Promise(r => setTimeout(r, 5000));
+  }
+  console.error('[invest_bot] No se pudo registrar el webhook después de 5 intentos');
 }
 
 // Enviar mensaje del bot de inversión
