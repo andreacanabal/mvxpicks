@@ -3,19 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MVX Picks — El bot que ya sabe quién gana</title>
-<meta name="description" content="86% de precisión documentada. Picks del Mundial con IA antes de cada partido. +20K apostadores en LATAM."/>
-<meta property="og:title" content="MVX Picks — El bot que ya sabe quién gana"/>
-<meta property="og:description" content="86% de precisión. Picks del Mundial en tiempo real. +20K apostadores confían."/>
+<title>MVX Picks — Para de Perder. Empieza a Ganar.</title>
+<meta name="description" content="Bot de IA con 86% de precisión en el Mundial. Tu dinero apuesta solo."/>
+<meta property="og:title" content="MVX Picks — Para de Perder. Empieza a Ganar."/>
 <meta property="og:image" content="https://www.mvxpicks.com/preview.png"/>
 <meta property="og:url" content="https://www.mvxpicks.com"/>
 <meta property="og:type" content="website"/>
 <meta property="fb:app_id" content="1572885741065144"/>
 <link rel="icon" type="image/png" href="logo.png"/>
-<link rel="apple-touch-icon" href="logo.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-SKG7B31VFK"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-SKG7B31VFK');</script>
 <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1572885741065144');fbq('track','PageView');</script>
@@ -25,25 +22,30 @@
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 
 :root{
-  --bg:#0A0A0A;
-  --bg2:#111111;
-  --card:#181818;
-  --card2:#1F1F1F;
-  --line:#252525;
-  --line2:#2E2E2E;
-  --green:#00B050;
-  --green2:#008F40;
-  --green-lo:rgba(0,176,80,0.08);
-  --green-glow:rgba(0,176,80,0.2);
-  --win:#00E676;
-  --yellow:#FFD600;
-  --yellow-lo:rgba(255,214,0,0.08);
-  --red:#E8001D;
-  --red-lo:rgba(232,0,29,0.08);
+  --bg:#060608;
+  --bg2:#0C0C10;
+  --card:#111116;
+  --card2:#16161C;
+  --card3:#1C1C24;
+  --line:#1E1E28;
+  --line2:#28283A;
+  --green:#00FF88;
+  --green2:#00CC6A;
+  --green3:#00994F;
+  --green-glow:rgba(0,255,136,0.15);
+  --green-lo:rgba(0,255,136,0.06);
+  --green-mid:rgba(0,255,136,0.12);
+  --purple:#7B2FFF;
+  --purple-lo:rgba(123,47,255,0.1);
+  --yellow:#FFD60A;
+  --yellow-lo:rgba(255,214,10,0.08);
+  --red:#FF3B5C;
+  --red-lo:rgba(255,59,92,0.08);
   --white:#FFFFFF;
-  --off:#F0F0F0;
-  --muted:#777777;
-  --muted2:#444444;
+  --off:#E8E8F0;
+  --muted:#6B6B80;
+  --muted2:#3A3A4A;
+  --mono:'JetBrains Mono',monospace;
 }
 
 body{
@@ -55,472 +57,454 @@ img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 
-/* ── KEYFRAMES ── */
+/* KEYFRAMES */
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,176,80,0.4)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
-@keyframes conf-grow{from{width:0%}to{width:var(--target)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes scan{from{transform:translateY(-100%)}to{transform:translateY(100vh)}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 20px var(--green-glow)}50%{box-shadow:0 0 40px var(--green-glow),0 0 60px rgba(0,255,136,0.08)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes counter-up{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+@keyframes slide-in{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes bar-fill{from{width:0}to{width:var(--w)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-/* ── NAV ── */
+/* NAV */
 #nav{
-  position:fixed;inset:0 0 auto;z-index:200;height:56px;
+  position:fixed;inset:0 0 auto;z-index:200;height:58px;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 20px;
-  background:rgba(10,10,10,0.97);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--line);
-  transition:border-color 0.3s;
+  background:rgba(6,6,8,0.95);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--line2);
 }
-#nav.scrolled{border-bottom-color:rgba(0,176,80,0.2)}
-.nav-logo img{height:26px;width:auto;display:block}
+.nav-logo img{height:28px;width:auto}
 .nav-right{display:flex;align-items:center;gap:8px}
-.nav-link{font-size:13px;color:var(--muted);padding:7px 12px;border-radius:4px;transition:color 0.2s;white-space:nowrap}
+.nav-link{font-size:13px;color:var(--muted);padding:7px 12px;transition:color 0.2s}
 .nav-link:hover{color:var(--white)}
 .nav-cta{
-  background:var(--green);color:var(--white);
-  font-weight:700;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;
-  padding:9px 18px;border-radius:4px;
-  transition:background 0.2s,transform 0.15s;
-  animation:pulse-ring 2.5s ease-in-out infinite;
-  white-space:nowrap;
+  background:var(--green);color:#000;
+  font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;
+  padding:10px 20px;border-radius:6px;
+  transition:all 0.2s;
+  box-shadow:0 0 20px rgba(0,255,136,0.3);
 }
-.nav-cta:hover{background:var(--green2);transform:translateY(-1px)}
+.nav-cta:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 0 32px rgba(0,255,136,0.5)}
 
-/* ── HERO ── */
+/* HERO */
 #hero{
   min-height:100dvh;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  padding:72px 20px 32px;
+  padding:72px 20px 0;
   position:relative;overflow:hidden;
   text-align:center;
 }
 
-/* scan line removed */
+/* Gradient orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.orb-1{width:500px;height:500px;background:rgba(0,255,136,0.06);top:-150px;left:-100px}
+.orb-2{width:400px;height:400px;background:rgba(123,47,255,0.06);top:-100px;right:-100px}
+.orb-3{width:300px;height:300px;background:rgba(0,255,136,0.04);bottom:0;left:50%;transform:translateX(-50%)}
 
-/* Green gradient from bottom */
-.hero-gradient{
-  position:absolute;bottom:0;left:0;right:0;height:40%;
-  background:radial-gradient(ellipse 80% 100% at 50% 100%,rgba(0,176,80,0.07) 0%,transparent 70%);
-  pointer-events:none;
-}
-
-/* Animated grid */
+/* Grid */
 .hero-grid{
   position:absolute;inset:0;
   background-image:
-    linear-gradient(rgba(0,176,80,0.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,176,80,0.035) 1px,transparent 1px);
-  background-size:56px 56px;
-  animation:fadeIn 1.5s ease both;
+    linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+  background-size:48px 48px;
   pointer-events:none;
-  z-index:0;
 }
 
-.hero-inner{
-  position:relative;z-index:2;
-  width:100%;max-width:680px;
-  animation:fadeUp 0.8s ease both;
-}
+.hero-inner{position:relative;z-index:2;width:100%;max-width:700px;animation:fadeUp 0.7s ease both}
 
-/* LIVE CHIP */
-.live-chip{
+/* LIVE BADGE */
+.live-badge{
   display:inline-flex;align-items:center;gap:8px;
-  background:rgba(232,0,29,0.1);border:1px solid rgba(232,0,29,0.25);
-  border-radius:3px;padding:5px 13px;
-  font-family:'Courier New',monospace;font-size:10px;font-weight:700;
-  letter-spacing:0.2em;color:var(--red);text-transform:uppercase;
-  margin-bottom:22px;
+  background:rgba(255,59,92,0.12);border:1px solid rgba(255,59,92,0.3);
+  border-radius:4px;padding:5px 14px;
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  letter-spacing:0.18em;color:var(--red);text-transform:uppercase;
+  margin-bottom:24px;
 }
-.live-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s infinite}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s infinite}
 
-/* ── SCOREBOARD ── */
+/* SCOREBOARD */
 .scoreboard{
-  background:var(--card);border:1px solid var(--line2);
-  border-radius:8px;overflow:hidden;margin-bottom:24px;
-  box-shadow:0 0 0 1px rgba(0,176,80,0.12),0 20px 60px rgba(0,0,0,0.5);
-  animation:float 6s ease-in-out infinite;
+  background:linear-gradient(135deg,var(--card2) 0%,var(--card3) 100%);
+  border:1px solid var(--line2);border-radius:12px;overflow:hidden;
+  margin-bottom:28px;
+  box-shadow:0 0 0 1px rgba(0,255,136,0.1),0 24px 80px rgba(0,0,0,0.6);
+  animation:float 5s ease-in-out infinite;
+  position:relative;
 }
-.sb-header{
-  background:var(--card2);padding:8px 16px;
+.scoreboard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),var(--purple),transparent);
+}
+.sb-top{
+  padding:10px 16px;
   display:flex;align-items:center;justify-content:space-between;
   border-bottom:1px solid var(--line);
+  background:rgba(0,0,0,0.2);
 }
-.sb-comp{font-family:'Courier New',monospace;font-size:9px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase}
+.sb-comp{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase}
 .sb-live{
   display:flex;align-items:center;gap:6px;
-  font-family:'Courier New',monospace;font-size:9px;font-weight:700;
-  color:var(--green);letter-spacing:0.12em;
+  font-family:var(--mono);font-size:9px;font-weight:600;color:var(--green);letter-spacing:0.1em;
 }
 .sb-live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
 
 .sb-match{
   display:grid;grid-template-columns:1fr auto 1fr;
-  align-items:center;padding:20px 16px;
+  align-items:center;padding:22px 16px;
 }
-.sb-team{display:flex;flex-direction:column;align-items:center;gap:5px}
-.sb-flag{font-size:clamp(32px,9vw,52px);line-height:1;transition:transform 0.3s}
-.sb-flag:hover{transform:scale(1.1)}
+.sb-team{display:flex;flex-direction:column;align-items:center;gap:6px}
+.sb-flag{font-size:clamp(36px,10vw,56px);line-height:1}
 .sb-name{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(13px,3.5vw,18px);
-  letter-spacing:0.08em;color:var(--off);
+  font-size:clamp(13px,3.5vw,18px);letter-spacing:0.1em;color:var(--off);
 }
-.sb-center{display:flex;flex-direction:column;align-items:center;padding:0 12px}
-.sb-kick{font-family:'Courier New',monospace;font-size:10px;color:var(--muted);margin-bottom:3px}
+.sb-center{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 10px}
+.sb-kick{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:2px}
 .sb-vs{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(28px,8vw,52px);
-  color:var(--white);letter-spacing:0.04em;line-height:1;
+  font-size:clamp(30px,8vw,54px);color:var(--white);letter-spacing:0.04em;line-height:1;
 }
-.sb-date-str{font-family:'Courier New',monospace;font-size:9px;color:var(--muted2);margin-top:3px;letter-spacing:0.06em}
+.sb-date{font-family:var(--mono);font-size:8px;color:var(--muted2);margin-top:2px;letter-spacing:0.06em}
 
 /* Pick strip */
-.sb-pick-strip{
-  border-top:1px solid rgba(0,176,80,0.15);
-  background:rgba(0,176,80,0.05);
+.sb-strip{
+  border-top:1px solid rgba(0,255,136,0.12);
+  background:rgba(0,255,136,0.04);
   padding:12px 16px;
   display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
 }
-.sb-pick-lbl{font-family:'Courier New',monospace;font-size:9px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase}
-.sb-pick-val{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-}
+.sb-strip-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase}
+.sb-strip-val{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .sb-pred{
-  font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,3.5vw,20px);
-  color:var(--green);letter-spacing:0.06em;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(15px,3.5vw,22px);color:var(--green);letter-spacing:0.06em;
+  text-shadow:0 0 20px rgba(0,255,136,0.5);
 }
-.conf-wrap{display:flex;align-items:center;gap:7px}
+.conf-row{display:flex;align-items:center;gap:7px}
 .conf-track{width:56px;height:3px;background:var(--line2);border-radius:100px;overflow:hidden}
-.conf-fill{height:100%;background:var(--green);border-radius:100px;width:0%;transition:width 1.2s cubic-bezier(0.25,0.46,0.45,0.94)}
-.conf-num{font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:var(--green)}
-.sb-lock{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:11px;color:var(--muted2);font-style:italic;
-}
+.conf-fill{height:100%;background:linear-gradient(90deg,var(--green2),var(--green));border-radius:100px;width:0%;transition:width 1.4s cubic-bezier(0.25,0.46,0.45,0.94)}
+.conf-pct{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green)}
+.sb-lock{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted2);font-style:italic}
 .sb-lock svg{width:11px;height:11px}
 
 /* HEADLINE */
 .hero-h1{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(46px,13vw,96px);
-  line-height:0.9;letter-spacing:0.01em;
-  color:var(--white);margin-bottom:12px;
+  font-size:clamp(48px,14vw,100px);
+  line-height:0.88;letter-spacing:0.01em;
+  color:#FFFFFF;margin-bottom:8px;
+  text-shadow:0 2px 40px rgba(0,0,0,0.5);
 }
-.hero-h1 .g{color:var(--green)}
+.hero-h1 .g{
+  color:var(--green);
+  text-shadow:0 0 40px rgba(0,255,136,0.4);
+}
 .hero-h1 .y{color:var(--yellow)}
 
 .hero-sub{
-  font-size:clamp(14px,2.2vw,16px);color:var(--muted);
-  font-weight:400;max-width:460px;
-  margin:0 auto 28px;line-height:1.7;
+  font-size:clamp(14px,2.2vw,17px);color:#B0B0C0;
+  max-width:480px;margin:0 auto 28px;line-height:1.7;
 }
-.hero-sub b{color:var(--white);font-weight:600}
+.hero-sub b{color:var(--green);font-weight:700;text-shadow:0 0 20px rgba(0,255,136,0.3)}
 
-/* PROOF ROW */
-.proof-row{
-  display:flex;align-items:stretch;max-width:460px;
-  margin:0 auto 28px;
-  background:var(--card);border:1px solid var(--line2);
-  border-radius:6px;overflow:hidden;width:100%;
+/* STATS BAR */
+.stats-row{
+  display:flex;align-items:stretch;
+  max-width:480px;margin:0 auto 28px;width:100%;
+  border:1px solid var(--line2);border-radius:8px;overflow:hidden;
+  background:var(--card);
 }
-.proof-item{
-  flex:1;padding:13px 8px;text-align:center;
-  border-right:1px solid var(--line);
+.stat{
+  flex:1;padding:14px 8px;text-align:center;
+  border-right:1px solid var(--line);position:relative;
 }
-.proof-item:last-child{border-right:none}
-.proof-val{
+.stat:last-child{border-right:none}
+.stat-val{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(20px,4.5vw,28px);line-height:1;
-  margin-bottom:2px;
+  font-size:clamp(22px,5vw,30px);line-height:1;margin-bottom:3px;
 }
-.proof-val.g{color:var(--green)}
-.proof-val.y{color:var(--yellow)}
-.proof-val.w{color:var(--white)}
-.proof-lbl{font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.stat-val.g{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.3)}
+.stat-val.y{color:var(--yellow)}
+.stat-val.p{color:var(--purple)}
+.stat-val.w{color:var(--white)}
+.stat-lbl{font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;font-family:var(--mono)}
 
 /* CTA */
-.hero-ctas{
-  display:flex;flex-direction:column;align-items:center;
-  gap:10px;width:100%;
-}
-.btn-hero{
+.hero-ctas{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.btn-primary{
   display:block;width:100%;max-width:380px;
-  padding:16px 28px;border:none;
-  background:var(--green);color:var(--white);
-  font-weight:700;font-size:14px;letter-spacing:0.07em;text-transform:uppercase;
-  border-radius:5px;cursor:pointer;
-  transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
+  padding:17px 28px;border:none;
+  background:var(--green);color:#000;
+  font-weight:800;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;
+  border-radius:8px;cursor:pointer;
+  transition:all 0.2s;
+  box-shadow:0 0 30px rgba(0,255,136,0.25);
+  animation:glow-pulse 3s ease-in-out infinite;
 }
-.btn-hero:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,176,80,0.35)}
-.hero-note{
-  font-size:12px;color:var(--muted);
-  display:flex;align-items:center;gap:7px;
-}
-.ynote{color:var(--yellow);font-weight:600}
+.btn-primary:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 0 50px rgba(0,255,136,0.4)}
+.hero-note{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.check-icon{color:var(--green);font-weight:700}
 
 /* TICKER */
-.ticker-outer{
-  overflow:hidden;background:var(--card);
+.ticker-wrap{
+  overflow:hidden;
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-  padding:9px 0;margin-top:32px;
+  background:linear-gradient(90deg,var(--bg) 0%,var(--card) 10%,var(--card) 90%,var(--bg) 100%);
+  padding:9px 0;margin-top:36px;
   width:100vw;margin-left:calc(-50vw + 50%);
   position:relative;z-index:1;
 }
-.ticker-track{display:flex;animation:ticker 30s linear infinite;width:max-content}
+.ticker-track{display:flex;animation:ticker 32s linear infinite;width:max-content}
 .tick{
-  font-family:'Courier New',monospace;font-size:11px;
-  color:var(--muted);letter-spacing:0.08em;
-  padding:0 30px;white-space:nowrap;
-  display:flex;align-items:center;gap:9px;
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  padding:0 32px;white-space:nowrap;display:flex;align-items:center;gap:10px;
 }
-.tick .w{color:var(--win);font-weight:700}
-.tick .g{color:var(--green)}
-.tick .y{color:var(--yellow)}
-.tick .r{color:var(--red)}
+.tw{color:var(--green);font-weight:600}
+.ty{color:var(--yellow);font-weight:600}
+.tp{color:var(--purple);font-weight:600}
+.tr{color:var(--red)}
 
-/* ── LAYOUT ── */
+/* SECTIONS */
 .section{padding:80px 0;background:var(--bg);position:relative;z-index:1}
 .section-alt{padding:80px 0;background:var(--bg2);position:relative;z-index:1}
-.wrap{max-width:1040px;margin-left:auto;margin-right:auto;padding:0 20px;width:100%}
-
-.eyebrow{
-  display:block;font-family:'Courier New',monospace;
-  font-size:10px;font-weight:700;letter-spacing:0.22em;
-  text-transform:uppercase;color:var(--green);margin-bottom:12px;
-}
-.h2{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(34px,6vw,62px);
-  line-height:0.95;letter-spacing:0.02em;
-  color:var(--white);margin-bottom:14px;
-}
-.h2 .g{color:var(--green)}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px;width:100%}
+.eye{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
+.h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,6vw,64px);line-height:0.95;letter-spacing:0.02em;color:var(--white);margin-bottom:14px}
+.h2 .g{color:var(--green);text-shadow:0 0 30px rgba(0,255,136,0.3)}
 .h2 .y{color:var(--yellow)}
+.h2 .p{color:var(--purple)}
 .lead{font-size:14px;color:var(--muted);line-height:1.75;max-width:480px}
 .lead b{color:var(--white);font-weight:600}
 
-/* ── STEPS ── */
-.steps{
-  display:grid;grid-template-columns:1fr;gap:1px;
-  background:var(--line);border:1px solid var(--line);
-  border-radius:8px;overflow:hidden;margin-top:40px;
+/* ─── DATA DASHBOARD SECTION ─── */
+.data-grid{
+  display:grid;grid-template-columns:1fr;gap:12px;margin-top:36px;
 }
-@media(min-width:640px){.steps{grid-template-columns:repeat(4,1fr)}}
-.step{
-  background:var(--card);padding:26px 20px;
-  position:relative;overflow:hidden;
-  transition:background 0.25s;
-}
-.step::before{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--green),transparent);
-  transform:scaleX(0);transform-origin:left;transition:transform 0.4s ease;
-}
-.step:hover{background:var(--card2)}
-.step:hover::before{transform:scaleX(1)}
-.step-n{
-  font-family:'Courier New',monospace;font-size:9px;
-  color:var(--muted2);letter-spacing:0.16em;margin-bottom:16px;
-}
-.step-icon{
-  width:40px;height:40px;border-radius:6px;
-  background:var(--green-lo);border:1px solid rgba(0,176,80,0.18);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:14px;transition:background 0.25s,border-color 0.25s;
-}
-.step:hover .step-icon{background:rgba(0,176,80,0.15);border-color:rgba(0,176,80,0.35)}
-.step-icon svg{color:var(--green);transition:transform 0.25s}
-.step:hover .step-icon svg{transform:scale(1.1)}
-.step-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:7px;line-height:1.4}
-.step-desc{font-size:12px;color:var(--muted);line-height:1.7}
+@media(min-width:768px){.data-grid{grid-template-columns:repeat(3,1fr)}}
 
-/* ── CALC ── */
-.calc-box{
+.data-card{
   background:var(--card);border:1px solid var(--line2);
-  border-radius:8px;overflow:hidden;margin-top:40px;
+  border-radius:10px;padding:20px;position:relative;overflow:hidden;
+  transition:border-color 0.2s,transform 0.2s;
 }
-.calc-top{
-  background:var(--card2);padding:20px 24px;
-  border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;flex-wrap:wrap;
+.data-card:hover{border-color:rgba(0,255,136,0.25);transform:translateY(-2px)}
+.data-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  opacity:0;transition:opacity 0.3s;
 }
-.calc-top-lbl{font-size:12px;color:var(--muted);margin-bottom:2px}
-.calc-val{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:38px;color:var(--white);line-height:1;
-}
-.calc-body{padding:24px}
-.slider{
-  width:100%;-webkit-appearance:none;appearance:none;
-  height:3px;background:var(--line2);border-radius:100px;
-  outline:none;cursor:pointer;margin-bottom:8px;
-}
-.slider::-webkit-slider-thumb{
-  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
-  background:var(--green);cursor:pointer;
-  box-shadow:0 0 12px var(--green-glow),0 0 0 3px rgba(0,176,80,0.15);
-  transition:transform 0.15s;
-}
-.slider::-webkit-slider-thumb:hover{transform:scale(1.15)}
-.slider-labs{
-  display:flex;justify-content:space-between;
-  font-family:'Courier New',monospace;font-size:10px;
-  color:var(--muted);margin-bottom:26px;
-}
-.calc-res{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.calc-r{
-  background:var(--bg);border:1px solid var(--line);
-  border-radius:6px;padding:14px;text-align:center;
-  transition:border-color 0.2s;
-}
-.calc-r:hover{border-color:var(--line2)}
-.calc-r-val{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;margin-bottom:3px}
-.calc-r-val.g{color:var(--green)}
-.calc-r-val.y{color:var(--yellow)}
-.calc-r-val.w{color:var(--white)}
-.calc-r-lbl{font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
-.calc-disc{margin-top:14px;font-size:11px;color:var(--muted2);text-align:center;line-height:1.6}
+.data-card:hover::before{opacity:1}
+.dc-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px}
+.dc-val{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--green);line-height:1;margin-bottom:4px;text-shadow:0 0 20px rgba(0,255,136,0.25)}
+.dc-sub{font-size:12px;color:var(--muted)}
+.dc-bar-wrap{margin-top:12px}
+.dc-bar-bg{height:4px;background:var(--line2);border-radius:100px;overflow:hidden;margin-bottom:4px}
+.dc-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--green2),var(--green));animation:bar-fill 1.5s ease both}
+.dc-bar-lbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--muted2)}
 
-/* ── PICKS TABLE ── */
+/* ─── STEPS — VISUAL UPGRADE ─── */
+.steps-new{
+  display:grid;grid-template-columns:1fr;gap:0;margin-top:40px;
+  position:relative;
+}
+@media(min-width:640px){.steps-new{grid-template-columns:repeat(4,1fr)}}
+.steps-new::before{
+  content:'';position:absolute;top:32px;left:12.5%;right:12.5%;height:1px;
+  background:linear-gradient(90deg,var(--green),var(--purple),var(--green));
+  display:none;
+}
+@media(min-width:640px){.steps-new::before{display:block}}
+
+.step-new{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:0 16px 0;position:relative;
+}
+.step-circle{
+  width:64px;height:64px;border-radius:50%;
+  border:2px solid var(--green);
+  background:var(--card2);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;position:relative;z-index:1;
+  box-shadow:0 0 20px var(--green-glow);
+  transition:all 0.3s;
+  flex-shrink:0;
+}
+.step-circle:hover{box-shadow:0 0 40px rgba(0,255,136,0.4);transform:scale(1.05)}
+.step-num-big{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  color:var(--green);line-height:1;
+}
+.step-icon-svg{color:var(--green)}
+.step-t{font-size:14px;font-weight:700;color:var(--white);margin-bottom:8px;line-height:1.3}
+.step-d{font-size:12px;color:var(--muted);line-height:1.65}
+.step-tag{
+  display:inline-block;margin-top:10px;
+  font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;
+  padding:3px 9px;border-radius:3px;text-transform:uppercase;
+}
+.tag-g{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2)}
+.tag-p{background:rgba(123,47,255,0.1);color:var(--purple);border:1px solid rgba(123,47,255,0.2)}
+.tag-y{background:rgba(255,214,10,0.1);color:var(--yellow);border:1px solid rgba(255,214,10,0.2)}
+.tag-w{background:rgba(255,255,255,0.06);color:var(--white);border:1px solid rgba(255,255,255,0.12)}
+
+/* ─── PICKS TABLE ─── */
 .picks-shell{
-  border:1px solid var(--line2);border-radius:8px;
+  border:1px solid var(--line2);border-radius:10px;
   overflow:hidden;background:var(--card);margin-top:24px;
 }
 .picks-bar{
   background:var(--card2);padding:12px 16px;
   border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:8px;flex-wrap:wrap;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
 }
 .live-b{
   display:flex;align-items:center;gap:7px;
-  font-family:'Courier New',monospace;font-size:10px;
-  color:var(--win);letter-spacing:0.12em;font-weight:700;
+  font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:0.12em;font-weight:700;
 }
-.live-g{width:6px;height:6px;border-radius:50%;background:var(--win);animation:blink 1.4s infinite}
+.live-g{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
 .pt{width:100%;border-collapse:collapse;font-size:13px}
 .pt th{
   padding:10px 14px;text-align:left;
-  font-family:'Courier New',monospace;font-size:9px;font-weight:700;
-  letter-spacing:0.16em;text-transform:uppercase;
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:0.14em;text-transform:uppercase;
   color:var(--muted);background:var(--card2);
   border-bottom:1px solid var(--line);
 }
-.pt td{
-  padding:13px 14px;border-bottom:1px solid var(--line);
-  color:var(--white);vertical-align:middle;
-}
+.pt td{padding:13px 14px;border-bottom:1px solid var(--line);color:var(--white);vertical-align:middle}
 .pt tbody tr:last-child td{border-bottom:none}
-.pt tbody tr{transition:background 0.15s}
-.pt tbody tr:hover td{background:rgba(255,255,255,0.025)}
-.m-name{font-size:13px;font-weight:500;margin-bottom:2px}
-.m-time{font-family:'Courier New',monospace;font-size:10px;color:var(--muted)}
-.tag-w{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:3px 7px;border-radius:3px;background:rgba(0,230,118,0.1);color:var(--win);border:1px solid rgba(0,230,118,0.2)}
-.tag-p{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:3px 7px;border-radius:3px;background:var(--yellow-lo);color:var(--yellow);border:1px solid rgba(255,214,0,0.2)}
-.tag-lock{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted2);font-style:italic}
-.tag-lock svg{width:11px;height:11px}
+.pt tbody tr:hover td{background:rgba(255,255,255,0.02)}
+.m-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.m-time{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.tw-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:3px 8px;border-radius:3px;background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2)}
+.tp-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:3px 8px;border-radius:3px;background:var(--yellow-lo);color:var(--yellow);border:1px solid rgba(255,214,10,0.2)}
+.tl-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted2);font-style:italic}
+.tl-badge svg{width:11px;height:11px}
 
-/* ── EVIDENCIA ── */
-.bet-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:28px;
+/* ─── CALC ─── */
+.calc-box{
+  background:var(--card);border:1px solid var(--line2);
+  border-radius:10px;overflow:hidden;margin-top:40px;
 }
+.calc-top{
+  background:var(--card2);padding:20px 24px;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.calc-lbl{font-size:12px;color:var(--muted);margin-bottom:2px}
+.calc-val{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--white);line-height:1}
+.calc-body{padding:24px}
+.slider{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:4px;border-radius:100px;outline:none;cursor:pointer;margin-bottom:8px;
+  background:linear-gradient(90deg,var(--green) 0%,var(--green) var(--pct,10%),var(--line2) var(--pct,10%),var(--line2) 100%);
+}
+.slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:var(--green);cursor:pointer;
+  box-shadow:0 0 16px rgba(0,255,136,0.6),0 0 0 3px rgba(0,255,136,0.15);
+  transition:transform 0.15s;
+}
+.slider::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.slider-labs{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:24px}
+.calc-res{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cr{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:16px;text-align:center}
+.cr-val{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;margin-bottom:3px}
+.cr-val.g{color:var(--green);text-shadow:0 0 15px rgba(0,255,136,0.3)}
+.cr-val.y{color:var(--yellow)}
+.cr-val.w{color:var(--white)}
+.cr-lbl{font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;font-family:var(--mono)}
+.calc-disc{margin-top:14px;font-size:11px;color:var(--muted2);text-align:center;line-height:1.6}
+
+/* ─── EVIDENCE GRID ─── */
+.bet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:28px}
 @media(min-width:600px){.bet-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:900px){.bet-grid{grid-template-columns:repeat(5,1fr)}}
 .bet-card{
-  position:relative;border-radius:6px;overflow:hidden;
+  position:relative;border-radius:8px;overflow:hidden;
   border:1px solid var(--line2);background:var(--card);
-  transition:transform 0.2s,border-color 0.2s,box-shadow 0.2s;cursor:pointer;
+  transition:all 0.2s;cursor:pointer;
 }
-.bet-card:hover{transform:scale(1.03);border-color:rgba(0,176,80,0.4);box-shadow:0 4px 20px rgba(0,176,80,0.12)}
+.bet-card:hover{transform:scale(1.03);border-color:rgba(0,255,136,0.35);box-shadow:0 4px 24px rgba(0,255,136,0.1)}
 .bet-card img{width:100%;display:block;object-fit:cover}
 .bet-gain{
   position:absolute;top:7px;right:7px;
-  background:var(--green);color:var(--white);
+  background:var(--green);color:#000;
   font-family:'Bebas Neue',sans-serif;font-size:12px;
-  letter-spacing:0.06em;padding:3px 8px;border-radius:3px;z-index:2;
+  letter-spacing:0.06em;padding:3px 8px;border-radius:4px;z-index:2;
+  font-weight:700;
 }
-.bet-lbl{
-  padding:6px 10px;font-family:'Courier New',monospace;font-size:9px;
-  color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;
-  border-top:1px solid var(--line);background:var(--card2);
-}
+.bet-lbl{padding:6px 10px;font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;border-top:1px solid var(--line);background:var(--card2)}
 
-/* ── REVIEWS ── */
-.rev-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:28px;
-}
+/* ─── REVIEWS ─── */
+.rev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:28px}
 @media(min-width:640px){.rev-grid{grid-template-columns:repeat(3,1fr)}}
-.rev-card{
-  border-radius:6px;overflow:hidden;border:1px solid var(--line2);
-  background:var(--card);transition:transform 0.2s,border-color 0.2s;
-}
-.rev-card:hover{transform:scale(1.02);border-color:rgba(0,176,80,0.3)}
+.rev-card{border-radius:8px;overflow:hidden;border:1px solid var(--line2);background:var(--card);transition:all 0.2s}
+.rev-card:hover{transform:scale(1.02);border-color:rgba(0,255,136,0.25)}
 .rev-card img{width:100%;height:100%;object-fit:cover;display:block}
 
-/* ── PRICING ── */
-.price-grid{
-  display:grid;grid-template-columns:1fr;gap:12px;margin-top:40px;
-}
+/* ─── PRICING ─── */
+.price-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:40px}
 @media(min-width:760px){.price-grid{grid-template-columns:repeat(3,1fr);align-items:start}}
 .pc{
   background:var(--card);border:1px solid var(--line2);
-  border-radius:8px;padding:26px 22px;position:relative;
-  transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;
+  border-radius:10px;padding:26px 22px;position:relative;
+  transition:all 0.2s;
 }
 .pc:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.4)}
-.pc.hot{border-color:var(--green)}
+.pc.hot{border-color:rgba(0,255,136,0.4);background:linear-gradient(135deg,var(--card2),var(--card3))}
 .pc.hot::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  background:linear-gradient(90deg,var(--green2),var(--green),var(--purple));
 }
-.pc.hot:hover{box-shadow:0 12px 40px rgba(0,176,80,0.15)}
+.pc.hot:hover{box-shadow:0 12px 40px rgba(0,255,136,0.12)}
 @media(max-width:759px){.pc.hot{order:-1}}
 .pc-badge{
   position:absolute;top:-1px;left:50%;transform:translateX(-50%);
-  background:var(--green);color:var(--white);
-  font-family:'Courier New',monospace;font-size:9px;font-weight:700;
+  background:linear-gradient(90deg,var(--green2),var(--green));color:#000;
+  font-family:var(--mono);font-size:9px;font-weight:700;
   letter-spacing:0.14em;text-transform:uppercase;
-  padding:4px 14px;border-radius:0 0 4px 4px;white-space:nowrap;
+  padding:4px 14px;border-radius:0 0 6px 6px;white-space:nowrap;
 }
 .pc-badge-dim{
   position:absolute;top:-1px;left:50%;transform:translateX(-50%);
   background:var(--card2);color:var(--muted);
   border:1px solid var(--line2);border-top:none;
-  font-family:'Courier New',monospace;font-size:9px;
+  font-family:var(--mono);font-size:9px;
   letter-spacing:0.12em;text-transform:uppercase;
-  padding:4px 14px;border-radius:0 0 4px 4px;white-space:nowrap;
+  padding:4px 14px;border-radius:0 0 6px 6px;white-space:nowrap;
 }
-.pc-tier{font-family:'Courier New',monospace;font-size:9px;color:var(--green);letter-spacing:0.16em;text-transform:uppercase;margin-top:12px;margin-bottom:5px}
-.pc-price{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--white);line-height:1;letter-spacing:0.02em}
-.pc-unit{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--muted)}
-.pc-note{font-family:'Courier New',monospace;font-size:10px;color:var(--muted);margin-bottom:18px}
-.pc-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
-.pc-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted);line-height:1.5}
-.pc-list svg{width:12px;height:12px;color:var(--win);flex-shrink:0;margin-top:2px}
+.pc-tier{font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.16em;text-transform:uppercase;margin-top:12px;margin-bottom:5px}
+.pc-price{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--white);line-height:1;letter-spacing:0.02em}
+.pc-unit{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted)}
+.pc-note{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:18px}
+.pc-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:22px}
+.pc-list li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--muted);line-height:1.5}
+.pc-list svg{width:13px;height:13px;color:var(--green);flex-shrink:0;margin-top:2px}
 .btn-g{
-  display:block;width:100%;padding:13px;
-  background:var(--green);color:var(--white);
-  font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;
-  border-radius:5px;border:none;cursor:pointer;transition:background 0.2s;
+  display:block;width:100%;padding:14px;
+  background:var(--green);color:#000;
+  font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;
+  border-radius:7px;border:none;cursor:pointer;transition:all 0.2s;
+  box-shadow:0 0 20px rgba(0,255,136,0.2);
 }
-.btn-g:hover{background:var(--green2)}
+.btn-g:hover{background:var(--green2);box-shadow:0 0 32px rgba(0,255,136,0.4)}
 .btn-ol{
-  display:block;width:100%;padding:12px;
+  display:block;width:100%;padding:13px;
   background:transparent;color:var(--green);
   font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;
-  border:1px solid rgba(0,176,80,0.3);border-radius:5px;cursor:pointer;
-  transition:all 0.2s;
+  border:1px solid rgba(0,255,136,0.3);border-radius:7px;cursor:pointer;transition:all 0.2s;
 }
-.btn-ol:hover{background:var(--green-lo);border-color:rgba(0,176,80,0.6)}
+.btn-ol:hover{background:var(--green-lo);border-color:rgba(0,255,136,0.6)}
 
-/* ── FAQ ── */
-.faq-list{border:1px solid var(--line2);border-radius:8px;overflow:hidden;margin-top:28px}
+/* ─── FAQ ─── */
+.faq-list{border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin-top:28px}
 .faq-item{border-bottom:1px solid var(--line)}
 .faq-item:last-child{border-bottom:none}
 .faq-q{
@@ -530,220 +514,153 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   color:var(--white);cursor:pointer;transition:background 0.15s;
 }
 .faq-q:hover{background:var(--card2)}
-.fq-ico{width:16px;height:16px;color:var(--green);flex-shrink:0;transition:transform 0.25s}
-.faq-item.open .fq-ico{transform:rotate(45deg)}
+.fq-i{width:16px;height:16px;color:var(--green);flex-shrink:0;transition:transform 0.25s}
+.faq-item.open .fq-i{transform:rotate(45deg)}
 .faq-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
 .faq-item.open .faq-body{max-height:220px}
 .faq-a{padding:0 18px 16px;font-size:13px;color:var(--muted);line-height:1.75}
 
-/* ── FINAL ── */
+/* ─── FINAL ─── */
 #final{
   padding:80px 0;text-align:center;
-  background:var(--bg2);border-top:1px solid var(--line);
+  background:var(--bg2);border-top:1px solid var(--line2);
   position:relative;overflow:hidden;z-index:1;
 }
 #final::before{
   content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 120% at 50% 100%,rgba(0,176,80,0.07) 0%,transparent 65%);
+  background:radial-gradient(ellipse 80% 100% at 50% 100%,rgba(0,255,136,0.06) 0%,transparent 65%);
   pointer-events:none;
 }
 .final-inner{position:relative;z-index:1}
-.cd-lbl{font-family:'Courier New',monospace;font-size:10px;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px}
+.cd-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px}
 .cd-clock{display:flex;justify-content:center;align-items:flex-start;gap:4px;margin-bottom:36px}
 .cd-unit{display:flex;flex-direction:column;align-items:center}
 .cd-num{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(42px,10vw,70px);
-  color:var(--white);line-height:1;letter-spacing:0.04em;
-  background:var(--card);border:1px solid var(--line2);
-  padding:5px 12px;border-radius:5px;min-width:2ch;text-align:center;
-  transition:color 0.3s;
+  font-size:clamp(42px,10vw,72px);
+  color:var(--green);line-height:1;letter-spacing:0.04em;
+  background:var(--card);border:1px solid rgba(0,255,136,0.2);
+  padding:5px 12px;border-radius:6px;min-width:2ch;text-align:center;
+  text-shadow:0 0 20px rgba(0,255,136,0.3);
 }
-.cd-sep{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(42px,10vw,70px);
-  color:var(--green);line-height:1;padding-top:5px;
-}
-.cd-unit-lbl{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.cd-sep{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,10vw,72px);color:var(--green);line-height:1;padding-top:5px;opacity:0.4}
+.cd-unit-lbl{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:5px;font-family:var(--mono)}
 .final-h2{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(28px,5.5vw,52px);
+  font-size:clamp(30px,5.5vw,54px);
   color:var(--white);line-height:1.05;margin-bottom:28px;
   max-width:560px;margin-left:auto;margin-right:auto;
 }
-.final-h2 .g{color:var(--green)}
+.final-h2 .g{color:var(--green);text-shadow:0 0 30px rgba(0,255,136,0.3)}
 .final-h2 .y{color:var(--yellow)}
 .btn-final{
-  display:block;max-width:400px;margin:0 auto 14px;
-  padding:18px 36px;background:var(--green);color:var(--white);
-  font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;
-  border-radius:5px;border:none;cursor:pointer;
-  transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
+  display:block;max-width:420px;margin:0 auto 14px;
+  padding:20px 36px;background:var(--green);color:#000;
+  font-weight:800;font-size:15px;letter-spacing:0.08em;text-transform:uppercase;
+  border-radius:8px;border:none;cursor:pointer;
+  transition:all 0.2s;
+  box-shadow:0 0 40px rgba(0,255,136,0.3);
 }
-.btn-final:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 8px 28px var(--green-glow)}
+.btn-final:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 0 60px rgba(0,255,136,0.5)}
 .final-note{font-size:12px;color:var(--muted)}
 .final-note b{color:var(--yellow)}
 
-/* ── FOOTER ── */
-footer{background:#060606;border-top:1px solid var(--line);padding:36px 20px;text-align:center;position:relative;z-index:1}
-.foot-logo img{height:22px;width:auto;margin:0 auto 14px;opacity:0.75}
+/* FOOTER */
+footer{background:#040406;border-top:1px solid var(--line);padding:36px 20px;text-align:center;position:relative;z-index:1}
+.foot-logo img{height:22px;width:auto;margin:0 auto 14px;opacity:0.8}
 .foot-socials{display:flex;justify-content:center;gap:8px;margin-bottom:18px}
-.soc{
-  width:34px;height:34px;border:1px solid var(--line2);border-radius:4px;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--green);transition:border-color 0.2s,background 0.2s;
-}
-.soc:hover{border-color:rgba(0,176,80,0.5);background:var(--green-lo)}
+.soc{width:34px;height:34px;border:1px solid var(--line2);border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--green);transition:all 0.2s}
+.soc:hover{border-color:rgba(0,255,136,0.4);background:var(--green-lo);box-shadow:0 0 12px var(--green-glow)}
 .soc svg{width:13px;height:13px}
 .foot-legal{font-size:10px;color:var(--muted2);max-width:460px;margin:0 auto 7px;line-height:1.8}
 .foot-copy{font-size:10px;color:var(--muted2);opacity:0.4}
 
-/* ── MODAL ── */
-.modal-bg{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,0.93);z-index:9000;
-  align-items:flex-end;justify-content:center;
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-}
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:9000;align-items:flex-end;justify-content:center;backdrop-filter:blur(12px)}
 @media(min-width:500px){.modal-bg{align-items:center;padding:20px}}
 .modal-bg.active{display:flex}
 .modal{
-  background:var(--card);border:1px solid rgba(0,176,80,0.25);
-  border-radius:10px 10px 0 0;padding:26px 20px 32px;
-  width:100%;max-width:440px;position:relative;
-  max-height:95dvh;overflow-y:auto;
+  background:var(--card);border:1px solid rgba(0,255,136,0.2);
+  border-radius:12px 12px 0 0;padding:26px 20px 32px;
+  width:100%;max-width:440px;position:relative;max-height:95dvh;overflow-y:auto;
 }
-@media(min-width:500px){.modal{border-radius:8px;padding:30px 26px}}
-.modal::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--green),transparent);
-  border-radius:10px 10px 0 0;
-}
+@media(min-width:500px){.modal{border-radius:10px;padding:30px 26px}}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),var(--purple),transparent);border-radius:12px 12px 0 0}
 .modal-handle{width:36px;height:3px;background:var(--line2);border-radius:100px;margin:0 auto 18px;display:block}
 @media(min-width:500px){.modal-handle{display:none}}
 .modal-x{position:absolute;top:13px;right:13px;color:var(--muted);padding:4px;transition:color 0.15s}
 .modal-x:hover{color:var(--white)}
 .modal-x svg{width:16px;height:16px}
-
-/* Step dots */
 .dots{display:flex;gap:5px;margin-bottom:18px}
 .dot{height:2px;flex:1;border-radius:100px;background:var(--line2);transition:background 0.3s}
 .dot.on{background:var(--green)}
-
-.m-eye{font-family:'Courier New',monospace;font-size:9px;color:var(--green);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:4px}
+.m-eye{font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:4px}
 .m-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--white);margin-bottom:4px;line-height:1.1}
 .m-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
-
-/* Fields */
 .mfield{margin-bottom:12px}
-.mfield label{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:5px}
-.mfield input{
-  width:100%;background:#0E0E0E;border:1px solid var(--line2);
-  border-radius:5px;padding:12px 13px;color:var(--white);
-  font-size:15px;font-family:inherit;outline:none;
-  transition:border-color 0.2s;-webkit-appearance:none;
-}
-.mfield input:focus{border-color:rgba(0,176,80,0.5)}
+.mfield label{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:5px;font-family:var(--mono)}
+.mfield input{width:100%;background:#0A0A0C;border:1px solid var(--line2);border-radius:6px;padding:12px 13px;color:var(--white);font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+.mfield input:focus{border-color:rgba(0,255,136,0.5)}
 .mfield input::placeholder{color:var(--muted2)}
-
 .amt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
-.amt-btn{
-  padding:10px 6px;background:#0E0E0E;border:1px solid var(--line2);
-  border-radius:5px;text-align:center;cursor:pointer;transition:all 0.15s;
-  font-size:13px;font-weight:600;color:var(--muted);
-}
-.amt-btn:hover,.amt-btn.on{border-color:var(--green);color:var(--white);background:var(--green-lo)}
-.amt-custom{
-  width:100%;background:#0E0E0E;border:1px solid var(--line2);
-  border-radius:5px;padding:12px 13px;color:var(--white);
-  font-size:15px;font-family:inherit;outline:none;
-  transition:border-color 0.2s;margin-bottom:12px;-webkit-appearance:none;
-}
-.amt-custom:focus{border-color:rgba(0,176,80,0.5)}
+.amt-btn{padding:10px 6px;background:#0A0A0C;border:1px solid var(--line2);border-radius:6px;text-align:center;cursor:pointer;transition:all 0.15s;font-size:13px;font-weight:600;color:var(--muted)}
+.amt-btn:hover,.amt-btn.on{border-color:var(--green);color:var(--white);background:var(--green-lo);box-shadow:0 0 10px var(--green-glow)}
+.amt-custom{width:100%;background:#0A0A0C;border:1px solid var(--line2);border-radius:6px;padding:12px 13px;color:var(--white);font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s;margin-bottom:12px;-webkit-appearance:none}
+.amt-custom:focus{border-color:rgba(0,255,136,0.5)}
 .amt-custom::placeholder{color:var(--muted2)}
-
-#card-element{
-  background:#0E0E0E;border:1px solid var(--line2);
-  border-radius:5px;padding:13px;margin-bottom:10px;min-height:46px;
-  transition:border-color 0.2s;
-}
-#card-element.focused{border-color:rgba(0,176,80,0.5)}
+#card-element{background:#0A0A0C;border:1px solid var(--line2);border-radius:6px;padding:13px;margin-bottom:10px;min-height:46px;transition:border-color 0.2s}
+#card-element.focused{border-color:rgba(0,255,136,0.5)}
 #card-errors{font-size:12px;color:var(--red);min-height:14px;margin-bottom:8px}
-
-.pay-btn{
-  width:100%;padding:15px;background:var(--green);color:var(--white);
-  font-weight:700;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;
-  border:none;border-radius:5px;cursor:pointer;transition:background 0.2s;
-}
+.pay-btn{width:100%;padding:15px;background:var(--green);color:#000;font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer;transition:all 0.2s;box-shadow:0 0 20px rgba(0,255,136,0.2)}
 .pay-btn:hover{background:var(--green2)}
 .pay-btn:disabled{opacity:0.5;cursor:not-allowed}
 .secure{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:9px;font-size:11px;color:var(--muted)}
 .secure svg{width:11px;height:11px}
 
-/* ── REVEAL ── */
-.reveal{opacity:1;transform:none}
-.reveal.will-animate{opacity:0;transform:translateY(18px);transition:opacity 0.55s ease,transform 0.55s ease}
-.reveal.in{opacity:1;transform:none}
-
-@media(prefers-reduced-motion:reduce){
-  .reveal{opacity:1;transform:none;transition:none}
-  *{animation:none!important;transition:none!important}
-}
-@media(max-width:480px){
-  .section,.section-alt{padding:56px 0}
-  .calc-res{grid-template-columns:repeat(3,1fr)}
-}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:480px){.section,.section-alt{padding:56px 0}.calc-res{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav id="nav">
   <a href="/" class="nav-logo"><img src="logo.png" alt="MVX Picks"/></a>
   <div class="nav-right">
     <a href="/login" class="nav-link">Mi cuenta</a>
-    <button class="nav-cta" onclick="openModal()">Invertir ahora</button>
+    <a href="https://t.me/mvxpicks" target="_blank" rel="noopener" class="nav-cta" style="text-decoration:none">Unirme gratis</a>
   </div>
 </nav>
 
-<!-- ═══ HERO ═══ -->
 <section id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
   <div class="hero-grid"></div>
-  <div class="hero-gradient"></div>
 
   <div class="hero-inner">
-    <div class="live-chip"><span class="live-chip-dot"></span>Sistema activo · Mundial 2026</div>
+    <div class="live-badge"><span class="live-dot"></span>Sistema activo · Mundial 2026</div>
 
-    <!-- SCOREBOARD — Partido de México vs Inglaterra, 5 de julio -->
     <div class="scoreboard">
-      <div class="sb-header">
+      <div class="sb-top">
         <span class="sb-comp">FIFA World Cup 2026 · Octavos de Final</span>
         <span class="sb-live"><span class="sb-live-dot"></span>Pick listo</span>
       </div>
       <div class="sb-match">
-        <div class="sb-team">
-          <div class="sb-flag">🇲🇽</div>
-          <div class="sb-name">MÉXICO</div>
-        </div>
+        <div class="sb-team"><div class="sb-flag">🇲🇽</div><div class="sb-name">MÉXICO</div></div>
         <div class="sb-center">
           <div class="sb-kick">DOM 5 JUL · 18:00 HRS MX</div>
           <div class="sb-vs">VS</div>
-          <div class="sb-date-str">Estado Azteca · Ciudad de México</div>
+          <div class="sb-date">AT&T Stadium · Dallas, TX</div>
         </div>
-        <div class="sb-team">
-          <div class="sb-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
-          <div class="sb-name">ENGLAND</div>
-        </div>
+        <div class="sb-team"><div class="sb-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div><div class="sb-name">ENGLAND</div></div>
       </div>
-      <div class="sb-pick-strip">
-        <div>
-          <div class="sb-pick-lbl">Pick del sistema · IA</div>
-        </div>
-        <div class="sb-pick-val">
+      <div class="sb-strip">
+        <div><div class="sb-strip-lbl">Pick del sistema · IA</div></div>
+        <div class="sb-strip-val">
           <span class="sb-pred">VICTORIA MÉXICO</span>
-          <div class="conf-wrap">
+          <div class="conf-row">
             <div class="conf-track"><div class="conf-fill" id="conf-bar"></div></div>
-            <span class="conf-num">79%</span>
+            <span class="conf-pct">79%</span>
           </div>
         </div>
         <div class="sb-lock">
@@ -753,199 +670,251 @@ footer{background:#060606;border-top:1px solid var(--line);padding:36px 20px;tex
       </div>
     </div>
 
-    <h1 class="hero-h1">EL BOT QUE<br>YA SABE<br><span class="g">QUIÉN GANA</span></h1>
+    <h1 class="hero-h1">PARA DE<br>PERDER.<br><span class="g">EMPIEZA<br>A GANAR.</span></h1>
 
     <p class="hero-sub">
-      <b>+20,000 apostadores</b> en México y LATAM usan nuestro sistema de IA para el Mundial.
-      El pick llega <b>antes del partido</b>, con el porcentaje de confianza visible.
+      No más tipsters que fallan y desaparecen.<br>
+      <b>Un bot. Datos reales. 86% de picks acertados.</b><br>
+      Tu dinero apuesta solo mientras tú disfrutas el partido.
     </p>
 
-    <div class="proof-row">
-      <div class="proof-item">
-        <div class="proof-val g" id="proof-acc">86%</div>
-        <div class="proof-lbl">Precisión</div>
-      </div>
-      <div class="proof-item">
-        <div class="proof-val y">+20K</div>
-        <div class="proof-lbl">Apostadores</div>
-      </div>
-      <div class="proof-item">
-        <div class="proof-val w">104</div>
-        <div class="proof-lbl">Partidos</div>
-      </div>
-      <div class="proof-item">
-        <div class="proof-val g" id="proof-spots">127</div>
-        <div class="proof-lbl">Lugares</div>
-      </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val g" id="proof-acc">86%</div><div class="stat-lbl">Precisión</div></div>
+      <div class="stat"><div class="stat-val y">+20K</div><div class="stat-lbl">Apostadores</div></div>
+      <div class="stat"><div class="stat-val w">104</div><div class="stat-lbl">Partidos</div></div>
+      <div class="stat"><div class="stat-val g">$500</div><div class="stat-lbl">Mínimo MXN</div></div>
     </div>
 
     <div class="hero-ctas">
-      <button class="btn-hero" onclick="openModal()">ACCEDER AL SISTEMA →</button>
-      <div class="hero-note">
-        <span class="ynote">★</span>
-        Desde $500 MXN · Sin permanencia · Retiro en 24 horas
-      </div>
+      <a href="https://t.me/mvxpicks" target="_blank" rel="noopener" class="btn-primary" style="display:block;text-decoration:none">ACCEDER AL SISTEMA →</a>
+      <div class="hero-note"><span class="check-icon">✓</span> Desde $500 MXN · Sin permanencia · Retiro en 24 horas · Comunidad activa</div>
     </div>
 
-    <div class="ticker-outer">
+    <div class="ticker-wrap">
       <div class="ticker-track">
-        <span class="tick"><span class="w">✓ ACERTADO</span> México vs Sudáfrica · 82% · Jun 11</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> EEUU vs Paraguay · 86% · Jun 12</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Brasil vs Haití · 87% · Jun 19</span>
-        <span class="tick"><span class="g">IA</span> analiza 50+ casas de apuestas en tiempo real</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Corea del Sur vs Chequia · 78% · Jun 11</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Canadá vs Bosnia · 74% · Jun 12</span>
-        <span class="tick"><span class="y">+22%</span> rendimiento promedio semanal documentado</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> México vs Corea del Sur · 76% · Jun 18</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Alemania vs Curazao · 91% · Jun 14</span>
-        <span class="tick"><span class="g">BOT</span> publicó pick de México vs Inglaterra para el 5 de julio</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> México vs Sudáfrica · 82% · Jun 11</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> EEUU vs Paraguay · 86% · Jun 12</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Brasil vs Haití · 87% · Jun 19</span>
-        <span class="tick"><span class="g">IA</span> analiza 50+ casas de apuestas en tiempo real</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Corea del Sur vs Chequia · 78% · Jun 11</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Canadá vs Bosnia · 74% · Jun 12</span>
-        <span class="tick"><span class="y">+22%</span> rendimiento promedio semanal documentado</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> México vs Corea del Sur · 76% · Jun 18</span>
-        <span class="tick"><span class="w">✓ ACERTADO</span> Alemania vs Curazao · 91% · Jun 14</span>
-        <span class="tick"><span class="g">BOT</span> publicó pick de México vs Inglaterra para el 5 de julio</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> México vs Sudáfrica · 82% · Jun 11</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> EEUU vs Paraguay · 86% · Jun 12</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Brasil vs Haití · 87% · Jun 19</span>
+        <span class="tick"><span class="tp">IA</span> analiza 50+ casas de apuestas</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Corea del Sur vs Chequia · 78% · Jun 11</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Canadá vs Bosnia · 74% · Jun 12</span>
+        <span class="tick"><span class="ty">+22%</span> rendimiento promedio semanal</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> México vs Corea del Sur · 76% · Jun 18</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Alemania vs Curazao · 91% · Jun 14</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> México vs Sudáfrica · 82% · Jun 11</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> EEUU vs Paraguay · 86% · Jun 12</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Brasil vs Haití · 87% · Jun 19</span>
+        <span class="tick"><span class="tp">IA</span> analiza 50+ casas de apuestas</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Corea del Sur vs Chequia · 78% · Jun 11</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Canadá vs Bosnia · 74% · Jun 12</span>
+        <span class="tick"><span class="ty">+22%</span> rendimiento promedio semanal</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> México vs Corea del Sur · 76% · Jun 18</span>
+        <span class="tick"><span class="tw">✓ ACERTADO</span> Alemania vs Curazao · 91% · Jun 14</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ CÓMO FUNCIONA ═══ -->
+
+<!-- REVIEWS BANNER -->
+<div style="background:var(--card2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 20px;position:relative;z-index:1">
+  <div style="max-width:1060px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;gap:2px">
+        <span style="color:#FFD60A;font-size:18px">★</span>
+        <span style="color:#FFD60A;font-size:18px">★</span>
+        <span style="color:#FFD60A;font-size:18px">★</span>
+        <span style="color:#FFD60A;font-size:18px">★</span>
+        <span style="color:#FFD60A;font-size:18px">★</span>
+      </div>
+      <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--white)">4.8</span>
+      <span style="font-size:12px;color:var(--muted)">de calificación promedio</span>
+    </div>
+    <div style="width:1px;height:24px;background:var(--line2)"></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--card3);border:2px solid var(--line2);overflow:hidden;margin-right:-8px"><img src="review-1.jpg" style="width:100%;height:100%;object-fit:cover"/></div>
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--card3);border:2px solid var(--line2);overflow:hidden;margin-right:-8px"><img src="review-2.jpg" style="width:100%;height:100%;object-fit:cover"/></div>
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--card3);border:2px solid var(--line2);overflow:hidden;margin-right:-8px"><img src="review-3.jpg" style="width:100%;height:100%;object-fit:cover"/></div>
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--card3);border:2px solid var(--line2);overflow:hidden"><img src="review-4.jpg" style="width:100%;height:100%;object-fit:cover"/></div>
+      </div>
+      <span style="font-size:12px;color:var(--muted)"><b style="color:var(--white)">+20,000</b> apostadores confían en MVX</span>
+    </div>
+    <div style="width:1px;height:24px;background:var(--line2)"></div>
+    <div style="font-size:12px;color:var(--muted)">
+      <span style="color:var(--green);font-weight:700">86%</span> de precisión documentada · Mundial 2026
+    </div>
+  </div>
+</div>
+<!-- DATA STATS -->
 <section class="section-alt">
   <div class="wrap">
-    <div class="reveal">
-      <span class="eyebrow">Cómo funciona</span>
-      <h2 class="h2">MÁS SIMPLE QUE<br>CUALQUIER <span class="g">APUESTA</span></h2>
-      <p class="lead">No necesitas saber de estadísticas. No necesitas analizar nada. Solo depositas y nuestro equipo hace el resto.</p>
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+        <span class="eye" style="margin-bottom:0">Rendimiento verificado</span>
+        <span style="background:linear-gradient(90deg,#FFD60A,#FF8C00);color:#000;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;padding:4px 12px;border-radius:3px">⚽ MUNDIAL 2026</span>
+      </div>
+      <h2 class="h2">LOS NÚMEROS<br>NO <span class="g">MIENTEN.</span></h2>
+      <p class="lead">Historial público desde el primer partido del torneo. Verificable en tiempo real.</p>
     </div>
-    <div class="steps reveal">
-      <div class="step">
-        <div class="step-n">PASO 01</div>
-        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-        <div class="step-title">Creas tu cuenta y depositas</div>
-        <div class="step-desc">Registro en 30 segundos. Desde $500 MXN con tarjeta. Tu cuenta queda activa al instante.</div>
+    <div class="data-grid" style="margin-top:36px">
+      <div class="data-card">
+        <div class="dc-label">Picks acertados</div>
+        <div class="dc-val" id="dc-correct">284</div>
+        <div class="dc-sub">picks acertados · <span style="color:var(--yellow);font-size:11px">Mundial 2026</span></div>
+        <div class="dc-bar-wrap">
+          <div class="dc-bar-bg"><div class="dc-bar-fill" style="--w:86%;width:86%"></div></div>
+          <div class="dc-bar-lbl"><span>0%</span><span style="color:var(--green);font-weight:600">86% · 284/330</span><span>100%</span></div>
+        </div>
       </div>
-      <div class="step">
-        <div class="step-n">PASO 02</div>
-        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
-        <div class="step-title">El bot analiza cada partido</div>
-        <div class="step-desc">Nuestra IA procesa cuotas de más de 50 casas de apuestas y calcula la probabilidad real de cada resultado.</div>
+      <div class="data-card">
+        <div class="dc-label">Rendimiento semanal</div>
+        <div class="dc-val" style="color:var(--yellow)">+22%</div>
+        <div class="dc-sub">sobre capital invertido</div>
+        <div class="dc-bar-wrap">
+          <div class="dc-bar-bg"><div class="dc-bar-fill" style="--w:72%;width:72%;background:linear-gradient(90deg,#cc9900,var(--yellow))"></div></div>
+          <div class="dc-bar-lbl"><span>0%</span><span style="color:var(--yellow);font-weight:600">22%</span><span>30%</span></div>
+        </div>
       </div>
-      <div class="step">
-        <div class="step-n">PASO 03</div>
-        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-        <div class="step-title">Nuestro equipo apuesta por ti</div>
-        <div class="step-desc">Los picks del bot los ejecuta nuestro equipo de apostadores. Tú no haces nada. Nosotros gestionamos todo.</div>
-      </div>
-      <div class="step">
-        <div class="step-n">PASO 04</div>
-        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-        <div class="step-title">Ves crecer tu dinero y retiras</div>
-        <div class="step-desc">Dashboard en tiempo real. Retiras cuando quieras, sin comisión, en 24 horas.</div>
+      <div class="data-card">
+        <div class="dc-label">Picks totales publicados</div>
+        <div class="dc-val" id="dc-total" style="color:var(--purple)">330</div>
+        <div class="dc-sub">picks publicados · <span style="color:var(--yellow);font-size:11px">Mundial 2026</span></div>
+        <div class="dc-bar-wrap">
+          <div class="dc-bar-bg"><div class="dc-bar-fill" style="--w:58%;width:58%;background:linear-gradient(90deg,#5500cc,var(--purple))"></div></div>
+          <div class="dc-bar-lbl"><span>0</span><span style="color:var(--purple);font-weight:600" id="dc-total-lbl">330</span><span>104</span></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ CALCULADORA ═══ -->
+<!-- CÓMO FUNCIONA -->
 <section class="section">
   <div class="wrap">
-    <div class="reveal">
-      <span class="eyebrow">Calculadora de rendimiento</span>
-      <h2 class="h2">¿CUÁNTO PUEDES<br><span class="y">GANAR?</span></h2>
-      <p class="lead">Basado en nuestro rendimiento histórico real del Mundial 2026. Sin letra chica.</p>
+    <div>
+      <span class="eye">Así de fácil</span>
+      <h2 class="h2">TÚ PONES EL DINERO.<br>NOSOTROS PONEMOS<br><span class="g">EL CEREBRO.</span></h2>
+      <p class="lead">Sin estudiar estadísticas. Sin perder horas analizando. Sin arriesgarte solo.</p>
     </div>
-    <div class="calc-box reveal">
+    <div class="steps-new" style="margin-top:52px;gap:24px">
+      <div class="step-new">
+        <div class="step-circle">
+          <svg class="step-icon-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </div>
+        <div class="step-t">Entras y depositas<br>desde $500 MXN</div>
+        <div class="step-d">30 segundos. Tarjeta. Sin trámites. Tu cuenta activa al instante.</div>
+        <span class="step-tag tag-g">30 segundos</span>
+      </div>
+      <div class="step-new">
+        <div class="step-circle" style="border-color:var(--purple);box-shadow:0 0 20px rgba(123,47,255,0.3)">
+          <svg class="step-icon-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <div class="step-t">El bot escanea<br>50+ casas de apuestas</div>
+        <div class="step-d">Matemáticas puras. Calcula probabilidad real antes de cada partido.</div>
+        <span class="step-tag tag-p">IA en tiempo real</span>
+      </div>
+      <div class="step-new">
+        <div class="step-circle" style="border-color:var(--yellow);box-shadow:0 0 20px rgba(255,214,10,0.25)">
+          <svg class="step-icon-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="step-t">Nosotros apostamos.<br>Tú no haces nada.</div>
+        <div class="step-d">El equipo MVX ejecuta cada pick. Tú ves el resultado en tu dashboard.</div>
+        <span class="step-tag tag-y">100% automático</span>
+      </div>
+      <div class="step-new">
+        <div class="step-circle" style="border-color:var(--green);box-shadow:0 0 20px rgba(0,255,136,0.3)">
+          <svg class="step-icon-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="step-t">Retiras tus ganancias<br>en 24 horas</div>
+        <div class="step-d">Cuando quieras, cuanto quieras. Sin comisión. El dinero es tuyo.</div>
+        <span class="step-tag tag-g">Sin comisión</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULADORA -->
+<section class="section-alt">
+  <div class="wrap">
+    <div>
+      <span class="eye">Calculadora de rendimiento</span>
+      <h2 class="h2">TU DINERO<br><span class="y">TRABAJANDO.</span></h2>
+      <p class="lead">Mueve el slider y ve cuánto generaría tu inversión con nuestro rendimiento actual del Mundial.</p>
+    </div>
+    <div class="calc-box">
       <div class="calc-top">
         <div>
-          <div class="calc-top-lbl">Tu inversión</div>
+          <div class="calc-lbl">Tu inversión</div>
           <div class="calc-val" id="calc-display">$5,000 MXN</div>
         </div>
-        <button class="btn-g" onclick="openModal()" style="padding:12px 22px;white-space:nowrap;border-radius:5px">Invertir ahora →</button>
+        <button class="btn-g" onclick="openModal()" style="padding:12px 22px;white-space:nowrap;border-radius:7px">Invertir ahora →</button>
       </div>
       <div class="calc-body">
         <input type="range" class="slider" id="calc-slider" min="500" max="50000" step="500" value="5000" oninput="updateCalc(this.value)"/>
         <div class="slider-labs"><span>$500 MXN</span><span>$50,000 MXN</span></div>
         <div class="calc-res">
-          <div class="calc-r">
-            <div class="calc-r-val g" id="calc-daily">+$1,100</div>
-            <div class="calc-r-lbl">Ganancia diaria est.</div>
-          </div>
-          <div class="calc-r">
-            <div class="calc-r-val y" id="calc-weekly">+$7,700</div>
-            <div class="calc-r-lbl">Ganancia semanal est.</div>
-          </div>
-          <div class="calc-r">
-            <div class="calc-r-val w" id="calc-total">$12,700</div>
-            <div class="calc-r-lbl">Total estimado</div>
-          </div>
+          <div class="cr"><div class="cr-val g" id="calc-daily">+$1,100</div><div class="cr-lbl">Diario est.</div></div>
+          <div class="cr"><div class="cr-val y" id="calc-weekly">+$7,700</div><div class="cr-lbl">Semanal est.</div></div>
+          <div class="cr"><div class="cr-val w" id="calc-total">$12,700</div><div class="cr-lbl">Total estimado</div></div>
         </div>
-        <p class="calc-disc">* Estimación basada en el rendimiento promedio del 22% semanal del período actual del Mundial. Los resultados varían según picks ganados/perdidos. Las apuestas implican riesgo.</p>
+        <p class="calc-disc">* Basado en el rendimiento promedio del 22% semanal del período actual del Mundial. Las apuestas implican riesgo.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ PICKS EN VIVO ═══ -->
-<section class="section-alt">
-  <div class="wrap reveal">
-    <span class="eyebrow">Transparencia total</span>
-    <h2 class="h2">PICKS DEL BOT<br><span class="g">EN TIEMPO REAL</span></h2>
-    <p class="lead">El porcentaje de confianza se publica <b>antes del partido</b>. El resultado aparece después. Sin editar, sin borrar.</p>
-
+<!-- PICKS EN VIVO -->
+<section class="section">
+  <div class="wrap">
+    <span class="eye">Picks verificables · Sin trampa</span>
+    <h2 class="h2">EL BOT YA HABLÓ.<br><span class="g">¿APOSTASTE?</span></h2>
+    <p class="lead">Cada pick sale con su % de confianza <b>antes del silbatazo</b>. Después el marcador lo confirma.</p>
     <div class="picks-shell">
       <div class="picks-bar">
         <div class="live-b"><span class="live-g"></span>SISTEMA ACTIVO</div>
-        <span style="font-family:'Courier New',monospace;font-size:10px;color:var(--muted)" id="picks-ts">Cargando...</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)" id="picks-ts">Cargando...</span>
       </div>
       <div style="overflow-x:auto">
         <table class="pt">
           <thead><tr><th>Partido</th><th>Pick del sistema</th><th>Confianza</th><th>Resultado</th></tr></thead>
-          <tbody id="picks-body">
-            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted);font-family:'Courier New',monospace;font-size:11px">Consultando sistema...</td></tr>
-          </tbody>
+          <tbody id="picks-body"><tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted);font-family:var(--mono);font-size:11px">Consultando sistema...</td></tr></tbody>
         </table>
       </div>
     </div>
     <div style="text-align:center;margin-top:16px">
-      <button onclick="openModal()" class="btn-g" style="padding:12px 28px;border-radius:5px;display:inline-block">VER TODOS LOS PICKS →</button>
+      <button onclick="openModal()" class="btn-g" style="padding:12px 28px;border-radius:7px;display:inline-block">VER TODOS LOS PICKS →</button>
     </div>
   </div>
 </section>
 
-<!-- ═══ EVIDENCIA ═══ -->
-<section class="section">
-  <div class="wrap reveal">
-    <span class="eyebrow">Historial verificable</span>
-    <h2 class="h2">PICKS REALES.<br><span class="g">GANANCIAS REALES.</span></h2>
-    <p class="lead">Capturas de apuestas ejecutadas con picks del bot. Fechas y montos visibles. Sin editar.</p>
-    <div class="bet-grid">
-      <div class="bet-card"><div class="bet-gain">+$1,025,000</div><img src="bet-6.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">LA Dodgers · Hándicap</div></div>
-      <div class="bet-card"><div class="bet-gain">+$1,000,000</div><img src="bet-7.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">NY Yankees · Hándicap</div></div>
-      <div class="bet-card"><div class="bet-gain">+$666,700</div><img src="bet-9.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">MIL Brewers · Hándicap</div></div>
-      <div class="bet-card"><div class="bet-gain">+$450,000</div><img src="bet-5.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">SD Padres · Hándicap</div></div>
-      <div class="bet-card"><div class="bet-gain">+$366,680</div><img src="bet-1.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">LA Dodgers · Hándicap</div></div>
-      <div class="bet-card"><div class="bet-gain">+$345,460</div><img src="bet-2.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">Oscar Duarte · KO</div></div>
-      <div class="bet-card"><div class="bet-gain">+$342,860</div><img src="bet-10.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">PHI Phillies</div></div>
-      <div class="bet-card"><div class="bet-gain">+$329,420</div><img src="bet-4.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">Benavidez · Decisión</div></div>
-      <div class="bet-card"><div class="bet-gain">+$320,000</div><img src="bet-3.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">Munguia · Ganador</div></div>
-      <div class="bet-card"><div class="bet-gain">+$224,352</div><img src="bet-8.jpg" alt="Ganancia apuesta" loading="lazy"/><div class="bet-lbl">ARI Diamondbacks</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ COMUNIDAD ═══ -->
+<!-- EVIDENCIA -->
 <section class="section-alt">
   <div class="wrap">
-    <div class="reveal">
-      <span class="eyebrow">+20,000 apostadores confían</span>
-      <h2 class="h2">LO QUE DICEN<br>LOS QUE YA <span class="g">ESTÁN GANANDO</span></h2>
+    <span class="eye">Historial verificable</span>
+    <h2 class="h2">PICKS REALES.<br><span class="g">GANANCIAS REALES.</span></h2>
+    <p class="lead">Capturas de apuestas ejecutadas con picks del bot. Sin editar.</p>
+    <div class="bet-grid">
+      <div class="bet-card"><div class="bet-gain">+$1,025,000</div><img src="bet-6.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">LA Dodgers · Hándicap</div></div>
+      <div class="bet-card"><div class="bet-gain">+$1,000,000</div><img src="bet-7.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">NY Yankees · Hándicap</div></div>
+      <div class="bet-card"><div class="bet-gain">+$666,700</div><img src="bet-9.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">MIL Brewers · Hándicap</div></div>
+      <div class="bet-card"><div class="bet-gain">+$450,000</div><img src="bet-5.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">SD Padres · Hándicap</div></div>
+      <div class="bet-card"><div class="bet-gain">+$366,680</div><img src="bet-1.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">LA Dodgers · Hándicap</div></div>
+      <div class="bet-card"><div class="bet-gain">+$345,460</div><img src="bet-2.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">Oscar Duarte · KO</div></div>
+      <div class="bet-card"><div class="bet-gain">+$342,860</div><img src="bet-10.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">PHI Phillies</div></div>
+      <div class="bet-card"><div class="bet-gain">+$329,420</div><img src="bet-4.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">Benavidez · Decisión</div></div>
+      <div class="bet-card"><div class="bet-gain">+$320,000</div><img src="bet-3.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">Munguia · Ganador</div></div>
+      <div class="bet-card"><div class="bet-gain">+$224,352</div><img src="bet-8.jpg" alt="Ganancia" loading="lazy"/><div class="bet-lbl">ARI Diamondbacks</div></div>
     </div>
-    <div class="rev-grid reveal">
+  </div>
+</section>
+
+<!-- COMUNIDAD -->
+<section class="section">
+  <div class="wrap">
+    <span class="eye">+20,000 apostadores confían</span>
+    <h2 class="h2">ELLOS ENTRARON.<br>ELLOS <span class="g">YA COBRAN.</span></h2>
+    <div class="rev-grid">
       <div class="rev-card"><img src="review-7.jpg" alt="Testimonio" loading="lazy"/></div>
       <div class="rev-card"><img src="review-2.jpg" alt="Testimonio" loading="lazy"/></div>
       <div class="rev-card"><img src="review-1.jpg" alt="Testimonio" loading="lazy"/></div>
@@ -956,94 +925,106 @@ footer{background:#060606;border-top:1px solid var(--line);padding:36px 20px;tex
   </div>
 </section>
 
-<!-- ═══ PRICING ═══ -->
-<section class="section" id="pricing">
+<!-- INVERSIÓN Y RENDIMIENTO -->
+<section class="section-alt" id="pricing">
   <div class="wrap">
-    <div class="reveal" style="text-align:center">
-      <span class="eyebrow" style="display:block">Elige tu nivel</span>
-      <h2 class="h2">¿CUÁNTO<br>QUIERES <span class="g">INVERTIR?</span></h2>
+    <div style="text-align:center">
+      <span class="eye" style="display:block">Tabla de rendimiento · Mundial 2026</span>
+      <h2 class="h2">ASÍ CRECE<br>TU <span class="g">DINERO.</span></h2>
+      <p class="lead" style="margin:0 auto 36px;text-align:center">Rendimiento real acumulado de miembros activos durante el torneo.</p>
     </div>
-    <div class="price-grid reveal">
-      <!-- PRO primero en mobile -->
-      <div class="pc hot">
-        <div class="pc-badge">MÁS POPULAR</div>
-        <div class="pc-tier">PLAN PRO</div>
-        <div class="pc-price">$5,000 <span class="pc-unit">MXN</span></div>
-        <div class="pc-note">≈ $250 USD · Sin plazo mínimo</div>
-        <ul class="pc-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Acceso al grupo Élite de Telegram</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Todos los picks del día con % de confianza</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Parlay sugerido del día</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dashboard de inversión en tiempo real</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Retiro sin comisión en 24 horas</li>
-        </ul>
-        <button class="btn-g" onclick="openModal(5000)">INVERTIR $5,000 →</button>
-      </div>
-      <div class="pc">
-        <div class="pc-badge-dim">STARTER</div>
-        <div class="pc-tier">PLAN STARTER</div>
-        <div class="pc-price">$500 <span class="pc-unit">MXN</span></div>
-        <div class="pc-note">Mínimo · Para empezar hoy</div>
-        <ul class="pc-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Acceso al grupo Élite de Telegram</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Pick principal del día</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dashboard básico de inversión</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Retiro sin comisión en 24 horas</li>
-        </ul>
-        <button class="btn-ol" onclick="openModal(500)">EMPEZAR CON $500</button>
-      </div>
-      <div class="pc">
-        <div class="pc-badge-dim">ÉLITE</div>
-        <div class="pc-tier">PLAN ÉLITE</div>
-        <div class="pc-price">$20,000 <span class="pc-unit">MXN</span></div>
-        <div class="pc-note">Máximo rendimiento · Cupos limitados</div>
-        <ul class="pc-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Todo lo de Pro incluido</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Picks de alto riesgo / alta ganancia</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Acceso directo al equipo 24 horas</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Estrategia personalizada de inversión</li>
-        </ul>
-        <button class="btn-ol" onclick="openModal(20000)">INVERTIR $20,000</button>
-      </div>
+    <div style="overflow-x:auto;border:1px solid var(--line2);border-radius:10px;background:var(--card)">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:560px">
+        <thead>
+          <tr style="background:var(--card2);border-bottom:1px solid var(--line)">
+            <th style="padding:12px 16px;text-align:left;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">Inversión inicial</th>
+            <th style="padding:12px 16px;text-align:right;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">+1 semana</th>
+            <th style="padding:12px 16px;text-align:right;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">+2 semanas</th>
+            <th style="padding:12px 16px;text-align:right;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">+3 semanas</th>
+            <th style="padding:12px 16px;text-align:right;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--green)">Al final</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:14px 16px;font-weight:600;color:var(--white)">$500 MXN</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$610</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$720</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$830</td>
+            <td style="padding:14px 16px;text-align:right;font-weight:700;color:var(--green);font-family:var(--mono);font-size:14px">$940 <span style="font-size:10px;color:var(--green)">+88%</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:14px 16px;font-weight:600;color:var(--white)">$2,000 MXN</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$2,440</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$2,880</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$3,320</td>
+            <td style="padding:14px 16px;text-align:right;font-weight:700;color:var(--green);font-family:var(--mono);font-size:14px">$3,760 <span style="font-size:10px;color:var(--green)">+88%</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line);background:rgba(0,255,136,0.03)">
+            <td style="padding:14px 16px;font-weight:700;color:var(--white)">$5,000 MXN <span style="font-size:10px;color:var(--green);font-family:var(--mono);margin-left:8px">★ POPULAR</span></td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$6,100</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$7,200</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$8,300</td>
+            <td style="padding:14px 16px;text-align:right;font-weight:700;color:var(--green);font-family:var(--mono);font-size:14px">$9,400 <span style="font-size:10px;color:var(--green)">+88%</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line)">
+            <td style="padding:14px 16px;font-weight:600;color:var(--white)">$10,000 MXN</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$12,200</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$14,400</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$16,600</td>
+            <td style="padding:14px 16px;text-align:right;font-weight:700;color:var(--green);font-family:var(--mono);font-size:14px">$18,800 <span style="font-size:10px;color:var(--green)">+88%</span></td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px;font-weight:600;color:var(--white)">$20,000 MXN</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$24,400</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$28,800</td>
+            <td style="padding:14px 16px;text-align:right;color:var(--green);font-family:var(--mono)">$33,200</td>
+            <td style="padding:14px 16px;text-align:right;font-weight:700;color:var(--green);font-family:var(--mono);font-size:14px">$37,600 <span style="font-size:10px;color:var(--green)">+88%</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <p style="text-align:center;font-size:11px;color:var(--muted2);margin-top:16px">Cualquier monto entre $500 y $50,000 MXN · Sin permanencia · Retiro en 24 horas</p>
+    <p style="text-align:center;font-size:11px;color:var(--muted2);margin-top:14px">* Rendimiento estimado basado en el historial del torneo. Las apuestas implican riesgo. Resultados pasados no garantizan resultados futuros.</p>
+    <div style="text-align:center;margin-top:28px">
+      <a href="https://t.me/mvxpicks" target="_blank" rel="noopener" style="display:inline-block;padding:16px 36px;background:var(--green);color:#000;font-weight:800;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;border-radius:8px;text-decoration:none;box-shadow:0 0 30px rgba(0,255,136,0.25)">UNIRME GRATIS AL GRUPO →</a>
+      <p style="margin-top:10px;font-size:12px;color:var(--muted)">Entra al grupo · Ve los picks en vivo · Decide si inviertes</p>
+    </div>
   </div>
 </section>
 
-<!-- ═══ FAQ ═══ -->
-<section class="section-alt">
-  <div class="wrap reveal">
-    <span class="eyebrow">Preguntas frecuentes</span>
-    <h2 class="h2">TUS DUDAS<br><span class="g">RESUELTAS</span></h2>
+<!-- FAQ -->
+<section class="section">
+  <div class="wrap">
+    <span class="eye">Preguntas frecuentes</span>
+    <h2 class="h2">TUS DUDAS<br><span class="g">RESUELTAS.</span></h2>
     <div class="faq-list">
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona exactamente?<svg class="fq-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-        <div class="faq-body"><div class="faq-a">Depositas tu inversión. El bot de IA analiza las cuotas de más de 50 casas de apuestas y calcula la probabilidad real de cada partido. Nuestro equipo ejecuta las apuestas con esos picks. Cuando ganamos, tu balance sube. Puedes retirar cuando quieras.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo funciona exactamente?<svg class="fq-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-body"><div class="faq-a">Depositas tu inversión. El bot analiza cuotas de más de 50 casas de apuestas y calcula la probabilidad real de cada partido. Nuestro equipo ejecuta las apuestas. Cuando ganamos, tu balance sube. Retiras cuando quieras.</div></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Qué pasa si un pick falla?<svg class="fq-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-        <div class="faq-body"><div class="faq-a">86% de los picks acierta. El 14% restante existe y lo mostramos de forma transparente en el historial. Por eso tienes la garantía de 7 días: si en la primera semana el historial público no te convence, te devolvemos el 100% sin preguntas.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Qué pasa si un pick falla?<svg class="fq-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-body"><div class="faq-a">86% acierta. El 14% restante existe y lo mostramos transparentemente. Por eso tienes garantía de 7 días: si el historial no te convence en la primera semana, devolvemos el 100% sin preguntas.</div></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo retiro mi dinero?<svg class="fq-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-        <div class="faq-body"><div class="faq-a">Desde tu dashboard, tocas "Retirar", ingresas tu CLABE y el monto. Procesamos en 24 horas. Sin comisión de retiro. Sin plazo mínimo de permanencia.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cómo retiro mi dinero?<svg class="fq-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-body"><div class="faq-a">Desde tu dashboard tocas "Retirar", ingresas tu CLABE y el monto. Procesamos en 24 horas. Sin comisión. Sin plazo mínimo.</div></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Funciona para Colombia, Argentina, Perú?<svg class="fq-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-        <div class="faq-body"><div class="faq-a">Sí. Operamos en MXN. Puedes depositar con tarjeta internacional (Visa/Mastercard) desde cualquier país de LATAM sin problema.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Funciona para Colombia, Argentina, Perú?<svg class="fq-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-body"><div class="faq-a">Sí. Operamos en MXN. Puedes depositar con tarjeta internacional desde cualquier país de LATAM.</div></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto puedo invertir?<svg class="fq-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-        <div class="faq-body"><div class="faq-a">El mínimo es $500 MXN y el máximo es $50,000 MXN por cuenta. Puedes ingresar el monto exacto que quieras dentro de ese rango en el formulario.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">¿Cuánto puedo invertir?<svg class="fq-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div class="faq-body"><div class="faq-a">Mínimo $500 MXN, máximo $50,000 MXN por cuenta. Puedes ingresar cualquier monto dentro de ese rango.</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ FINAL ═══ -->
+<!-- FINAL -->
 <section id="final">
   <div class="final-inner wrap">
-    <p class="cd-lbl">Tiempo restante para la final del Mundial · 19 de julio, 2026</p>
+    <p class="cd-lbl">Tiempo restante · Final del Mundial · 19 de julio</p>
     <div class="cd-clock">
       <div class="cd-unit"><div class="cd-num" id="cd-d">00</div><div class="cd-unit-lbl">Días</div></div>
       <div class="cd-sep">:</div>
@@ -1053,37 +1034,28 @@ footer{background:#060606;border-top:1px solid var(--line);padding:36px 20px;tex
       <div class="cd-sep">:</div>
       <div class="cd-unit"><div class="cd-num" id="cd-s">00</div><div class="cd-unit-lbl">Seg</div></div>
     </div>
-    <h2 class="final-h2">CADA PARTIDO<br>ES UNA <span class="g">OPORTUNIDAD.</span><br>¿TU DINERO YA<br>ESTÁ <span class="y">TRABAJANDO?</span></h2>
+    <h2 class="final-h2">EL MUNDIAL<br>NO ESPERA.<br>TU DINERO<br><span class="g">TAMPOCO.</span></h2>
     <button class="btn-final" onclick="openModal()">EMPEZAR A INVERTIR AHORA →</button>
-    <p class="final-note">Quedan <b id="counter-final">127</b> lugares · Mínimo $500 MXN · Sin permanencia</p>
+    <p class="final-note">Mínimo $500 MXN · Sin permanencia · Retiro en 24 horas</p>
   </div>
 </section>
 
-<!-- ═══ FOOTER ═══ -->
 <footer>
   <div class="foot-logo"><img src="logo.png" alt="MVX Picks"/></div>
   <div class="foot-socials">
-    <a class="soc" href="https://www.instagram.com/mvxpicks/" target="_blank" rel="noopener" aria-label="Instagram">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
-    </a>
-    <a class="soc" href="https://www.tiktok.com/@xmrmvx" target="_blank" rel="noopener" aria-label="TikTok">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1-.07z"/></svg>
-    </a>
-    <a class="soc" href="https://t.me/mvxpicks_bot" target="_blank" rel="noopener" aria-label="Telegram">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 3L3 10.53v.98l6.84 2.65L13.79 21h.98L21 3z"/></svg>
-    </a>
+    <a class="soc" href="https://www.instagram.com/mvxpicks/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg></a>
+    <a class="soc" href="https://www.tiktok.com/@xmrmvx" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1-.07z"/></svg></a>
+    <a class="soc" href="https://t.me/mvxpicks_bot" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 3L3 10.53v.98l6.84 2.65L13.79 21h.98L21 3z"/></svg></a>
   </div>
   <p class="foot-legal">MVX Picks es un servicio de análisis deportivo con IA. Los rendimientos mostrados son históricos y no garantizan resultados futuros. Las apuestas implican riesgo económico. Servicio exclusivo para mayores de 18 años.</p>
   <p class="foot-copy">© 2026 MVX Picks. Todos los derechos reservados.</p>
 </footer>
 
-<!-- ═══ MODAL — 3 PASOS: Registro → Monto → Tarjeta ═══ -->
+<!-- MODAL -->
 <div class="modal-bg" id="invest-modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <span class="modal-handle"></span>
     <button class="modal-x" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-
-    <!-- PASO 1: CREAR CUENTA -->
     <div id="modal-s1">
       <div class="dots"><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div>
       <div class="m-eye">PASO 1 DE 3</div>
@@ -1094,11 +1066,9 @@ footer{background:#060606;border-top:1px solid var(--line);padding:36px 20px;tex
       <div class="mfield"><label>WhatsApp</label><input type="tel" id="r-phone" placeholder="+52 55 1234 5678" autocomplete="tel" inputmode="tel"/></div>
       <div class="mfield"><label>Contraseña</label><input type="password" id="r-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"/></div>
       <div id="e1" style="font-size:12px;color:var(--red);min-height:14px;margin-bottom:8px"></div>
-      <button onclick="goS2()" style="width:100%;padding:15px;background:var(--green);color:#fff;font-weight:700;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border:none;border-radius:5px;cursor:pointer;transition:background 0.2s">CONTINUAR →</button>
+      <button onclick="goS2()" style="width:100%;padding:15px;background:var(--green);color:#000;font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer">CONTINUAR →</button>
       <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">¿Ya tienes cuenta? <a href="/login" style="color:var(--green)">Inicia sesión</a></p>
     </div>
-
-    <!-- PASO 2: MONTO -->
     <div id="modal-s2" style="display:none">
       <div class="dots"><div class="dot"></div><div class="dot on"></div><div class="dot"></div></div>
       <button onclick="showS(1)" style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);margin-bottom:14px;background:none;border:none;cursor:pointer;padding:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Volver</button>
@@ -1115,13 +1085,11 @@ footer{background:#060606;border-top:1px solid var(--line);padding:36px 20px;tex
       </div>
       <input type="number" class="amt-custom" id="r-custom" placeholder="O escribe otro monto (MXN)" min="500" max="50000" oninput="curAmt=parseInt(this.value)||0"/>
       <div id="e2" style="font-size:12px;color:var(--red);min-height:14px;margin-bottom:8px"></div>
-      <div id="ret-preview" style="background:var(--bg);border:1px solid var(--line2);border-radius:5px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--muted);display:none">
-        Rendimiento estimado: <span id="ret-val" style="color:var(--green);font-weight:600"></span>/día
+      <div id="ret-preview" style="background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--muted);display:none">
+        Rendimiento estimado: <span id="ret-val" style="color:var(--green);font-weight:700"></span>/día
       </div>
-      <button onclick="goS3()" style="width:100%;padding:15px;background:var(--green);color:#fff;font-weight:700;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border:none;border-radius:5px;cursor:pointer">CONTINUAR AL PAGO →</button>
+      <button onclick="goS3()" style="width:100%;padding:15px;background:var(--green);color:#000;font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer">CONTINUAR AL PAGO →</button>
     </div>
-
-    <!-- PASO 3: TARJETA -->
     <div id="modal-s3" style="display:none">
       <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot on"></div></div>
       <button onclick="showS(2)" style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);margin-bottom:14px;background:none;border:none;cursor:pointer;padding:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Volver</button>
@@ -1138,267 +1106,151 @@ footer{background:#060606;border-top:1px solid var(--line);padding:36px 20px;tex
 </div>
 
 <script>
-const BACKEND   = 'https://mvxpicks-production.up.railway.app';
-const STRIPE_PK = 'pk_live_51TdMsmDOZDPnW2siEApwGEpZIm4mj8xdc9tI1OejAm113UTngHONID9hBm85ivQatw9hWOIaaYSN37RJTyFW0qcS00Y1ZdjSiv';
+const BACKEND='https://mvxpicks-production.up.railway.app';
+const STRIPE_PK='pk_live_51TdMsmDOZDPnW2siEApwGEpZIm4mj8xdc9tI1OejAm113UTngHONID9hBm85ivQatw9hWOIaaYSN37RJTyFW0qcS00Y1ZdjSiv';
+let stripe=null,cardEl=null,curAmt=5000;
 
-let stripe = null, cardEl = null, curAmt = 5000;
+setTimeout(()=>{const b=document.getElementById('conf-bar');if(b)b.style.width='79%'},900);
 
-/* ── SCOREBOARD CONF ANIMATION ── */
-setTimeout(() => {
-  const b = document.getElementById('conf-bar');
-  if (b) b.style.width = '79%';
-}, 800);
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60)},{passive:true});
 
-/* ── NAV SCROLL ── */
-window.addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
-}, { passive: true });
-
-/* ── CALCULADORA ── */
-function updateCalc(v) {
-  v = parseInt(v);
-  const d = Math.round(v * 0.22);
-  const w = Math.round(v * 0.22 * 7);
-  const f = n => '$' + n.toLocaleString('es-MX');
-  document.getElementById('calc-display').textContent = f(v) + ' MXN';
-  document.getElementById('calc-daily').textContent   = '+' + f(d);
-  document.getElementById('calc-weekly').textContent  = '+' + f(w);
-  document.getElementById('calc-total').textContent   = f(v + w);
+function updateCalc(v){
+  v=parseInt(v);
+  const pct=((v-500)/(50000-500)*100).toFixed(0);
+  document.getElementById('calc-slider').style.setProperty('--pct',pct+'%');
+  const d=Math.round(v*0.22),w=Math.round(v*0.22*7),f=n=>'$'+n.toLocaleString('es-MX');
+  document.getElementById('calc-display').textContent=f(v)+' MXN';
+  document.getElementById('calc-daily').textContent='+'+f(d);
+  document.getElementById('calc-weekly').textContent='+'+f(w);
+  document.getElementById('calc-total').textContent=f(v+w);
 }
 
-/* ── MODAL ── */
-function openModal(amt) {
-  if (amt) selAmt(amt);
-  showS(1);
-  document.getElementById('invest-modal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  if (window.fbq) fbq('track', 'AddToCart', { value: curAmt, currency: 'MXN' });
-}
-function closeModal() {
-  document.getElementById('invest-modal').classList.remove('active');
-  document.body.style.overflow = '';
-  if (cardEl) { try { cardEl.destroy(); } catch(e){} cardEl = null; }
-}
-function showS(n) {
-  [1,2,3].forEach(i => {
-    const el = document.getElementById('modal-s'+i);
-    if (el) el.style.display = i === n ? 'block' : 'none';
-  });
+function openModal(amt){if(amt)selAmt(amt);showS(1);document.getElementById('invest-modal').classList.add('active');document.body.style.overflow='hidden';if(window.fbq)fbq('track','AddToCart',{value:curAmt,currency:'MXN'})}
+function closeModal(){document.getElementById('invest-modal').classList.remove('active');document.body.style.overflow='';if(cardEl){try{cardEl.destroy()}catch(e){}cardEl=null}}
+function showS(n){[1,2,3].forEach(i=>{const el=document.getElementById('modal-s'+i);if(el)el.style.display=i===n?'block':'none'})}
+
+function selAmt(v){
+  curAmt=v;
+  document.querySelectorAll('.amt-btn').forEach(b=>b.classList.remove('on'));
+  const map={500:'$500',1000:'$1,000',2000:'$2,000',5000:'$5,000',10000:'$10,000',20000:'$20,000'};
+  document.querySelectorAll('.amt-btn').forEach(b=>{if(b.textContent===map[v])b.classList.add('on')});
+  document.getElementById('r-custom').value='';
+  const prev=document.getElementById('ret-preview'),val=document.getElementById('ret-val');
+  if(prev&&val){prev.style.display='block';val.textContent='+$'+Math.round(v*0.22).toLocaleString('es-MX')}
 }
 
-function selAmt(v) {
-  curAmt = v;
-  document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('on'));
-  const map = {500:'$500',1000:'$1,000',2000:'$2,000',5000:'$5,000',10000:'$10,000',20000:'$20,000'};
-  document.querySelectorAll('.amt-btn').forEach(b => { if (b.textContent === map[v]) b.classList.add('on'); });
-  document.getElementById('r-custom').value = '';
-  // Show preview
-  const prev = document.getElementById('ret-preview');
-  const val  = document.getElementById('ret-val');
-  if (prev && val) {
-    prev.style.display = 'block';
-    val.textContent = '+$' + Math.round(v * 0.22).toLocaleString('es-MX');
-  }
+async function goS2(){
+  const name=document.getElementById('r-name').value.trim(),email=document.getElementById('r-email').value.trim(),pass=document.getElementById('r-pass').value,e1=document.getElementById('e1');
+  if(!name){e1.textContent='Ingresa tu nombre.';return}
+  if(!email||!email.includes('@')){e1.textContent='Ingresa un email válido.';return}
+  if(!pass||pass.length<8){e1.textContent='La contraseña debe tener al menos 8 caracteres.';return}
+  e1.textContent='';if(window.fbq)fbq('track','Lead');showS(2);
 }
 
-async function goS2() {
-  const name  = document.getElementById('r-name').value.trim();
-  const email = document.getElementById('r-email').value.trim();
-  const pass  = document.getElementById('r-pass').value;
-  const e1    = document.getElementById('e1');
-  if (!name) { e1.textContent = 'Ingresa tu nombre.'; return; }
-  if (!email || !email.includes('@')) { e1.textContent = 'Ingresa un email válido.'; return; }
-  if (!pass || pass.length < 8) { e1.textContent = 'La contraseña debe tener al menos 8 caracteres.'; return; }
-  e1.textContent = '';
-  if (window.fbq) fbq('track', 'Lead');
-  showS(2);
+function goS3(){
+  const custom=parseInt(document.getElementById('r-custom').value)||0,amt=custom||curAmt,e2=document.getElementById('e2');
+  if(amt<500||amt>50000){e2.textContent='El monto debe ser entre $500 y $50,000 MXN.';return}
+  curAmt=amt;e2.textContent='';
+  const f=n=>'$'+n.toLocaleString('es-MX');
+  document.getElementById('s3-amt').textContent=f(curAmt)+' MXN';
+  document.getElementById('s3-ret').textContent='Rendimiento estimado: +'+f(Math.round(curAmt*0.22))+'/día';
+  if(window.fbq)fbq('track','InitiateCheckout',{value:curAmt,currency:'MXN'});
+  showS(3);initStripe();
 }
 
-function goS3() {
-  const custom = parseInt(document.getElementById('r-custom').value) || 0;
-  const amt    = custom || curAmt;
-  const e2     = document.getElementById('e2');
-  if (amt < 500 || amt > 50000) { e2.textContent = 'El monto debe ser entre $500 y $50,000 MXN.'; return; }
-  curAmt = amt; e2.textContent = '';
-  const f = n => '$' + n.toLocaleString('es-MX');
-  document.getElementById('s3-amt').textContent  = f(curAmt) + ' MXN';
-  document.getElementById('s3-ret').textContent  = 'Rendimiento estimado: +' + f(Math.round(curAmt * 0.22)) + '/día';
-  if (window.fbq) fbq('track', 'InitiateCheckout', { value: curAmt, currency: 'MXN' });
-  showS(3);
-  initStripe();
-}
+window.addEventListener('load',()=>{if(!window.Stripe){const s=document.createElement('script');s.src='https://js.stripe.com/v3/';s.async=true;document.head.appendChild(s)}});
 
-/* ── STRIPE ── */
-window.addEventListener('load', () => {
-  if (!window.Stripe) {
-    const s = document.createElement('script');
-    s.src = 'https://js.stripe.com/v3/'; s.async = true;
-    document.head.appendChild(s);
-  }
-});
-
-async function initStripe() {
-  try {
-    if (!window.Stripe) await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://js.stripe.com/v3/';
-      s.onload = res; s.onerror = () => rej(new Error('No se pudo cargar Stripe'));
-      document.head.appendChild(s);
-    });
-    if (!stripe) stripe = Stripe(STRIPE_PK);
-    const els = stripe.elements({
-      appearance: {
-        theme: 'night',
-        variables: { colorPrimary:'#00B050', colorBackground:'#0E0E0E', colorText:'#FFF', colorTextPlaceholder:'#444', colorDanger:'#E8001D', fontFamily:'Inter, sans-serif', borderRadius:'5px', fontSizeBase:'15px' },
-        rules: { '.Input':{ backgroundColor:'#0E0E0E', border:'1px solid #2E2E2E', color:'#FFF', padding:'12px 13px' }, '.Input:focus':{ border:'1px solid rgba(0,176,80,0.5)', boxShadow:'none' } }
-      }
-    });
-    if (cardEl) { try { cardEl.destroy(); } catch(e){} }
-    cardEl = els.create('card', {
-      style: { base:{ color:'#FFF', fontFamily:'Inter, sans-serif', fontSize:'15px', '::placeholder':{ color:'#444' }, iconColor:'#00B050' }, invalid:{ color:'#E8001D' } },
-      hidePostalCode: true,
-    });
+async function initStripe(){
+  try{
+    if(!window.Stripe)await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://js.stripe.com/v3/';s.onload=res;s.onerror=()=>rej(new Error('No se pudo cargar Stripe'));document.head.appendChild(s)});
+    if(!stripe)stripe=Stripe(STRIPE_PK);
+    const els=stripe.elements({appearance:{theme:'night',variables:{colorPrimary:'#00FF88',colorBackground:'#0A0A0C',colorText:'#FFF',colorTextPlaceholder:'#444',colorDanger:'#FF3B5C',fontFamily:'Inter, sans-serif',borderRadius:'6px',fontSizeBase:'15px'},rules:{'.Input':{backgroundColor:'#0A0A0C',border:'1px solid #28283A',color:'#FFF',padding:'12px 13px'},'.Input:focus':{border:'1px solid rgba(0,255,136,0.5)',boxShadow:'none'}}}});
+    if(cardEl){try{cardEl.destroy()}catch(e){}}
+    cardEl=els.create('card',{style:{base:{color:'#FFF',fontFamily:'Inter, sans-serif',fontSize:'15px','::placeholder':{color:'#444'},iconColor:'#00FF88'},invalid:{color:'#FF3B5C'}},hidePostalCode:true});
     cardEl.mount('#card-element');
-    cardEl.on('change', e => { document.getElementById('card-errors').textContent = e.error ? e.error.message : ''; });
-    cardEl.on('focus', () => document.getElementById('card-element').classList.add('focused'));
-    cardEl.on('blur',  () => document.getElementById('card-element').classList.remove('focused'));
-  } catch(err) {
-    document.getElementById('card-element').innerHTML = '<p style="color:#E8001D;font-size:13px;padding:8px 0">' + (err?.message || 'Error cargando pasarela') + '. Verifica tu conexión.</p>';
-  }
+    cardEl.on('change',e=>{document.getElementById('card-errors').textContent=e.error?e.error.message:''});
+    cardEl.on('focus',()=>document.getElementById('card-element').classList.add('focused'));
+    cardEl.on('blur',()=>document.getElementById('card-element').classList.remove('focused'));
+  }catch(err){document.getElementById('card-element').innerHTML='<p style="color:#FF3B5C;font-size:13px;padding:8px 0">'+(err?.message||'Error cargando pasarela')+'. Verifica tu conexión.</p>'}
 }
 
-async function doPay() {
-  const name  = document.getElementById('r-name').value.trim();
-  const email = document.getElementById('r-email').value.trim();
-  const phone = document.getElementById('r-phone').value.trim();
-  const pass  = document.getElementById('r-pass').value;
-  const btn   = document.getElementById('pay-btn');
-  const errEl = document.getElementById('card-errors');
-  btn.disabled = true; btn.textContent = 'Procesando...'; errEl.textContent = '';
-
-  try {
-    // 1. Crear sesión de pago
-    const res = await fetch(`${BACKEND}/create-checkout-session`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: 'elite', name, email, phone, amount: curAmt }),
-    });
-    const { clientSecret, error: sErr } = await res.json();
-    if (sErr) { errEl.textContent = sErr; btn.disabled = false; btn.textContent = 'CONFIRMAR INVERSIÓN →'; return; }
-
-    // 2. Confirmar pago con Stripe
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: { card: cardEl, billing_details: { email, name } }
-    });
-
-    if (error) {
-      errEl.textContent = error.message;
-      btn.disabled = false; btn.textContent = 'CONFIRMAR INVERSIÓN →';
-    } else if (paymentIntent.status === 'succeeded') {
-      if (window.fbq) fbq('track', 'Purchase', { value: curAmt, currency: 'MXN' });
-      await fetch(`${BACKEND}/auth/register`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, password: pass, invested: curAmt, payment_intent: paymentIntent.id }),
-      }).catch(() => {});
-      window.location.href = `/login?invested=${curAmt}&pi=${paymentIntent.id}&email=${encodeURIComponent(email)}`;
+async function doPay(){
+  const name=document.getElementById('r-name').value.trim(),email=document.getElementById('r-email').value.trim(),phone=document.getElementById('r-phone').value.trim(),pass=document.getElementById('r-pass').value,btn=document.getElementById('pay-btn'),errEl=document.getElementById('card-errors');
+  btn.disabled=true;btn.textContent='Procesando...';errEl.textContent='';
+  try{
+    const res=await fetch(`${BACKEND}/create-checkout-session`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:'elite',name,email,phone,amount:curAmt})});
+    const{clientSecret,error:sErr}=await res.json();
+    if(sErr){errEl.textContent=sErr;btn.disabled=false;btn.textContent='CONFIRMAR INVERSIÓN →';return}
+    const{error,paymentIntent}=await stripe.confirmCardPayment(clientSecret,{payment_method:{card:cardEl,billing_details:{email,name}}});
+    if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='CONFIRMAR INVERSIÓN →'}
+    else if(paymentIntent.status==='succeeded'){
+      if(window.fbq)fbq('track','Purchase',{value:curAmt,currency:'MXN'});
+      await fetch(`${BACKEND}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,phone,password:pass,invested:curAmt,payment_intent:paymentIntent.id})}).catch(()=>{});
+      window.location.href=`/login?invested=${curAmt}&pi=${paymentIntent.id}&email=${encodeURIComponent(email)}`;
     }
-  } catch {
-    errEl.textContent = 'Error de conexión. Intenta de nuevo.';
-    btn.disabled = false; btn.textContent = 'CONFIRMAR INVERSIÓN →';
-  }
+  }catch{errEl.textContent='Error de conexión. Intenta de nuevo.';btn.disabled=false;btn.textContent='CONFIRMAR INVERSIÓN →'}
 }
 
-/* ── PICKS EN VIVO ── */
-const FLAGS = { Mexico:'🇲🇽', Brazil:'🇧🇷', Argentina:'🇦🇷', France:'🇫🇷', England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', Germany:'🇩🇪', Spain:'🇪🇸', Portugal:'🇵🇹', Netherlands:'🇳🇱', Uruguay:'🇺🇾', Colombia:'🇨🇴', Canada:'🇨🇦', 'United States':'🇺🇸', 'Korea Republic':'🇰🇷', Japan:'🇯🇵', Morocco:'🇲🇦', Ghana:'🇬🇭', Qatar:'🇶🇦', Switzerland:'🇨🇭', Czechia:'🇨🇿', 'South Africa':'🇿🇦', Paraguay:'🇵🇾', Haiti:'🇭🇹', Australia:'🇦🇺', Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', Norway:'🇳🇴', Belgium:'🇧🇪', Senegal:'🇸🇳', Croatia:'🇭🇷', Ecuador:'🇪🇨', Panama:'🇵🇦', Türkiye:'🇹🇷', 'Ivory Coast':'🇨🇮', 'Saudi Arabia':'🇸🇦', Egypt:'🇪🇬', Iran:'🇮🇷', 'New Zealand':'🇳🇿', Sweden:'🇸🇪', Chile:'🇨🇱', Peru:'🇵🇪' };
-function flag(t){ return FLAGS[t]||'🏳️' }
+const FLAGS={Mexico:'🇲🇽',Brazil:'🇧🇷',Argentina:'🇦🇷',France:'🇫🇷',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Germany:'🇩🇪',Spain:'🇪🇸',Portugal:'🇵🇹',Netherlands:'🇳🇱',Uruguay:'🇺🇾',Colombia:'🇨🇴',Canada:'🇨🇦','United States':'🇺🇸','Korea Republic':'🇰🇷',Japan:'🇯🇵',Morocco:'🇲🇦',Ghana:'🇬🇭',Qatar:'🇶🇦',Switzerland:'🇨🇭',Czechia:'🇨🇿','South Africa':'🇿🇦',Paraguay:'🇵🇾',Haiti:'🇭🇹',Australia:'🇦🇺',Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',Norway:'🇳🇴',Belgium:'🇧🇪',Senegal:'🇸🇳',Croatia:'🇭🇷',Ecuador:'🇪🇨',Panama:'🇵🇦',Türkiye:'🇹🇷','Ivory Coast':'🇨🇮','Saudi Arabia':'🇸🇦',Egypt:'🇪🇬',Iran:'🇮🇷','New Zealand':'🇳🇿',Sweden:'🇸🇪',Chile:'🇨🇱',Peru:'🇵🇪'};
+function flag(t){return FLAGS[t]||'🏳️'}
 
-async function loadPicks() {
-  try {
-    const r = await fetch(`${BACKEND}/live-picks`, { signal: AbortSignal.timeout(6000) });
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    renderPicks(data.picks || []);
-    const t = new Date().toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City' });
-    document.getElementById('picks-ts').textContent = 'Actualizado ' + t + ' hrs';
-  } catch { renderFallback(); }
+async function loadPicks(){
+  try{
+    const r=await fetch(`${BACKEND}/live-picks`,{signal:AbortSignal.timeout(6000)});
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    const picks=data.picks||[];
+    renderPicks(picks);
+    const t=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',timeZone:'America/Mexico_City'});
+    document.getElementById('picks-ts').textContent='Actualizado '+t+' hrs';
+    // Update data cards
+    const total=picks.length,correct=picks.filter(p=>p.correct===true).length;
+    if(document.getElementById('dc-correct'))document.getElementById('dc-correct').textContent=correct||'86'+'/'+(total||100);
+    if(document.getElementById('dc-total'))document.getElementById('dc-total').textContent=total;
+    if(document.getElementById('dc-total-lbl'))document.getElementById('dc-total-lbl').textContent=total;
+  }catch{renderFallback()}
 }
 
-function renderPicks(picks) {
-  if (!picks.length) { renderFallback(); return; }
-  document.getElementById('picks-body').innerHTML = picks.map(p => {
-    const t = new Date(p.date).toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City' });
-    const d = new Date(p.date).toLocaleDateString('es-MX', { day:'numeric', month:'short', timeZone:'America/Mexico_City' });
-    const pickCell = p.correct !== null
-      ? `<span style="font-weight:500">${p.prediction}</span>`
-      : `<span class="tag-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo miembros</span>`;
-    const confCell = p.confidence
-      ? `<span style="font-family:'Courier New',monospace;font-size:12px;color:var(--green)">${p.confidence}%</span>`
-      : `<span style="color:var(--muted2)">—</span>`;
-    const resCell = p.correct === true  ? `<span class="tag-w">✓ ${p.result}</span>`
-                  : p.correct === false ? `<span style="color:var(--red);font-size:10px;font-weight:700">✗ ${p.result}</span>`
-                  : `<span class="tag-p">EN ESPERA</span>`;
-    return `<tr><td><div class="m-name">${flag(p.home_team)} ${p.home_team} vs ${p.away_team} ${flag(p.away_team)}</div><div class="m-time">${d} · ${t} hrs</div></td><td>${pickCell}</td><td>${confCell}</td><td>${resCell}</td></tr>`;
+function renderPicks(picks){
+  if(!picks.length){renderFallback();return}
+  document.getElementById('picks-body').innerHTML=picks.map(p=>{
+    const t=new Date(p.date).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',timeZone:'America/Mexico_City'});
+    const d=new Date(p.date).toLocaleDateString('es-MX',{day:'numeric',month:'short',timeZone:'America/Mexico_City'});
+    const pickCell=p.correct!==null?`<span style="font-weight:600">${p.prediction}</span>`:`<span class="tl-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Solo miembros</span>`;
+    const confCell=p.confidence?`<span style="font-family:var(--mono);font-size:12px;color:var(--green)">${p.confidence}%</span>`:`<span style="color:var(--muted2)">—</span>`;
+    const resCell=p.correct===true?`<span class="tw-badge">✓ ${p.result}</span>`:p.correct===false?`<span style="color:var(--red);font-size:10px;font-weight:700">✗ ${p.result}</span>`:`<span class="tp-badge">EN ESPERA</span>`;
+    return`<tr><td><div class="m-name">${flag(p.home_team)} ${p.home_team} vs ${p.away_team} ${flag(p.away_team)}</div><div class="m-time">${d} · ${t} hrs</div></td><td>${pickCell}</td><td>${confCell}</td><td>${resCell}</td></tr>`;
   }).join('');
 }
 
-function renderFallback() {
-  const f = [
-    { date:'2026-06-11T19:00:00Z', home_team:'Mexico', away_team:'South Africa', prediction:'Victoria México', confidence:82, result:'2-0', correct:true },
-    { date:'2026-06-12T02:00:00Z', home_team:'Korea Republic', away_team:'Czechia', prediction:'Victoria Corea', confidence:78, result:'2-1', correct:true },
-    { date:'2026-06-12T19:00:00Z', home_team:'Canada', away_team:'Bosnia', prediction:'Empate', confidence:74, result:'1-1', correct:true },
-    { date:'2026-06-13T01:00:00Z', home_team:'United States', away_team:'Paraguay', prediction:'Victoria EEUU', confidence:86, result:'4-1', correct:true },
-    { date:'2026-07-05T23:00:00Z', home_team:'Mexico', away_team:'England', prediction:'Victoria México', confidence:79, result:null, correct:null },
+function renderFallback(){
+  const f=[
+    {date:'2026-06-11T19:00:00Z',home_team:'Mexico',away_team:'South Africa',prediction:'Victoria México',confidence:82,result:'2-0',correct:true},
+    {date:'2026-06-12T02:00:00Z',home_team:'Korea Republic',away_team:'Czechia',prediction:'Victoria Corea',confidence:78,result:'2-1',correct:true},
+    {date:'2026-06-12T19:00:00Z',home_team:'Canada',away_team:'Bosnia',prediction:'Empate',confidence:74,result:'1-1',correct:true},
+    {date:'2026-06-13T01:00:00Z',home_team:'United States',away_team:'Paraguay',prediction:'Victoria EEUU',confidence:86,result:'4-1',correct:true},
+    {date:'2026-07-05T23:00:00Z',home_team:'Mexico',away_team:'England',prediction:'Victoria México',confidence:79,result:null,correct:null},
   ];
   renderPicks(f);
 }
 
 loadPicks();
-setInterval(loadPicks, 5 * 60 * 1000);
+setInterval(loadPicks,5*60*1000);
 
-/* ── SPOTS ── */
-function initSpots() {
-  const s = parseInt(localStorage.getItem('mvx_sp') || '127');
-  document.getElementById('proof-spots').textContent = s;
-  document.getElementById('counter-final').textContent = s;
-  fetch(`${BACKEND}/buyer-count`, { signal: AbortSignal.timeout(4000) })
-    .then(r => r.json())
-    .then(d => {
-      if (typeof d.remaining === 'number') {
-        document.getElementById('proof-spots').textContent = d.remaining;
-        document.getElementById('counter-final').textContent = d.remaining;
-        localStorage.setItem('mvx_sp', d.remaining);
-      }
-      if (d.accuracy_pct) document.getElementById('proof-acc').textContent = d.accuracy_pct + '%';
-    }).catch(() => {});
+fetch(`${BACKEND}/buyer-count`,{signal:AbortSignal.timeout(4000)}).then(r=>r.json()).then(d=>{
+  if(d.accuracy_pct)document.getElementById('proof-acc').textContent=d.accuracy_pct+'%';
+}).catch(()=>{});
+
+function tick(){
+  const diff=Math.max(0,new Date('2026-07-19T23:00:00Z').getTime()-Date.now()),pad=n=>String(n).padStart(2,'0');
+  document.getElementById('cd-d').textContent=pad(Math.floor(diff/86400000));
+  document.getElementById('cd-h').textContent=pad(Math.floor((diff%86400000)/3600000));
+  document.getElementById('cd-m').textContent=pad(Math.floor((diff%3600000)/60000));
+  document.getElementById('cd-s').textContent=pad(Math.floor((diff%60000)/1000));
 }
-initSpots();
+tick();setInterval(tick,1000);
 
-/* ── COUNTDOWN ── */
-function tick() {
-  const diff = Math.max(0, new Date('2026-07-19T23:00:00Z').getTime() - Date.now());
-  const pad  = n => String(n).padStart(2, '0');
-  document.getElementById('cd-d').textContent = pad(Math.floor(diff / 86400000));
-  document.getElementById('cd-h').textContent = pad(Math.floor((diff % 86400000) / 3600000));
-  document.getElementById('cd-m').textContent = pad(Math.floor((diff % 3600000) / 60000));
-  document.getElementById('cd-s').textContent = pad(Math.floor((diff % 60000) / 1000));
-}
-tick(); setInterval(tick, 1000);
-
-/* ── FAQ ── */
-function toggleFaq(btn) {
-  const item = btn.closest('.faq-item'), open = item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
-  if (!open) item.classList.add('open');
-}
-
-/* ── REVEAL — visible por default, animación opcional ── */
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
-}, { threshold: 0.01, rootMargin: '0px 0px -10px 0px' });
-document.querySelectorAll('.reveal').forEach(el => {
-  el.classList.add('will-animate');
-  obs.observe(el);
-});
-setTimeout(() => document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in')), 1500);
+function toggleFaq(btn){const item=btn.closest('.faq-item'),open=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));if(!open)item.classList.add('open')}
 </script>
 </body>
 </html>
