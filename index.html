@@ -626,7 +626,7 @@ footer{background:#040406;border-top:1px solid var(--line);padding:36px 20px;tex
 <nav id="nav">
   <a href="/" class="nav-logo"><img src="logo.png" alt="MVX Picks"/></a>
   <div class="nav-right">
-    <a href="/login" class="nav-link">Mi cuenta</a>
+    <a href="/login" class="nav-link" id="nav-account">Mi cuenta</a>
     <a href="https://t.me/mvxpicks" target="_blank" rel="noopener" class="nav-cta" style="text-decoration:none">Unirme gratis</a>
   </div>
 </nav>
@@ -1245,6 +1245,19 @@ function tick(){
 tick();setInterval(tick,1000);
 
 function toggleFaq(btn){const item=btn.closest('.faq-item'),open=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));if(!open)item.classList.add('open')}
+
+// Nav account link — if logged in go to dashboard, else open modal
+const _token=localStorage.getItem('mvx_token');
+const _navAccount=document.getElementById('nav-account');
+if(_navAccount){
+  if(_token){
+    _navAccount.textContent='Mi dashboard';
+    _navAccount.href='/dashboard';
+  } else {
+    _navAccount.textContent='Iniciar sesión';
+    _navAccount.href='/login';
+  }
+}
 </script>
 </body>
 </html>
