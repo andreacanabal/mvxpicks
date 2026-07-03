@@ -411,8 +411,34 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
       <div class="modal-eye">CONFIRMACIÓN DE PAGO</div>
       <div class="modal-title" id="pm-amt-display">$5,000 MXN</div>
       <div class="modal-sub" id="pm-ret-display">Rendimiento estimado: +$1,100/día</div>
-      <div class="mfield"><label>Número de tarjeta</label></div>
-      <div id="pay-card-el"></div>
+
+      <!-- Selector método de pago -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
+        <div id="dash-opt-card" onclick="dashSetPayMethod('card')" style="padding:10px 8px;background:var(--green-lo);border:1px solid rgba(0,255,136,0.4);border-radius:6px;text-align:center;cursor:pointer;transition:all 0.15s">
+          <div style="font-size:18px;margin-bottom:3px">💳</div>
+          <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--green)">Tarjeta</div>
+        </div>
+        <div id="dash-opt-oxxo" onclick="dashSetPayMethod('oxxo')" style="padding:10px 8px;background:var(--bg);border:1px solid var(--line2);border-radius:6px;text-align:center;cursor:pointer;transition:all 0.15s">
+          <div style="font-size:18px;margin-bottom:3px">🏪</div>
+          <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">OXXO</div>
+        </div>
+      </div>
+      <!-- Info OXXO -->
+      <div id="dash-oxxo-info" style="display:none;background:rgba(255,214,10,0.06);border:1px solid rgba(255,214,10,0.2);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--yellow);line-height:1.6">
+        ⏱ Stripe envía el voucher a tu email. Tienes <strong>3 días</strong> para pagar en cualquier OXXO. Tu acceso se activa automáticamente al confirmar.
+      </div>
+      <!-- Card -->
+      <div id="dash-card-section">
+        <div class="mfield"><label>Número de tarjeta</label></div>
+        <div id="pay-card-el"></div>
+      </div>
+      <!-- OXXO -->
+      <div id="dash-oxxo-section" style="display:none">
+        <div style="background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:14px;font-size:13px;color:var(--muted);text-align:center;margin-bottom:10px">
+          El voucher se enviará a<br><strong style="color:var(--white)" id="dash-oxxo-email"></strong>
+        </div>
+      </div>
+
       <div id="pay-card-err"></div>
       <button class="pay-submit" id="pm-pay-btn" onclick="pmDoPay()">CONFIRMAR INVERSIÓN →</button>
       <div class="pay-secure">
@@ -459,7 +485,26 @@ const token      = localStorage.getItem('mvx_token');
 
 if (!token) window.location.href = '/login';
 
-let stripe = null, cardEl = null, pmAmt = 5000, dashData = null;
+let stripe = null, cardEl = null, pmAmt = 5000, dashData = null, dashPayMethod = 'card';
+
+function dashSetPayMethod(m) {
+  dashPayMethod = m;
+  const isOxxo = m === 'oxxo';
+  document.getElementById('dash-opt-card').style.background  = isOxxo ? 'var(--bg)'           : 'var(--green-lo)';
+  document.getElementById('dash-opt-card').style.borderColor = isOxxo ? 'var(--line2)'         : 'rgba(0,255,136,0.4)';
+  document.getElementById('dash-opt-card').querySelector('div:last-child').style.color = isOxxo ? 'var(--muted)' : 'var(--green)';
+  document.getElementById('dash-opt-oxxo').style.background  = isOxxo ? 'var(--green-lo)'     : 'var(--bg)';
+  document.getElementById('dash-opt-oxxo').style.borderColor = isOxxo ? 'rgba(0,255,136,0.4)' : 'var(--line2)';
+  document.getElementById('dash-opt-oxxo').querySelector('div:last-child').style.color = isOxxo ? 'var(--green)' : 'var(--muted)';
+  document.getElementById('dash-card-section').style.display  = isOxxo ? 'none'  : 'block';
+  document.getElementById('dash-oxxo-section').style.display  = isOxxo ? 'block' : 'none';
+  document.getElementById('dash-oxxo-info').style.display     = isOxxo ? 'block' : 'none';
+  document.getElementById('pm-pay-btn').textContent = isOxxo ? 'GENERAR VOUCHER OXXO →' : 'CONFIRMAR INVERSIÓN →';
+  // Fill email
+  const u = dashData?.user || JSON.parse(localStorage.getItem('mvx_user') || '{}');
+  const emailEl = document.getElementById('dash-oxxo-email');
+  if (emailEl) emailEl.textContent = u.email || '';
+}
 
 function logout() {
   localStorage.removeItem('mvx_token');
@@ -621,30 +666,80 @@ async function pmDoPay() {
   const u      = dashData?.user || JSON.parse(localStorage.getItem('mvx_user')||'{}');
   const btn    = document.getElementById('pm-pay-btn');
   const errEl  = document.getElementById('pay-card-err');
-  btn.disabled = true; btn.textContent = 'Procesando...'; errEl.textContent = '';
+  const isOxxo = dashPayMethod === 'oxxo';
+
+  btn.disabled = true;
+  btn.textContent = isOxxo ? 'Generando voucher...' : 'Procesando...';
+  errEl.textContent = '';
+
   try {
-    const res  = await fetch(`${BACKEND}/create-checkout-session`, {
+    const res = await fetch(`${BACKEND}/create-checkout-session`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ plan:'elite', name:u.name||'', email:u.email||'', phone:u.phone||'', amount:pmAmt }),
+      body: JSON.stringify({
+        plan:'elite', name:u.name||'', email:u.email||'',
+        phone:u.phone||'', amount:pmAmt,
+        payment_method: isOxxo ? 'oxxo' : 'card',
+      }),
     });
     const { clientSecret, error:sErr } = await res.json();
-    if (sErr) { errEl.textContent=sErr; btn.disabled=false; btn.textContent='CONFIRMAR INVERSIÓN →'; return; }
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method:{ card:cardEl, billing_details:{ email:u.email||'', name:u.name||'' } }
-    });
-    if (error) { errEl.textContent=error.message; btn.disabled=false; btn.textContent='CONFIRMAR INVERSIÓN →'; }
-    else if (paymentIntent.status==='succeeded') {
-      closePayModal();
-      // Update user investment in backend
-      await fetch(`${BACKEND}/auth/register`, {
-        method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-        body: JSON.stringify({ name:u.name, email:u.email, phone:u.phone, password:'__existing__', invested:pmAmt, payment_intent:paymentIntent.id }),
-      }).catch(()=>{});
-      // Reload dashboard
-      await loadDashboard();
-      alert(`✅ ¡Inversión de ${fmt(pmAmt)} MXN confirmada! Tu dashboard se actualizará en breve.`);
+    if (sErr) {
+      errEl.textContent = sErr;
+      btn.disabled = false;
+      btn.textContent = isOxxo ? 'GENERAR VOUCHER OXXO →' : 'CONFIRMAR INVERSIÓN →';
+      return;
     }
-  } catch { errEl.textContent='Error de conexión. Intenta de nuevo.'; btn.disabled=false; btn.textContent='CONFIRMAR INVERSIÓN →'; }
+
+    if (isOxxo) {
+      const { error, paymentIntent } = await stripe.confirmOxxoPayment(clientSecret, {
+        payment_method: { billing_details: { name: u.name||'', email: u.email||'' } },
+      });
+      if (error && error.type !== 'payment_intent_unexpected_state') {
+        errEl.textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'GENERAR VOUCHER OXXO →';
+      } else {
+        closePayModal();
+        // Show OXXO confirmation
+        document.getElementById('confirm-popup').innerHTML = `
+          <div class="confirm-box" style="border-color:rgba(255,214,10,0.3)">
+            <div class="confirm-icon">🏪</div>
+            <div class="confirm-title" style="color:var(--yellow)">VOUCHER GENERADO</div>
+            <div class="confirm-desc">
+              Stripe envió las instrucciones de pago a<br>
+              <strong style="color:var(--white)">${u.email}</strong><br><br>
+              Tienes <strong>3 días</strong> para pagar en cualquier OXXO.<br>
+              Tu acceso se activa automáticamente al confirmar el pago.
+            </div>
+            <button class="btn-close-popup" onclick="document.getElementById('confirm-popup').classList.remove('open')">ENTENDIDO</button>
+          </div>`;
+        document.getElementById('confirm-popup').classList.add('open');
+      }
+    } else {
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card:cardEl, billing_details:{ email:u.email||'', name:u.name||'' } },
+      });
+      if (error) {
+        errEl.textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'CONFIRMAR INVERSIÓN →';
+      } else if (paymentIntent.status === 'succeeded') {
+        closePayModal();
+        await loadDashboard();
+        document.getElementById('confirm-popup').innerHTML = `
+          <div class="confirm-box">
+            <div class="confirm-icon">✅</div>
+            <div class="confirm-title">INVERSIÓN CONFIRMADA</div>
+            <div class="confirm-desc">Tu inversión de <strong>${fmt(pmAmt)} MXN</strong> fue procesada exitosamente. Tu dashboard se actualizó.</div>
+            <button class="btn-close-popup" onclick="document.getElementById('confirm-popup').classList.remove('open')">PERFECTO</button>
+          </div>`;
+        document.getElementById('confirm-popup').classList.add('open');
+      }
+    }
+  } catch {
+    errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+    btn.disabled = false;
+    btn.textContent = isOxxo ? 'GENERAR VOUCHER OXXO →' : 'CONFIRMAR INVERSIÓN →';
+  }
 }
 
 /* ── WITHDRAW ── */
