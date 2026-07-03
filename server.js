@@ -1318,9 +1318,9 @@ const FLOW = {
       `Monto: *${fmt(amount)} MXN*\n\n` +
       `👇 Entra aquí para completar tu registro y pago:`,
       { reply_markup: { inline_keyboard: [[
-        { text: `💳 Invertir ${fmt(amount)} MXN ahora`, url: `https://mvxpicks.com?amount=${amount}` }
+        { text: `💳 Invertir ${fmt(amount)} MXN ahora`, url: `https://www.mvxpicks.com/login` }
       ], [
-        { text: '🔒 Pago seguro con Stripe · SSL', callback_data: 'noop' }
+        { text: `🏪 Pago con depósito en OXXO`, url: `https://www.mvxpicks.com/login` }
       ]]}}
     );
     await new Promise(r => setTimeout(r, 1000));
