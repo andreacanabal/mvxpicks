@@ -1,124 +1,255 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MVX Picks — Iniciar sesión</title>
+<title>MVX Picks — Acceder</title>
 <link rel="icon" type="image/png" href="logo.png"/>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;height:100%}
 :root{
-  --black:#080810;--surface:#12121f;--surface2:#1a1a2e;
-  --border:#ffffff0f;--border2:#ffffff18;
-  --blue:#0047FF;--blue2:#0035cc;--blue-dim:rgba(0,71,255,0.08);
-  --red:#FF1B1B;--white:#F8F8FF;--muted:#8888aa;--green:#00D68F;
+  --bg:#060608;--bg2:#0C0C10;--card:#111116;--card2:#16161C;
+  --line:#1E1E28;--line2:#28283A;
+  --green:#00FF88;--green2:#00CC6A;--green-lo:rgba(0,255,136,0.06);--green-glow:rgba(0,255,136,0.2);
+  --purple:#7B2FFF;--red:#FF3B5C;
+  --white:#FFFFFF;--off:#E8E8F0;--muted:#6B6B80;--muted2:#3A3A4A;
+  --mono:'JetBrains Mono',monospace;
 }
-body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;min-height:100dvh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,71,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,71,255,0.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+body{
+  background:var(--bg);color:var(--white);
+  font-family:'Inter',sans-serif;min-height:100dvh;
+  display:flex;flex-direction:column;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.orb1{width:400px;height:400px;background:rgba(0,255,136,0.05);top:-100px;left:-100px}
+.orb2{width:300px;height:300px;background:rgba(123,47,255,0.04);bottom:-50px;right:-50px}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 
 /* HEADER */
-.auth-header{
-  position:fixed;top:0;left:0;right:0;
-  height:60px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;background:rgba(8,8,16,0.92);
-  backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);z-index:100;
+.hdr{
+  position:relative;z-index:10;
+  height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid var(--line2);
+  background:rgba(6,6,8,0.9);backdrop-filter:blur(20px);
 }
-.auth-header img{height:26px;width:auto}
-.auth-header a{font-size:13px;color:var(--muted);transition:color 0.2s}
-.auth-header a:hover{color:var(--white)}
+.hdr-logo img{height:26px;width:auto}
+.hdr-back{
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;color:var(--muted);transition:color 0.2s;
+}
+.hdr-back:hover{color:var(--white)}
+.hdr-back svg{width:14px;height:14px}
 
 /* MAIN */
 .auth-main{
   flex:1;display:flex;align-items:center;justify-content:center;
-  padding:80px 20px 40px;position:relative;z-index:1;
+  padding:24px 20px;position:relative;z-index:1;
 }
+
+/* CARD */
 .auth-card{
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:12px;padding:36px 32px;width:100%;max-width:420px;
-  position:relative;
+  background:var(--card);
+  border:1px solid var(--line2);
+  border-radius:12px;
+  width:100%;max-width:420px;
+  position:relative;overflow:hidden;
 }
 .auth-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--blue),transparent);
-  border-radius:12px 12px 0 0;
+  background:linear-gradient(90deg,transparent,var(--green),var(--purple),transparent);
 }
-.auth-logo{display:flex;justify-content:center;margin-bottom:24px}
-.auth-logo img{height:32px;width:auto}
-.auth-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;text-align:center;margin-bottom:4px}
-.auth-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px}
 
 /* TABS */
-.auth-tabs{display:flex;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:24px}
-.auth-tab{
-  flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;
-  border-radius:6px;cursor:pointer;color:var(--muted);transition:all 0.2s;
+.tabs{display:flex;background:var(--card2);border-bottom:1px solid var(--line)}
+.tab{
+  flex:1;padding:14px;text-align:center;
+  font-size:13px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all 0.2s;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
 }
-.auth-tab.active{background:var(--blue);color:#fff}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
 
-/* FIELDS */
+/* BODY */
+.auth-body{padding:28px 24px}
+
+/* FIELD */
 .field{margin-bottom:14px}
-.field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px}
+.field label{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.field label svg{width:12px;height:12px;color:var(--green);flex-shrink:0}
 .field input{
-  width:100%;background:var(--black);border:1px solid var(--border2);
-  border-radius:8px;padding:13px 14px;color:var(--white);
+  width:100%;background:var(--bg);
+  border:1px solid var(--line2);border-radius:7px;
+  padding:13px 14px;color:var(--white);
   font-size:15px;font-family:inherit;outline:none;
-  transition:border-color 0.2s;-webkit-appearance:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+  -webkit-appearance:none;
 }
-.field input:focus{border-color:var(--blue)}
-.field input::placeholder{color:var(--muted)}
+.field input:focus{
+  border-color:rgba(0,255,136,0.5);
+  box-shadow:0 0 0 3px rgba(0,255,136,0.06);
+}
+.field input::placeholder{color:var(--muted2)}
 
-/* BUTTONS */
-.btn-primary{
-  width:100%;padding:15px;background:var(--blue);color:#fff;
-  font-weight:700;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;
+/* BUTTON */
+.btn-submit{
+  width:100%;padding:15px;
+  background:var(--green);color:#000;
+  font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;
   border:none;border-radius:8px;cursor:pointer;
-  transition:background 0.2s;margin-top:4px;
+  transition:all 0.2s;margin-top:4px;
+  box-shadow:0 0 20px rgba(0,255,136,0.2);
 }
-.btn-primary:hover{background:var(--blue2)}
-.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-submit:hover{background:var(--green2);box-shadow:0 0 32px rgba(0,255,136,0.4);transform:translateY(-1px)}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 
-/* ERROR / SUCCESS */
-#auth-error{font-size:12px;color:var(--red);text-align:center;min-height:16px;margin-bottom:10px}
-#auth-success{font-size:12px;color:var(--green);text-align:center;min-height:16px;margin-bottom:10px}
+/* MESSAGES */
+.msg-err{
+  display:flex;align-items:center;gap:7px;
+  font-size:12px;color:var(--red);
+  background:rgba(255,59,92,0.08);border:1px solid rgba(255,59,92,0.2);
+  border-radius:6px;padding:10px 12px;margin-bottom:12px;
+  min-height:0;
+}
+.msg-err svg{width:13px;height:13px;flex-shrink:0}
+.msg-ok{
+  display:flex;align-items:center;gap:7px;
+  font-size:12px;color:var(--green);
+  background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);
+  border-radius:6px;padding:10px 12px;margin-bottom:12px;
+}
+.msg-ok svg{width:13px;height:13px;flex-shrink:0}
+
+/* FOOTER NOTE */
+.auth-note{
+  text-align:center;font-size:12px;color:var(--muted);
+  margin-top:14px;
+}
+.auth-note a{color:var(--green);font-weight:600}
+.auth-note a:hover{text-decoration:underline}
+
+/* DIVIDER */
+.divider{
+  display:flex;align-items:center;gap:12px;
+  margin:16px 0;font-size:11px;color:var(--muted2);
+  font-family:var(--mono);letter-spacing:0.1em;
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;background:var(--line2);
+}
+
+/* SECURE BADGE */
+.secure-badge{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:14px;font-size:11px;color:var(--muted2);
+  font-family:var(--mono);
+}
+.secure-badge svg{width:11px;height:11px;color:var(--green)}
 </style>
 </head>
 <body>
-<header class="auth-header">
-  <a href="/"><img src="logo.png" alt="MVX Picks"/></a>
-  <a href="/">← Volver al inicio</a>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<header class="hdr">
+  <a href="/" class="hdr-logo"><img src="logo.png" alt="MVX Picks"/></a>
+  <a href="/" class="hdr-back">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Volver al inicio
+  </a>
 </header>
 
 <main class="auth-main">
   <div class="auth-card">
-    <div class="auth-logo"><img src="logo.png" alt="MVX Picks"/></div>
-    <h1 class="auth-title">MI CUENTA</h1>
-    <p class="auth-sub">Accede a tu dashboard de inversiones</p>
 
-    <div class="auth-tabs">
-      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</div>
-      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
+    <div class="tabs">
+      <div class="tab on" id="tab-login" onclick="switchTab('login')">Iniciar sesión</div>
+      <div class="tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
     </div>
 
-    <!-- LOGIN -->
-    <div id="form-login">
-      <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email" inputmode="email"/></div>
-      <div class="field"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/></div>
-      <div id="auth-error"></div>
-      <button class="btn-primary" onclick="handleLogin()">ENTRAR A MI CUENTA →</button>
-    </div>
+    <div class="auth-body">
 
-    <!-- REGISTER -->
-    <div id="form-register" style="display:none">
-      <div class="field"><label>Nombre completo</label><input type="text" id="reg-name" placeholder="Tu nombre" autocomplete="name"/></div>
-      <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email" inputmode="email"/></div>
-      <div class="field"><label>WhatsApp</label><input type="tel" id="reg-phone" placeholder="+52 55 1234 5678" autocomplete="tel" inputmode="tel"/></div>
-      <div class="field"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"/></div>
-      <div id="auth-error"></div>
-      <button class="btn-primary" onclick="handleRegister()">CREAR CUENTA →</button>
+      <!-- LOGIN -->
+      <div id="form-login">
+        <div id="login-msg" style="display:none"></div>
+        <div class="field">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+          </label>
+          <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email" inputmode="email"/>
+        </div>
+        <div class="field">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Contraseña
+          </label>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+        <button class="btn-submit" id="login-btn" onclick="handleLogin()">ENTRAR A MI CUENTA →</button>
+        <div class="auth-note" style="margin-top:16px">
+          ¿No tienes cuenta? <a onclick="switchTab('register')">Crear una gratis</a>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="form-register" style="display:none">
+        <div id="register-msg" style="display:none"></div>
+        <div class="field">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Nombre completo
+          </label>
+          <input type="text" id="reg-name" placeholder="Tu nombre" autocomplete="name"/>
+        </div>
+        <div class="field">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+          </label>
+          <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email" inputmode="email"/>
+        </div>
+        <div class="field">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            WhatsApp
+          </label>
+          <input type="tel" id="reg-phone" placeholder="+52 55 1234 5678" autocomplete="tel" inputmode="tel"/>
+        </div>
+        <div class="field">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Contraseña
+          </label>
+          <input type="password" id="reg-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"/>
+        </div>
+        <button class="btn-submit" id="register-btn" onclick="handleRegister()">CREAR CUENTA →</button>
+        <div class="auth-note" style="margin-top:16px">
+          ¿Ya tienes cuenta? <a onclick="switchTab('login')">Inicia sesión</a>
+        </div>
+      </div>
+
+      <div class="secure-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Conexión segura · SSL
+      </div>
+
     </div>
   </div>
 </main>
@@ -126,54 +257,57 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 <script>
 const BACKEND = 'https://mvxpicks-production.up.railway.app';
 
-// Check if already logged in
+// If already logged in → go to dashboard
 const token = localStorage.getItem('mvx_token');
 if (token) window.location.href = '/dashboard';
 
-// Check if coming from purchase
+// Check URL params (coming from purchase)
 const params = new URLSearchParams(window.location.search);
 if (params.get('invested')) {
   switchTab('register');
-  document.getElementById('reg-email').value = params.get('email') || '';
-  showSuccess('¡Pago exitoso! Crea tu cuenta para ver tu dashboard.');
+  if (params.get('email')) document.getElementById('reg-email').value = params.get('email');
+  showMsg('register', 'ok', '¡Pago exitoso! Crea tu cuenta para activar el dashboard.');
 }
 
 function switchTab(tab) {
-  document.getElementById('form-login').style.display    = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-login').style.display    = tab === 'login'    ? 'block' : 'none';
   document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
-  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-  clearMessages();
+  document.getElementById('tab-login').classList.toggle('on', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('on', tab === 'register');
 }
 
-function showError(msg) {
-  document.querySelectorAll('#auth-error').forEach(el => el.textContent = msg);
-  document.querySelectorAll('#auth-success').forEach(el => el.textContent = '');
+function showMsg(form, type, text) {
+  const el = document.getElementById(form + '-msg');
+  const icon = type === 'err'
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  el.className = type === 'err' ? 'msg-err' : 'msg-ok';
+  el.innerHTML = icon + text;
+  el.style.display = 'flex';
 }
-function showSuccess(msg) {
-  document.querySelectorAll('#auth-success').forEach(el => el.textContent = msg);
-  document.querySelectorAll('#auth-error').forEach(el => el.textContent = '');
-}
-function clearMessages() {
-  document.querySelectorAll('#auth-error,#auth-success').forEach(el => el.textContent = '');
+function clearMsg(form) {
+  const el = document.getElementById(form + '-msg');
+  el.style.display = 'none';
 }
 
 async function handleLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) { showError('Completa todos los campos.'); return; }
-
+  const btn   = document.getElementById('login-btn');
+  clearMsg('login');
+  if (!email || !pass) { showMsg('login','err','Completa todos los campos.'); return; }
+  btn.disabled = true; btn.textContent = 'Entrando...';
   try {
-    const res = await fetch(`${BACKEND}/auth/login`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    const res  = await fetch(`${BACKEND}/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ email, password: pass }),
     });
     const data = await res.json();
-    if (!res.ok) { showError(data.error || 'Email o contraseña incorrectos.'); return; }
+    if (!res.ok) { showMsg('login','err', data.error || 'Email o contraseña incorrectos.'); btn.disabled=false; btn.textContent='ENTRAR A MI CUENTA →'; return; }
     localStorage.setItem('mvx_token', data.token);
-    localStorage.setItem('mvx_user', JSON.stringify(data.user));
+    localStorage.setItem('mvx_user',  JSON.stringify(data.user));
     window.location.href = '/dashboard';
-  } catch { showError('Error de conexión. Intenta nuevamente.'); }
+  } catch { showMsg('login','err','Error de conexión. Intenta de nuevo.'); btn.disabled=false; btn.textContent='ENTRAR A MI CUENTA →'; }
 }
 
 async function handleRegister() {
@@ -181,31 +315,33 @@ async function handleRegister() {
   const email = document.getElementById('reg-email').value.trim();
   const phone = document.getElementById('reg-phone').value.trim();
   const pass  = document.getElementById('reg-pass').value;
-  if (!name || !email || !pass) { showError('Completa todos los campos.'); return; }
-  if (pass.length < 8) { showError('La contraseña debe tener al menos 8 caracteres.'); return; }
-
+  const btn   = document.getElementById('register-btn');
+  clearMsg('register');
+  if (!name || !email || !pass) { showMsg('register','err','Completa todos los campos.'); return; }
+  if (pass.length < 8) { showMsg('register','err','La contraseña debe tener al menos 8 caracteres.'); return; }
+  btn.disabled = true; btn.textContent = 'Creando cuenta...';
   try {
-    const res = await fetch(`${BACKEND}/auth/register`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone, password: pass,
-        invested: parseInt(params.get('invested') || '0'),
-        payment_intent: params.get('pi') || '',
+    const res  = await fetch(`${BACKEND}/auth/register`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name, email, phone, password: pass,
+        invested:        parseInt(params.get('invested') || '0'),
+        payment_intent:  params.get('pi') || '',
       }),
     });
     const data = await res.json();
-    if (!res.ok) { showError(data.error || 'Error al crear cuenta.'); return; }
+    if (!res.ok) { showMsg('register','err', data.error || 'Error al crear cuenta.'); btn.disabled=false; btn.textContent='CREAR CUENTA →'; return; }
     localStorage.setItem('mvx_token', data.token);
-    localStorage.setItem('mvx_user', JSON.stringify(data.user));
+    localStorage.setItem('mvx_user',  JSON.stringify(data.user));
     window.location.href = '/dashboard';
-  } catch { showError('Error de conexión. Intenta nuevamente.'); }
+  } catch { showMsg('register','err','Error de conexión. Intenta de nuevo.'); btn.disabled=false; btn.textContent='CREAR CUENTA →'; }
 }
 
-// Enter key support
+// Enter key
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    if (document.getElementById('form-login').style.display !== 'none') handleLogin();
-    else handleRegister();
-  }
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('form-login').style.display !== 'none') handleLogin();
+  else handleRegister();
 });
 </script>
 </body>
