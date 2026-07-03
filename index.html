@@ -1090,8 +1090,32 @@ footer{background:#040406;border-top:1px solid var(--line);padding:36px 20px;tex
       <div class="m-eye">PASO 3 DE 3</div>
       <div class="m-title" id="s3-amt">$5,000 MXN</div>
       <div class="m-sub" id="s3-ret">Rendimiento estimado: +$1,100/día</div>
-      <div class="mfield"><label>Número de tarjeta</label></div>
-      <div id="card-element"></div>
+      <!-- Selector método de pago -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
+        <div id="opt-card" onclick="setPayMethod('card')" style="padding:10px 8px;background:var(--green-lo);border:1px solid rgba(0,255,136,0.4);border-radius:6px;text-align:center;cursor:pointer;transition:all 0.15s">
+          <div style="font-size:18px;margin-bottom:3px">💳</div>
+          <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--green)">Tarjeta</div>
+        </div>
+        <div id="opt-oxxo" onclick="setPayMethod('oxxo')" style="padding:10px 8px;background:var(--bg);border:1px solid var(--line2);border-radius:6px;text-align:center;cursor:pointer;transition:all 0.15s">
+          <div style="font-size:18px;margin-bottom:3px">🏪</div>
+          <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">OXXO</div>
+        </div>
+      </div>
+      <!-- Info OXXO -->
+      <div id="oxxo-info" style="display:none;background:rgba(255,214,10,0.06);border:1px solid rgba(255,214,10,0.2);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--yellow);line-height:1.6">
+        ⏱ Stripe envía el voucher a tu email. Tienes <strong>3 días</strong> para pagar en cualquier OXXO. Tu acceso se activa automáticamente al confirmar el pago.
+      </div>
+      <!-- Card section -->
+      <div id="card-section">
+        <div class="mfield"><label>Número de tarjeta</label></div>
+        <div id="card-element"></div>
+      </div>
+      <!-- OXXO section -->
+      <div id="oxxo-section" style="display:none">
+        <div style="background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:14px;font-size:13px;color:var(--muted);text-align:center;margin-bottom:10px">
+          El voucher se enviará a<br><strong style="color:var(--white)" id="oxxo-email-lbl"></strong>
+        </div>
+      </div>
       <div id="card-errors"></div>
       <button class="pay-btn" id="pay-btn" onclick="doPay()">CONFIRMAR INVERSIÓN →</button>
       <div class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>100% seguro · Stripe · SSL</div>
@@ -1102,7 +1126,30 @@ footer{background:#040406;border-top:1px solid var(--line);padding:36px 20px;tex
 <script>
 const BACKEND='https://mvxpicks-production.up.railway.app';
 const STRIPE_PK='pk_live_51TdMsmDOZDPnW2siEApwGEpZIm4mj8xdc9tI1OejAm113UTngHONID9hBm85ivQatw9hWOIaaYSN37RJTyFW0qcS00Y1ZdjSiv';
-let stripe=null,cardEl=null,curAmt=5000;
+let stripe=null,cardEl=null,curAmt=5000,curPayMethod='card';
+
+function setPayMethod(m){
+  curPayMethod=m;
+  const isOxxo=m==='oxxo';
+  // Toggle card option
+  document.getElementById('opt-card').style.background   = isOxxo ? 'var(--bg)'        : 'var(--green-lo)';
+  document.getElementById('opt-card').style.borderColor  = isOxxo ? 'var(--line2)'      : 'rgba(0,255,136,0.4)';
+  document.getElementById('opt-card').querySelector('div:last-child').style.color = isOxxo ? 'var(--muted)' : 'var(--green)';
+  // Toggle oxxo option
+  document.getElementById('opt-oxxo').style.background   = isOxxo ? 'var(--green-lo)'  : 'var(--bg)';
+  document.getElementById('opt-oxxo').style.borderColor  = isOxxo ? 'rgba(0,255,136,0.4)' : 'var(--line2)';
+  document.getElementById('opt-oxxo').querySelector('div:last-child').style.color = isOxxo ? 'var(--green)' : 'var(--muted)';
+  // Show/hide sections
+  document.getElementById('card-section').style.display  = isOxxo ? 'none'  : 'block';
+  document.getElementById('oxxo-section').style.display  = isOxxo ? 'block' : 'none';
+  document.getElementById('oxxo-info').style.display     = isOxxo ? 'block' : 'none';
+  // Update button
+  document.getElementById('pay-btn').textContent = isOxxo ? 'GENERAR VOUCHER OXXO →' : 'CONFIRMAR INVERSIÓN →';
+  // Fill email for OXXO display
+  const email=document.getElementById('r-email')?.value?.trim()||'';
+  const lbl=document.getElementById('oxxo-email-lbl');
+  if(lbl) lbl.textContent=email;
+}
 
 setTimeout(()=>{const b=document.getElementById('conf-bar');if(b)b.style.width='79%'},900);
 
@@ -1169,20 +1216,72 @@ async function initStripe(){
 }
 
 async function doPay(){
-  const name=document.getElementById('r-name').value.trim(),email=document.getElementById('r-email').value.trim(),phone=document.getElementById('r-phone').value.trim(),pass=document.getElementById('r-pass').value,btn=document.getElementById('pay-btn'),errEl=document.getElementById('card-errors');
-  btn.disabled=true;btn.textContent='Procesando...';errEl.textContent='';
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const phone=document.getElementById('r-phone').value.trim();
+  const pass=document.getElementById('r-pass').value;
+  const btn=document.getElementById('pay-btn');
+  const errEl=document.getElementById('card-errors');
+  const isOxxo=curPayMethod==='oxxo';
+
+  btn.disabled=true;
+  btn.textContent=isOxxo?'Generando voucher...':'Procesando...';
+  errEl.textContent='';
+
   try{
-    const res=await fetch(`${BACKEND}/create-checkout-session`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:'elite',name,email,phone,amount:curAmt})});
+    // Crear payment intent en el backend
+    const res=await fetch(`${BACKEND}/create-checkout-session`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({plan:'elite',name,email,phone,amount:curAmt,payment_method:isOxxo?'oxxo':'card'})
+    });
     const{clientSecret,error:sErr}=await res.json();
-    if(sErr){errEl.textContent=sErr;btn.disabled=false;btn.textContent='CONFIRMAR INVERSIÓN →';return}
-    const{error,paymentIntent}=await stripe.confirmCardPayment(clientSecret,{payment_method:{card:cardEl,billing_details:{email,name}}});
-    if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='CONFIRMAR INVERSIÓN →'}
-    else if(paymentIntent.status==='succeeded'){
-      if(window.fbq)fbq('track','Purchase',{value:curAmt,currency:'MXN'});
-      await fetch(`${BACKEND}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,phone,password:pass,invested:curAmt,payment_intent:paymentIntent.id})}).catch(()=>{});
-      window.location.href=`/login?invested=${curAmt}&pi=${paymentIntent.id}&email=${encodeURIComponent(email)}`;
+    if(sErr){errEl.textContent=sErr;btn.disabled=false;btn.textContent=isOxxo?'GENERAR VOUCHER OXXO →':'CONFIRMAR INVERSIÓN →';return}
+
+    if(isOxxo){
+      // OXXO: Stripe genera voucher y envía email automáticamente
+      const{error,paymentIntent}=await stripe.confirmOxxoPayment(clientSecret,{
+        payment_method:{billing_details:{name,email}}
+      });
+      if(error&&error.type!=='payment_intent_unexpected_state'){
+        errEl.textContent=error.message;btn.disabled=false;btn.textContent='GENERAR VOUCHER OXXO →';
+      } else {
+        // Registrar usuario (sin inversión aún — se activa cuando OXXO confirme el pago vía webhook)
+        await fetch(`${BACKEND}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({name,email,phone,password:pass,invested:0,payment_intent:paymentIntent?.id||''})
+        }).catch(()=>{});
+        // Mostrar pantalla de confirmación OXXO
+        const modal=document.querySelector('.modal');
+        modal.innerHTML=`
+          <div style="text-align:center;padding:20px 10px">
+            <div style="font-size:52px;margin-bottom:16px">🏪</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green);margin-bottom:10px;letter-spacing:0.04em">VOUCHER GENERADO</div>
+            <p style="font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:18px">
+              Stripe envió las instrucciones de pago a<br>
+              <strong style="color:var(--white)">${email}</strong><br><br>
+              Tienes <strong style="color:var(--yellow)">3 días</strong> para pagar en cualquier OXXO.<br>
+              Tu acceso se activa automáticamente al confirmar el pago.
+            </p>
+            <p style="font-size:11px;color:var(--muted2);margin-bottom:20px">
+              ¿No ves el email? Revisa spam o escribe a @mvxinvest_bot
+            </p>
+            <button onclick="closeModal()" style="padding:13px 28px;background:var(--green);color:#000;font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer">ENTENDIDO</button>
+          </div>`;
+      }
+    } else {
+      // Tarjeta — flujo normal
+      const{error,paymentIntent}=await stripe.confirmCardPayment(clientSecret,{
+        payment_method:{card:cardEl,billing_details:{email,name}}
+      });
+      if(error){errEl.textContent=error.message;btn.disabled=false;btn.textContent='CONFIRMAR INVERSIÓN →'}
+      else if(paymentIntent.status==='succeeded'){
+        if(window.fbq)fbq('track','Purchase',{value:curAmt,currency:'MXN'});
+        await fetch(`${BACKEND}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({name,email,phone,password:pass,invested:curAmt,payment_intent:paymentIntent.id})
+        }).catch(()=>{});
+        window.location.href=`/login?invested=${curAmt}&pi=${paymentIntent.id}&email=${encodeURIComponent(email)}`;
+      }
     }
-  }catch{errEl.textContent='Error de conexión. Intenta de nuevo.';btn.disabled=false;btn.textContent='CONFIRMAR INVERSIÓN →'}
+  }catch{errEl.textContent='Error de conexión. Intenta de nuevo.';btn.disabled=false;btn.textContent=isOxxo?'GENERAR VOUCHER OXXO →':'CONFIRMAR INVERSIÓN →'}
 }
 
 const FLAGS={Mexico:'🇲🇽',Brazil:'🇧🇷',Argentina:'🇦🇷',France:'🇫🇷',England:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',Germany:'🇩🇪',Spain:'🇪🇸',Portugal:'🇵🇹',Netherlands:'🇳🇱',Uruguay:'🇺🇾',Colombia:'🇨🇴',Canada:'🇨🇦','United States':'🇺🇸','Korea Republic':'🇰🇷',Japan:'🇯🇵',Morocco:'🇲🇦',Ghana:'🇬🇭',Qatar:'🇶🇦',Switzerland:'🇨🇭',Czechia:'🇨🇿','South Africa':'🇿🇦',Paraguay:'🇵🇾',Haiti:'🇭🇹',Australia:'🇦🇺',Scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',Norway:'🇳🇴',Belgium:'🇧🇪',Senegal:'🇸🇳',Croatia:'🇭🇷',Ecuador:'🇪🇨',Panama:'🇵🇦',Türkiye:'🇹🇷','Ivory Coast':'🇨🇮','Saudi Arabia':'🇸🇦',Egypt:'🇪🇬',Iran:'🇮🇷','New Zealand':'🇳🇿',Sweden:'🇸🇪',Chile:'🇨🇱',Peru:'🇵🇪'};
