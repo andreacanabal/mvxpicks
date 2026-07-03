@@ -443,8 +443,32 @@ scheduleDaily(8, 0, runDailyPicks, 'PICKS DIARIOS');
 // Verificación de resultados a las 11:00 PM México
 scheduleDaily(23, 0, runCheckResults, 'CHECK RESULTADOS');
 
+// Mensaje de buenas noches / felicidades ganadores a las 11:30 PM México
+scheduleDaily(23, 30, async () => {
+  const { data: todayPicks } = await sb
+    .from('picks_history')
+    .select('correct')
+    .gte('date', new Date().toISOString().split('T')[0])
+    .not('correct', 'is', null)
+    .catch(() => ({ data: [] }));
+
+  const correct = todayPicks?.filter(p => p.correct).length || 0;
+  const total   = todayPicks?.length || 0;
+
+  if (total > 0) {
+    await sendResultsRecap(total, correct);
+  } else {
+    await telegramSendAll(
+      `🌙 *BUENAS NOCHES — MVX PICKS*\n\n` +
+      `⚽ Mañana hay más partidos del Mundial.\n` +
+      `🤖 El sistema ya está procesando los picks.\n\n` +
+      `🔥 ¿Aún no inviertes con nosotros?\n` +
+      `👉 @mvxinvest\\_bot`
+    );
+  }
+}, 'BUENAS NOCHES');
+
 // Verificar resultados cada 30 minutos entre 12PM y 11PM México
-// Para detectar picks ganados inmediatamente al terminar los partidos
 setInterval(async () => {
   const mxHour = parseInt(new Date().toLocaleString('en-US', {
     hour: 'numeric', hour12: false, timeZone: 'America/Mexico_City'
@@ -452,9 +476,9 @@ setInterval(async () => {
   if (mxHour >= 12 && mxHour <= 23) {
     await runCheckResults().catch(e => console.error('[autocheck]', e.message));
   }
-}, 30 * 60 * 1000); // cada 30 minutos
+}, 30 * 60 * 1000);
 
-console.log('[scheduler] Picks programados: 8:00 AM México · Resultados: cada 30min (12PM-11PM) + 11:00 PM México');
+console.log('[scheduler] Picks: 8AM · Resultados: cada 30min · Buenas noches: 11:30PM · México');
 
 // ═══════════════════════════════════════════════════════════════
 // MOTOR DE PICKS DIARIOS
@@ -606,29 +630,23 @@ async function sendPicksTelegram(picks) {
   if (!TELEGRAM_BOT()) return;
   const groups = GROUPS();
 
-  // Mensaje hype de apertura del día — solo si hay partidos
-  await telegramSendAll(formatHypeMessage(picks));
+  // 1. Mensaje de buenos días
+  await telegramSend(groups.elite, formatGoodMorning(picks));
   await sleep(2000);
 
-  // Picks por plan
-  for (const [plan, chatId] of Object.entries(groups)) {
-    if (!chatId) continue;
-    const picksToSend = plan === 'basic' ? [picks[0]]
-                      : plan === 'pro'   ? picks.slice(0, 3)
-                      : picks; // elite: TODOS
-    await telegramSend(chatId, formatPicksMessage(picksToSend, plan));
-    await sleep(1000);
+  // 2. Picks censurados → solo grupo élite (el grupo público)
+  await telegramSend(groups.elite, formatPicksCensored(picks));
+  await sleep(1500);
+
+  // 3. Picks completos → básico y pro (grupos de backup)
+  for (const plan of ['basic', 'pro']) {
+    if (groups[plan]) {
+      await telegramSend(groups[plan], formatPicksFull(picks));
+      await sleep(1000);
+    }
   }
 
-  // Parlay del día — solo Pro y Élite — picks con confianza >= 70%
-  const parlayPicks = picks.filter(p => p.confidence >= 70).slice(0, 3);
-  if (parlayPicks.length >= 2) {
-    const parlayMsg = formatParlayMessage(parlayPicks);
-    await telegramSend(groups.pro,   parlayMsg);
-    await telegramSend(groups.elite, parlayMsg);
-  }
-
-  // Programar recordatorios 2h antes de cada partido
+  // 4. Recordatorios 2h antes
   scheduleReminders(picks);
 }
 
@@ -645,134 +663,146 @@ async function savePicksSupabase(picks) {
   if (error) console.error('[Supabase picks]', error.message);
 }
 
-// ── PARLAY DEL DÍA ──
-function formatParlayMessage(picks) {
-  const parlayOdds = picks.reduce((acc, p) => acc * (p.odds_pick || 1.5), 1);
-  const roundedOdds = Math.round(parlayOdds * 100) / 100;
+// ── BUENOS DÍAS ──
+function formatGoodMorning(picks) {
+  const dateStr = new Date().toLocaleDateString('es-MX', {
+    weekday: 'long', day: 'numeric', month: 'long',
+    timeZone: 'America/Mexico_City',
+  }).toUpperCase();
 
-  let msg = `🎯 *PARLAY SUGERIDO DEL DÍA*\n`;
+  const total   = picks.length;
+  const fuego   = picks.filter(p => p.confidence >= 80).length;
+
+  let msg = `🔥 *BUENOS DÍAS — ${dateStr}*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-  msg += `Combinación de los picks con mayor confianza:\n\n`;
-
-  picks.forEach((p, i) => {
-    msg += `${i + 1}. ⚽ *${p.home_team} vs ${p.away_team}*\n`;
-    msg += `   Pick: *${p.prediction}* · ${p.confidence}%\n\n`;
-  });
-
-  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `📊 Cuota combinada estimada: *${roundedOdds}x*\n\n`;
-  msg += `_El parlay es de alto riesgo. Apuesta solo lo que puedes perder._\n`;
-  msg += `_mvxpicks.com_`;
-  return msg;
-}
-
-// ── MENSAJE HYPE DE APERTURA ──
-function formatHypeMessage(picks) {
-  const dateStr = new Date().toLocaleDateString('es-MX', {
-    weekday: 'long', day: 'numeric', month: 'long',
-    timeZone: 'America/Mexico_City',
-  }).toUpperCase();
-
-  const totalPartidos = picks.length;
-  const highConf = picks.filter(p => p.confidence >= 80).length;
-
-  let msg = `⚡ *BUENOS DÍAS — ${dateStr}*\n\n`;
-  msg += `El sistema procesó los partidos de hoy.\n\n`;
-  msg += `📅 *${totalPartidos} partido${totalPartidos > 1 ? 's' : ''} hoy*\n`;
-  if (highConf > 0) {
-    msg += `🎯 *${highConf} pick${highConf > 1 ? 's' : ''} con confianza alta (+80%)*\n`;
+  msg += `⚽ *${total} partido${total > 1 ? 's' : ''} hoy en el Mundial*\n`;
+  if (fuego > 0) {
+    msg += `🔥 *${fuego} pick${fuego > 1 ? 's' : ''} de alta confianza hoy*\n`;
   }
-  msg += `\nLos picks completos llegan en un momento.\n`;
-  msg += `_Publicados antes del partido. Sin editar._`;
+  msg += `\n🤖 El sistema ya analizó las cuotas de 50+ casas.\n`;
+  msg += `Los picks del día llegan en un momento.\n\n`;
+  msg += `💰 ¿Quieres invertir con nosotros?\n`;
+  msg += `👉 Escribe a @mvxinvest\\_bot`;
   return msg;
 }
 
-// ── PICKS DEL DÍA ──
-function formatPicksMessage(picks, plan) {
+// ── PICKS CENSURADOS (grupo élite público) ──
+function formatPicksCensored(picks) {
   const dateStr = new Date().toLocaleDateString('es-MX', {
     weekday: 'long', day: 'numeric', month: 'long',
     timeZone: 'America/Mexico_City',
   }).toUpperCase();
 
-  const planLabel = { basic: 'BÁSICO', pro: 'PRO', elite: 'ÉLITE' }[plan] || plan.toUpperCase();
   const confBar = (pct) => {
     const filled = Math.round(pct / 10);
     return '█'.repeat(filled) + '░'.repeat(10 - filled) + ` ${pct}%`;
   };
+  const confLabel = (pct) =>
+    pct >= 85 ? '🔥 MUY ALTA' :
+    pct >= 75 ? '🚨 ALTA' :
+    pct >= 65 ? '⚠️ MEDIA' : '📊 MODERADA';
 
-  let msg = `🔮 *THE PICK — ${dateStr}*\n`;
+  let msg = `⚽ *MVX PICKS — ${dateStr}*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   for (const p of picks) {
     const t = new Date(p.date).toLocaleTimeString('es-MX', {
       hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City',
     });
+    const oddsLine = (p.odds_pick && p.odds_pick > 0)
+      ? `💵 Cuota promedio: *${p.odds_pick}* · ${p.odds_pick <= 1.6 ? 'Favorito claro' : p.odds_pick <= 2.2 ? 'Cuota competitiva' : 'Valor alto'}`
+      : '';
 
-    // Nivel de confianza en texto
-    const confLabel = p.confidence >= 85 ? '🔥 MUY ALTA'
-                    : p.confidence >= 75 ? '✅ ALTA'
-                    : p.confidence >= 65 ? '⚠️ MEDIA'
-                    : '📊 MODERADA';
-
-    msg += `⚽ *${p.home_team} vs ${p.away_team}*\n`;
-    msg += `🕐 Hoy a las *${t} hrs* (México)\n\n`;
-    msg += `🎯 *PICK: ${p.prediction}*\n`;
-    msg += `${confBar(p.confidence)} — ${confLabel}\n\n`;
-
-    // Razonamiento limpio — solo líneas con información real
-    const cleanReasons = (p.reasoning || []).filter(r =>
-      !r.includes('0%/0%') &&
-      !r.includes('No predictions') &&
-      !r.includes('undefined') &&
-      r.trim().length > 5
-    );
-
-    if (cleanReasons.length > 0) {
-      msg += `💡 *Por qué:*\n`;
-      cleanReasons.forEach(r => { msg += `  · ${r}\n`; });
-      msg += `\n`;
-    }
-
-    msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    msg += `🚨 *${p.home_team} vs ${p.away_team}*\n`;
+    msg += `🕐 Hoy *${t} hrs* (México)\n\n`;
+    msg += `🤖 *PICK DEL SISTEMA:*\n`;
+    msg += `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ _(resultado censurado)_\n\n`;
+    msg += `${confBar(p.confidence)} — ${confLabel(p.confidence)}\n`;
+    if (oddsLine) msg += `${oddsLine}\n`;
+    msg += `\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
   }
 
-  msg += `_% publicado ANTES del partido · Sin editar_\n`;
-  msg += `_mvxpicks.com_`;
+  msg += `🔒 *¿Quieres ver el pick completo?*\n`;
+  msg += `💰 Invierte con nosotros y accede a todo.\n`;
+  msg += `👉 Escribe a @mvxinvest\\_bot`;
+  return msg;
+}
+
+// ── PICKS COMPLETOS (grupos backup: básico y pro) ──
+function formatPicksFull(picks) {
+  const dateStr = new Date().toLocaleDateString('es-MX', {
+    weekday: 'long', day: 'numeric', month: 'long',
+    timeZone: 'America/Mexico_City',
+  }).toUpperCase();
+
+  const confBar = (pct) => {
+    const filled = Math.round(pct / 10);
+    return '█'.repeat(filled) + '░'.repeat(10 - filled) + ` ${pct}%`;
+  };
+  const confLabel = (pct) =>
+    pct >= 85 ? '🔥 MUY ALTA' :
+    pct >= 75 ? '🚨 ALTA' :
+    pct >= 65 ? '⚠️ MEDIA' : '📊 MODERADA';
+
+  let msg = `⚽ *MVX PICKS — ${dateStr}*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  for (const p of picks) {
+    const t = new Date(p.date).toLocaleTimeString('es-MX', {
+      hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City',
+    });
+    const oddsLine = (p.odds_pick && p.odds_pick > 0)
+      ? `💵 Cuota promedio: *${p.odds_pick}* · ${p.odds_pick <= 1.6 ? 'Favorito claro' : p.odds_pick <= 2.2 ? 'Cuota competitiva' : 'Valor alto'}\n`
+      : '';
+
+    msg += `🚨 *${p.home_team} vs ${p.away_team}*\n`;
+    msg += `🕐 Hoy *${t} hrs* (México)\n\n`;
+    msg += `🎯 *PICK: ${p.prediction}*\n`;
+    msg += `${confBar(p.confidence)} — ${confLabel(p.confidence)}\n`;
+    if (oddsLine) msg += oddsLine;
+    msg += `\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  }
+
+  msg += `💰 ¿Quieres invertir con nosotros?\n`;
+  msg += `👉 @mvxinvest\\_bot`;
   return msg;
 }
 
 // ── RECORDATORIOS 2H ANTES ──
 function scheduleReminders(picks) {
   for (const pick of picks) {
-    const kickoff = new Date(pick.date).getTime();
-    const reminderTime = kickoff - (2 * 60 * 60 * 1000); // 2h antes
-    const msUntil = reminderTime - Date.now();
+    const kickoff     = new Date(pick.date).getTime();
+    const reminderMs  = kickoff - (2 * 60 * 60 * 1000);
+    const msUntil     = reminderMs - Date.now();
 
     if (msUntil > 0 && msUntil < 24 * 60 * 60 * 1000) {
       setTimeout(async () => {
         const t = new Date(pick.date).toLocaleTimeString('es-MX', {
           hour: '2-digit', minute: '2-digit', timeZone: 'America/Mexico_City',
         });
-        const msg = `⏰ *RECORDATORIO — 2 HORAS*\n\n`
+
+        const msg = `🚨 *ALERTA — 2 HORAS PARA EL PARTIDO*\n`
+          + `━━━━━━━━━━━━━━━━━━━━━\n\n`
           + `⚽ *${pick.home_team} vs ${pick.away_team}*\n`
           + `🕐 Arranca a las *${t} hrs* (México)\n\n`
-          + `🎯 Pick: *${pick.prediction}*\n`
-          + `📊 Confianza: *${pick.confidence}%*\n\n`
-          + `_Ya tienes la información. Tú decides._`;
+          + `🤖 El sistema ya tiene el pick listo.\n\n`
+          + `🔒 ¿Aún no inviertes?\n`
+          + `💰 Escribe a @mvxinvest\\_bot y empieza hoy.`;
+
         await telegramSendAll(msg);
-        console.log(`[Reminder] ✓ Enviado — ${pick.home_team} vs ${pick.away_team}`);
+        console.log(`[Reminder] ✓ ${pick.home_team} vs ${pick.away_team}`);
       }, msUntil);
-      console.log(`[Reminder] Programado en ${(msUntil / 3600000).toFixed(1)}h — ${pick.home_team} vs ${pick.away_team}`);
+      console.log(`[Reminder] Programado ${(msUntil / 3600000).toFixed(1)}h — ${pick.home_team} vs ${pick.away_team}`);
     }
   }
 }
 
-// ── RESUMEN DE RESULTADOS (mejorado) ──
+// ── RESUMEN DE FIN DE DÍA ──
 async function sendResultsRecap(updated, correct) {
   if (!TELEGRAM_BOT()) return;
 
   const accuracy = updated > 0 ? Math.round((correct / updated) * 100) : 0;
-  const failed = updated - correct;
+  const failed   = updated - correct;
 
   const { data: allTime } = await sb
     .from('picks_history').select('correct').not('correct', 'is', null)
@@ -782,38 +812,37 @@ async function sendResultsRecap(updated, correct) {
   const correctAll = allTime?.filter(p => p.correct).length || correct;
   const accAll     = Math.round((correctAll / totalAll) * 100);
 
-  let msg = `📊 *RESUMEN DEL DÍA — THE PICK*\n`;
+  const perfMsg = accuracy === 100 ? `🔥 *DÍA PERFECTO. Todos los picks acertados.*`
+                : accuracy >= 75   ? `🔥 *Gran día. El sistema no falla.*`
+                : `⚽ *El sistema sigue trabajando.*`;
+
+  let msg = `🏆 *RESUMEN DEL DÍA — MVX PICKS*\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-  msg += `*Partidos de hoy:*\n`;
-  msg += `✅ Acertados: *${correct}*\n`;
+  msg += `${perfMsg}\n\n`;
+  msg += `✅ Picks acertados hoy: *${correct}/${updated}* (${accuracy}%)\n`;
   if (failed > 0) msg += `❌ Fallidos: *${failed}*\n`;
-  msg += `📈 Precisión hoy: *${accuracy}%*\n\n`;
-  msg += `*Historial total del torneo:*\n`;
-  msg += `🎯 ${correctAll}/${totalAll} picks correctos — *${accAll}% precisión*\n\n`;
+  msg += `\n📊 *Historial del torneo:*\n`;
+  msg += `⚽ ${correctAll}/${totalAll} picks · *${accAll}% de precisión*\n\n`;
+  msg += `🎉 *¡Felicidades a todos los ganadores de hoy!*\n\n`;
+  msg += `💰 Mañana hay más partidos. ¿Ya invertiste?\n`;
+  msg += `👉 @mvxinvest\\_bot`;
 
-  if (accuracy === 100) {
-    msg += `🔥 *Día perfecto. Todos los picks acertados.*\n\n`;
-  } else if (accuracy >= 80) {
-    msg += `💪 *Muy buen día. El sistema sigue funcionando.*\n\n`;
-  } else if (accuracy >= 60) {
-    msg += `📊 *Día normal. El historial habla por sí solo.*\n\n`;
-  }
-
-  msg += `_mvxpicks.com_`;
   await telegramSendAll(msg);
 }
 
-// ── MENSAJE DE PICK ACERTADO (para enviar cuando se confirma resultado) ──
+// ── PICK ACERTADO (inmediato al terminar partido) ──
 async function sendWinMessage(pick, result) {
   if (!TELEGRAM_BOT()) return;
 
-  const msg = `✅ *PICK ACERTADO*\n\n`
+  const msg = `🔥 *¡PICK ACERTADO!*\n`
+    + `━━━━━━━━━━━━━━━━━━━━━\n\n`
     + `⚽ *${pick.home_team} vs ${pick.away_team}*\n`
     + `🏆 Resultado: *${result.home_goals}-${result.away_goals}*\n`
-    + `🎯 Pick publicado: *${pick.prediction}*\n`
-    + `📊 Confianza del sistema: *${pick.confidence}%*\n\n`
-    + `_El historial no miente. Siguiente partido, siguiente pick._\n`
-    + `_mvxpicks.com_`;
+    + `🤖 Pick del sistema: *${pick.prediction}*\n`
+    + `📊 Confianza: *${pick.confidence}%*\n\n`
+    + `🔥 El sistema no para. Siguiente partido, siguiente pick.\n\n`
+    + `💰 ¿Aún no inviertes con nosotros?\n`
+    + `👉 @mvxinvest\\_bot`;
 
   await telegramSendAll(msg);
 }
@@ -1078,6 +1107,253 @@ async function updateInvestorReturns(picksWon, picksTotal) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// BOT DE ONBOARDING — @mvxinvest_bot
+// Flujo: usuario escribe → bot guía paso a paso hacia el pago
+// ═══════════════════════════════════════════════════════════════
+
+const INVEST_BOT  = () => process.env.TELEGRAM_INVEST_BOT_TOKEN;
+const INVEST_API  = () => `https://api.telegram.org/bot${INVEST_BOT()}`;
+
+// Estado de conversación por usuario (en memoria — se reinicia con el server)
+const userState = {};
+
+// Registrar webhook del bot de inversión
+async function setupInvestBotWebhook() {
+  const token = INVEST_BOT();
+  if (!token) { console.warn('[invest_bot] No token configured'); return; }
+  const webhookUrl = `${process.env.SITE_URL || 'https://mvxpicks-production.up.railway.app'}/invest-bot-webhook`;
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: webhookUrl, allowed_updates: ['message', 'callback_query'] }),
+    });
+    const d = await r.json();
+    console.log('[invest_bot] Webhook:', d.ok ? '✓ Configurado → ' + webhookUrl : d.description);
+  } catch (e) { console.error('[invest_bot] Webhook error:', e.message); }
+}
+
+// Enviar mensaje del bot de inversión
+async function investBotSend(chatId, text, extra = {}) {
+  const token = INVEST_BOT();
+  if (!token) return;
+  await fetch(`${INVEST_API()}/sendMessage`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown', ...extra }),
+  }).catch(e => console.error('[invest_bot send]', e.message));
+}
+
+// Keyboard helpers
+const KB = {
+  inicio: { inline_keyboard: [[
+    { text: '💰 Quiero invertir', callback_data: 'start' },
+    { text: '📊 Ver picks del día', callback_data: 'picks' },
+  ]]},
+  montos: { inline_keyboard: [
+    [{ text: '$500 MXN', callback_data: 'amt_500' }, { text: '$1,000 MXN', callback_data: 'amt_1000' }, { text: '$2,000 MXN', callback_data: 'amt_2000' }],
+    [{ text: '$5,000 MXN ⭐', callback_data: 'amt_5000' }, { text: '$10,000 MXN', callback_data: 'amt_10000' }, { text: '$20,000 MXN', callback_data: 'amt_20000' }],
+    [{ text: '✏️ Otro monto', callback_data: 'amt_custom' }],
+  ]},
+  confirmar: (amt) => ({ inline_keyboard: [[
+    { text: `✅ Sí, invertir $${parseInt(amt).toLocaleString('es-MX')} MXN`, callback_data: `confirm_${amt}` },
+    { text: '← Cambiar monto', callback_data: 'start' },
+  ]]}),
+  soporte: { inline_keyboard: [[{ text: '💬 Hablar con el equipo', url: 'https://t.me/xmrmvx' }]]},
+};
+
+// Flujo del bot — mensajes por estado
+const FLOW = {
+  // Bienvenida
+  welcome: async (chatId, name) => {
+    await investBotSend(chatId,
+      `👋 Hola *${name}*, bienvenido a MVX Picks.\n\n` +
+      `Soy el asistente de inversión del sistema.\n\n` +
+      `*¿Qué hacemos?*\n` +
+      `Nuestro bot de IA analiza cuotas de 50+ casas de apuestas antes de cada partido del Mundial. ` +
+      `Nuestro equipo apuesta por ti. Tú ves crecer tu dinero.\n\n` +
+      `📊 *86% de precisión documentada* · 330 picks publicados · Mundial 2026\n\n` +
+      `¿Qué quieres hacer?`,
+      { reply_markup: KB.inicio }
+    );
+    userState[chatId] = { step: 'welcomed' };
+  },
+
+  // Explicar el modelo
+  explain: async (chatId) => {
+    await investBotSend(chatId,
+      `💰 *Así funciona la inversión:*\n\n` +
+      `1️⃣ Tú depositas desde *$500 MXN*\n` +
+      `2️⃣ El bot analiza y genera el pick\n` +
+      `3️⃣ Nuestro equipo apuesta por ti\n` +
+      `4️⃣ Cuando ganamos, tu balance sube\n` +
+      `5️⃣ Retiras cuando quieras en 24 horas\n\n` +
+      `*Sin comisión. Sin permanencia mínima.*\n\n` +
+      `¿Cuánto quieres invertir?`,
+      { reply_markup: KB.montos }
+    );
+    userState[chatId] = { step: 'choosing_amount' };
+  },
+
+  // Confirmar monto
+  confirmAmount: async (chatId, amount) => {
+    const daily  = Math.round(parseInt(amount) * 0.22);
+    const weekly = Math.round(parseInt(amount) * 0.22 * 7);
+    const fmt    = n => '$' + parseInt(n).toLocaleString('es-MX');
+    await investBotSend(chatId,
+      `✅ *Monto seleccionado: ${fmt(amount)} MXN*\n\n` +
+      `📈 *Rendimiento estimado:*\n` +
+      `• Diario: +${fmt(daily)} MXN\n` +
+      `• Semanal: +${fmt(weekly)} MXN\n` +
+      `• Al final del torneo: ~+${fmt(weekly * 5.7)} MXN\n\n` +
+      `_Basado en el rendimiento actual del 22% semanal_\n\n` +
+      `¿Confirmas?`,
+      { reply_markup: KB.confirmar(amount) }
+    );
+    userState[chatId] = { step: 'confirming', amount };
+  },
+
+  // Pedir monto personalizado
+  askCustom: async (chatId) => {
+    await investBotSend(chatId,
+      `✏️ *¿Cuánto quieres invertir?*\n\n` +
+      `Escribe el monto en pesos mexicanos.\n` +
+      `Mínimo: *$500 MXN*\n` +
+      `Máximo: *$50,000 MXN*\n\n` +
+      `_Ejemplo: 3500_`
+    );
+    userState[chatId] = { step: 'waiting_custom_amount' };
+  },
+
+  // Enviar link de pago
+  sendPaymentLink: async (chatId, amount) => {
+    const fmt = n => '$' + parseInt(n).toLocaleString('es-MX');
+    await investBotSend(chatId,
+      `🔗 *Tu link de inversión está listo*\n\n` +
+      `Monto: *${fmt(amount)} MXN*\n\n` +
+      `👇 Entra aquí para completar tu registro y pago:`,
+      { reply_markup: { inline_keyboard: [[
+        { text: `💳 Invertir ${fmt(amount)} MXN ahora`, url: `https://mvxpicks.com?amount=${amount}` }
+      ], [
+        { text: '🔒 Pago seguro con Stripe · SSL', callback_data: 'noop' }
+      ]]}}
+    );
+    await new Promise(r => setTimeout(r, 1000));
+    await investBotSend(chatId,
+      `⚡ *Una vez que completes el pago:*\n\n` +
+      `✅ Recibes acceso inmediato al grupo Élite\n` +
+      `✅ Tu dashboard queda activo\n` +
+      `✅ Los picks de hoy ya están publicados\n\n` +
+      `¿Tienes alguna duda? Escríbeme aquí o contacta al equipo.`,
+      { reply_markup: KB.soporte }
+    );
+    userState[chatId] = { step: 'sent_link', amount };
+  },
+
+  // Mostrar picks del día
+  showPicks: async (chatId) => {
+    await investBotSend(chatId,
+      `📊 *Picks de hoy — Mundial 2026*\n\n` +
+      `Los picks completos con % de confianza están en el grupo:\n\n` +
+      `👥 *t.me/mvxpicks*\n\n` +
+      `Entra al grupo gratis y ve los picks en tiempo real.\n` +
+      `Si quieres que tu dinero trabaje con nosotros, escríbeme de vuelta.`,
+      { reply_markup: { inline_keyboard: [[
+        { text: '⚽ Ver picks en el grupo', url: 'https://t.me/mvxpicks' },
+        { text: '💰 Quiero invertir', callback_data: 'start' },
+      ]]}}
+    );
+  },
+};
+
+// WEBHOOK endpoint
+app.post('/invest-bot-webhook', async (req, res) => {
+  res.sendStatus(200); // Responder rápido a Telegram
+  const update = req.body;
+
+  try {
+    // Callback query (botones)
+    if (update.callback_query) {
+      const cq     = update.callback_query;
+      const chatId = cq.message.chat.id;
+      const data   = cq.data;
+      const name   = cq.from.first_name || 'amigo';
+
+      // Acknowledge callback
+      await fetch(`${INVEST_API()}/answerCallbackQuery`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callback_query_id: cq.id }),
+      }).catch(() => {});
+
+      if (data === 'start')        await FLOW.explain(chatId);
+      else if (data === 'picks')   await FLOW.showPicks(chatId);
+      else if (data === 'noop')    return;
+      else if (data.startsWith('amt_')) {
+        const amt = data.replace('amt_', '');
+        if (amt === 'custom') await FLOW.askCustom(chatId);
+        else await FLOW.confirmAmount(chatId, amt);
+      }
+      else if (data.startsWith('confirm_')) {
+        const amt = data.replace('confirm_', '');
+        await FLOW.sendPaymentLink(chatId, amt);
+      }
+      return;
+    }
+
+    // Mensaje de texto
+    if (!update.message) return;
+    const msg    = update.message;
+    const chatId = msg.chat.id;
+    const text   = (msg.text || '').trim().toLowerCase();
+    const name   = msg.from?.first_name || 'amigo';
+    const state  = userState[chatId] || {};
+
+    // Comandos
+    if (text === '/start' || text === '/invertir' || text === 'hola' || text === 'hello') {
+      await FLOW.welcome(chatId, name);
+      return;
+    }
+
+    // Esperando monto personalizado
+    if (state.step === 'waiting_custom_amount') {
+      const num = parseInt(text.replace(/[^0-9]/g, ''));
+      if (!num || num < 500 || num > 50000) {
+        await investBotSend(chatId,
+          `⚠️ El monto debe ser entre *$500* y *$50,000 MXN*.\n\nEscribe solo el número. Ejemplo: _3500_`
+        );
+        return;
+      }
+      await FLOW.confirmAmount(chatId, num);
+      return;
+    }
+
+    // Usuario escribe cualquier cosa sin estado → bienvenida
+    if (!state.step || state.step === 'welcomed') {
+      await FLOW.welcome(chatId, name);
+      return;
+    }
+
+    // Si ya tiene link enviado
+    if (state.step === 'sent_link') {
+      await investBotSend(chatId,
+        `✅ Ya te enviamos el link de pago.\n\n` +
+        `Si tienes algún problema, escríbeme aquí o contacta al equipo 👇`,
+        { reply_markup: KB.soporte }
+      );
+      return;
+    }
+
+    // Default
+    await FLOW.welcome(chatId, name);
+
+  } catch (err) {
+    console.error('[invest_bot webhook]', err.message);
+  }
+});
+
 // ── Start ──
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Mr. MVX backend running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Mr. MVX backend running on port ${PORT}`);
+  // Configurar webhook del bot de inversión al iniciar
+  setTimeout(setupInvestBotWebhook, 3000);
+});
