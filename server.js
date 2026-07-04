@@ -759,33 +759,8 @@ app.get('/sync-picks-today', async (req, res) => {
   }
   try {
     console.log('[sync-picks-today] Iniciando sync...');
-    const picks = await generateDailyPicks();
-    if (!picks?.length) return res.json({ ok: false, message: 'No se encontraron picks para hoy' });
-
-    // Guardar en Supabase
-    const rows = picks.map(p => ({
-      fixture_id:          p.fixture_id,
-      date:                p.date,
-      home_team:           p.home_team,
-      away_team:           p.away_team,
-      prediction:          p.prediction,
-      confidence:          p.confidence,
-      odds_pick:           p.odds_pick || null,
-      reasoning:           p.reasoning || [],
-      league_round:        p.league_round || '',
-      timestamp_published: new Date().toISOString(),
-      result:              null,
-      correct:             null,
-    }));
-
-    const { error } = await sb.from('picks_history').upsert(rows, { onConflict: 'fixture_id' });
-    if (error) {
-      console.error('[sync-picks-today] Error Supabase:', error.message);
-      return res.status(500).json({ error: error.message });
-    }
-
-    console.log(`[sync-picks-today] ✓ ${rows.length} picks sincronizados`);
-    res.json({ ok: true, synced: rows.length, picks: rows.map(r => ({ fixture_id: r.fixture_id, home_team: r.home_team, away_team: r.away_team, prediction: r.prediction })) });
+    const result = await runDailyPicks();
+    res.json({ ok: true, ...result });
   } catch (err) {
     console.error('[sync-picks-today]', err.message);
     res.status(500).json({ error: err.message });
@@ -984,38 +959,59 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function runCheckResults() {
   console.log('[CheckResults] Iniciando...');
 
+  // Buscar todos los picks sin resultado de los últimos 7 días
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
   const { data: pending, error } = await sb
-    .from('picks_history').select('*').is('result', null)
+    .from('picks_history')
+    .select('*')
+    .is('correct', null)
+    .gte('date', sevenDaysAgo)
     .lte('date', new Date().toISOString());
 
-  if (error) throw error;
-  if (!pending?.length) return { updated: 0 };
+  if (error) { console.error('[CheckResults] Supabase error:', error.message); throw error; }
+  if (!pending?.length) {
+    console.log('[CheckResults] No hay picks pendientes');
+    return { updated: 0, correct: 0, accuracy: null };
+  }
+
+  console.log(`[CheckResults] ${pending.length} picks pendientes de resultado`);
 
   let updated = 0, correct = 0;
 
   for (const pick of pending) {
-    const result = await getFixtureResult(pick.fixture_id);
-    if (!result) continue;
+    try {
+      const result = await getFixtureResult(pick.fixture_id);
+      if (!result) {
+        console.log(`[CheckResults] ${pick.home_team} vs ${pick.away_team} — sin resultado aún (fixture_id: ${pick.fixture_id})`);
+        continue;
+      }
 
-    const isCorrect = evaluatePick(pick.prediction, result, pick.home_team, pick.away_team);
-    await sb.from('picks_history').update({
-      result: `${result.home_goals}-${result.away_goals}`, correct: isCorrect,
-    }).eq('fixture_id', pick.fixture_id);
+      const isCorrect = evaluatePick(pick.prediction, result, pick.home_team, pick.away_team);
+      const { error: updateErr } = await sb.from('picks_history').update({
+        result:  `${result.home_goals}-${result.away_goals}`,
+        correct: isCorrect,
+      }).eq('fixture_id', pick.fixture_id);
 
-    if (isCorrect) {
-      correct++;
-      // Mensaje inmediato de pick acertado
-      await sendWinMessage(pick, result).catch(() => {});
-      await sleep(1500);
+      if (updateErr) { console.error(`[CheckResults] Error actualizando ${pick.fixture_id}:`, updateErr.message); continue; }
+
+      console.log(`[CheckResults] ${pick.home_team} vs ${pick.away_team} → ${result.home_goals}-${result.away_goals} · Pick: ${pick.prediction} · ${isCorrect ? '✓ ACERTADO' : '✗ FALLÓ'}`);
+
+      if (isCorrect) {
+        correct++;
+        await sendWinMessage(pick, result).catch(e => console.error('[sendWinMessage]', e.message));
+        await sleep(1500);
+      }
+      updated++;
+    } catch (err) {
+      console.error(`[CheckResults] Error en fixture ${pick.fixture_id}:`, err.message);
     }
-    updated++;
   }
 
   if (updated > 0) {
-    await updateAccuracyStats();
-    await sendResultsRecap(updated, correct);
-    // Actualizar rendimientos de inversores
-    await updateInvestorReturns(correct, updated);
+    await updateAccuracyStats().catch(() => {});
+    await sendResultsRecap(updated, correct).catch(() => {});
+    await updateInvestorReturns(correct, updated).catch(() => {});
   }
 
   console.log(`[CheckResults] ✓ ${correct}/${updated} correctos`);
