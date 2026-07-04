@@ -721,16 +721,76 @@ async function sendPicksTelegram(picks) {
 
 async function savePicksSupabase(picks) {
   const rows = picks.map(p => ({
-    fixture_id: p.fixture_id, date: p.date,
-    home_team: p.home_team, away_team: p.away_team,
-    prediction: p.prediction, confidence: p.confidence,
-    reasoning: p.reasoning, league_round: p.league_round,
-    timestamp_published: p.timestamp_published,
-    result: null, correct: null,
+    fixture_id:          p.fixture_id,
+    date:                p.date,
+    home_team:           p.home_team,
+    away_team:           p.away_team,
+    prediction:          p.prediction,
+    confidence:          p.confidence,
+    odds_pick:           p.odds_pick || null,
+    reasoning:           p.reasoning || [],
+    league_round:        p.league_round || '',
+    timestamp_published: p.timestamp_published || new Date().toISOString(),
+    result:              null,
+    correct:             null,
   }));
-  const { error } = await sb.from('picks_history').upsert(rows, { onConflict: 'fixture_id' });
-  if (error) console.error('[Supabase picks]', error.message);
+
+  console.log(`[Supabase] Guardando ${rows.length} picks...`);
+  const { data, error } = await sb.from('picks_history').upsert(rows, { onConflict: 'fixture_id' });
+  if (error) {
+    console.error('[Supabase] ERROR guardando picks:', JSON.stringify(error));
+  } else {
+    console.log(`[Supabase] ✓ ${rows.length} picks guardados`);
+  }
 }
+
+// GET /debug-picks?secret=X — ver qué hay en picks_history
+app.get('/debug-picks', async (req, res) => {
+  if (req.query.secret !== (process.env.CRON_SECRET || 'mvxpicks2026')) return res.status(401).json({ error: 'No autorizado' });
+  const { data, error } = await sb.from('picks_history').select('fixture_id,date,home_team,away_team,prediction,confidence,result,correct').order('date', { ascending: false }).limit(20);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ count: data?.length || 0, picks: data });
+});
+
+// GET /sync-picks-today?secret=X — forzar sync de picks de hoy desde la API al Supabase
+app.get('/sync-picks-today', async (req, res) => {
+  if (req.query.secret !== (process.env.CRON_SECRET || 'mvxpicks2026')) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+  try {
+    console.log('[sync-picks-today] Iniciando sync...');
+    const picks = await generateDailyPicks();
+    if (!picks?.length) return res.json({ ok: false, message: 'No se encontraron picks para hoy' });
+
+    // Guardar en Supabase
+    const rows = picks.map(p => ({
+      fixture_id:          p.fixture_id,
+      date:                p.date,
+      home_team:           p.home_team,
+      away_team:           p.away_team,
+      prediction:          p.prediction,
+      confidence:          p.confidence,
+      odds_pick:           p.odds_pick || null,
+      reasoning:           p.reasoning || [],
+      league_round:        p.league_round || '',
+      timestamp_published: new Date().toISOString(),
+      result:              null,
+      correct:             null,
+    }));
+
+    const { error } = await sb.from('picks_history').upsert(rows, { onConflict: 'fixture_id' });
+    if (error) {
+      console.error('[sync-picks-today] Error Supabase:', error.message);
+      return res.status(500).json({ error: error.message });
+    }
+
+    console.log(`[sync-picks-today] ✓ ${rows.length} picks sincronizados`);
+    res.json({ ok: true, synced: rows.length, picks: rows.map(r => ({ fixture_id: r.fixture_id, home_team: r.home_team, away_team: r.away_team, prediction: r.prediction })) });
+  } catch (err) {
+    console.error('[sync-picks-today]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ── BUENOS DÍAS ──
 function formatGoodMorning(picks) {
