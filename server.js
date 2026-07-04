@@ -804,11 +804,6 @@ app.post('/update-results-bulk', async (req, res) => {
   await updateAccuracyStats().catch(() => {});
   res.json({ ok: true, updated });
 });
-  if (req.query.secret !== (process.env.CRON_SECRET || 'mvxpicks2026')) return res.status(401).json({ error: 'No autorizado' });
-  const { data, error } = await sb.from('picks_history').select('fixture_id,date,home_team,away_team,prediction,confidence,result,correct').order('date', { ascending: false }).limit(20);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ count: data?.length || 0, picks: data });
-});
 
 // GET /debug-picks?secret=X — ver qué hay en picks_history
 app.get('/debug-picks', async (req, res) => {
@@ -816,7 +811,9 @@ app.get('/debug-picks', async (req, res) => {
   const { data, error } = await sb.from('picks_history').select('fixture_id,date,home_team,away_team,prediction,confidence,result,correct').order('date', { ascending: false }).limit(20);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ count: data?.length || 0, picks: data });
-});?secret=X — forzar sync de picks de hoy desde la API al Supabase
+});
+
+// GET /sync-picks-today?secret=X — forzar sync de picks de hoy desde la API al Supabase
 app.get('/sync-picks-today', async (req, res) => {
   if (req.query.secret !== (process.env.CRON_SECRET || 'mvxpicks2026')) {
     return res.status(401).json({ error: 'No autorizado' });
