@@ -1020,23 +1020,24 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function runCheckResults() {
   console.log('[CheckResults] Iniciando...');
 
-  // Buscar todos los picks sin resultado de los últimos 7 días
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  // Solo picks de HOY en adelante
+  const todayMX = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+  const todayStart = new Date(todayMX + 'T00:00:00-06:00').toISOString();
 
   const { data: pending, error } = await sb
     .from('picks_history')
     .select('*')
     .is('correct', null)
-    .gte('date', sevenDaysAgo)
+    .gte('date', todayStart)
     .lte('date', new Date().toISOString());
 
   if (error) { console.error('[CheckResults] Supabase error:', error.message); throw error; }
   if (!pending?.length) {
-    console.log('[CheckResults] No hay picks pendientes');
+    console.log('[CheckResults] No hay picks pendientes hoy');
     return { updated: 0, correct: 0, accuracy: null };
   }
 
-  console.log(`[CheckResults] ${pending.length} picks pendientes de resultado`);
+  console.log(`[CheckResults] ${pending.length} picks pendientes hoy`);
 
   let updated = 0, correct = 0;
 
@@ -1044,7 +1045,7 @@ async function runCheckResults() {
     try {
       const result = await getFixtureResult(pick.fixture_id);
       if (!result) {
-        console.log(`[CheckResults] ${pick.home_team} vs ${pick.away_team} — sin resultado aún (fixture_id: ${pick.fixture_id})`);
+        console.log(`[CheckResults] ${pick.home_team} vs ${pick.away_team} — sin resultado aún`);
         continue;
       }
 
@@ -1054,9 +1055,9 @@ async function runCheckResults() {
         correct: isCorrect,
       }).eq('fixture_id', pick.fixture_id);
 
-      if (updateErr) { console.error(`[CheckResults] Error actualizando ${pick.fixture_id}:`, updateErr.message); continue; }
+      if (updateErr) { console.error(`[CheckResults] Error actualizando:`, updateErr.message); continue; }
 
-      console.log(`[CheckResults] ${pick.home_team} vs ${pick.away_team} → ${result.home_goals}-${result.away_goals} · Pick: ${pick.prediction} · ${isCorrect ? '✓ ACERTADO' : '✗ FALLÓ'}`);
+      console.log(`[CheckResults] ${pick.home_team} vs ${pick.away_team} → ${result.home_goals}-${result.away_goals} · ${isCorrect ? '✓ ACERTADO' : '✗ FALLÓ'}`);
 
       if (isCorrect) {
         correct++;
@@ -1075,7 +1076,7 @@ async function runCheckResults() {
     await updateInvestorReturns(correct, updated).catch(() => {});
   }
 
-  console.log(`[CheckResults] ✓ ${correct}/${updated} correctos`);
+  console.log(`[CheckResults] ✓ ${correct}/${updated} correctos hoy`);
   return { updated, correct, accuracy: updated > 0 ? Math.round((correct / updated) * 100) : null };
 }
 
