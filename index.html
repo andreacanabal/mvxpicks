@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es-MX" style="background:#060608">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -49,10 +49,11 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 }
 
 body{
-  background:var(--bg);color:var(--white);
+  background:#060608 !important;color:#FFFFFF;
   font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;
   overflow-x:hidden;-webkit-font-smoothing:antialiased;
 }
+html{background:#060608 !important}
 img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
@@ -98,13 +99,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
   padding:72px 20px 0;
   position:relative;overflow:hidden;
   text-align:center;
+  background:#060608;
 }
 
 /* Gradient orbs */
-.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
-.orb-1{width:500px;height:500px;background:rgba(0,255,136,0.06);top:-150px;left:-100px}
-.orb-2{width:400px;height:400px;background:rgba(123,47,255,0.06);top:-100px;right:-100px}
-.orb-3{width:300px;height:300px;background:rgba(0,255,136,0.04);bottom:0;left:50%;transform:translateX(-50%)}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none;z-index:0}
+.orb-1{width:300px;height:300px;background:rgba(0,255,136,0.05);top:-100px;left:-80px}
+.orb-2{width:280px;height:280px;background:rgba(123,47,255,0.04);top:-80px;right:-80px}
+.orb-3{width:200px;height:200px;background:rgba(0,255,136,0.03);bottom:0;left:50%;transform:translateX(-50%)}
 
 /* Grid */
 .hero-grid{
@@ -640,33 +642,53 @@ footer{background:#040406;border-top:1px solid var(--line);padding:36px 20px;tex
   <div class="hero-inner">
     <div class="live-badge"><span class="live-dot"></span>Sistema activo · Mundial 2026</div>
 
-    <div class="scoreboard">
-      <div class="sb-top">
-        <span class="sb-comp">FIFA World Cup 2026 · Octavos de Final</span>
-        <span class="sb-live"><span class="sb-live-dot"></span>Pick listo</span>
-      </div>
-      <div class="sb-match">
-        <div class="sb-team"><div class="sb-flag">🇲🇽</div><div class="sb-name">MÉXICO</div></div>
-        <div class="sb-center">
-          <div class="sb-kick">DOM 5 JUL · 18:00 HRS MX</div>
-          <div class="sb-vs">VS</div>
-          <div class="sb-date">AT&T Stadium · Dallas, TX</div>
-        </div>
-        <div class="sb-team"><div class="sb-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div><div class="sb-name">ENGLAND</div></div>
-      </div>
-      <div class="sb-strip">
-        <div><div class="sb-strip-lbl">Pick del sistema · IA</div></div>
-        <div class="sb-strip-val">
-          <span class="sb-pred">VICTORIA MÉXICO</span>
-          <div class="conf-row">
-            <div class="conf-track"><div class="conf-fill" id="conf-bar"></div></div>
-            <span class="conf-pct">79%</span>
-          </div>
-        </div>
-        <div class="sb-lock">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Solo miembros
-        </div>
+    <!-- FOUNDER CARD — compact premium -->
+    <div style="
+      position:relative;overflow:hidden;
+      border-radius:10px;margin-bottom:24px;
+      height:160px;
+      background:#0A0A0A;
+      box-shadow:0 8px 40px rgba(0,0,0,0.8);
+    ">
+      <!-- Foto full bleed — si no carga, el fondo negro se ve igual de bien -->
+      <img src="mvx-photo..jpg" alt="Mr. MVX"
+        onerror="this.style.display='none'"
+        style="
+          position:absolute;inset:0;width:100%;height:100%;
+          object-fit:cover;object-position:center 15%;
+          display:block;
+        "
+      />
+      <!-- Overlay gradiente negro siempre presente -->
+      <div style="
+        position:absolute;inset:0;
+        background:linear-gradient(105deg,rgba(6,6,8,0.1) 0%,rgba(6,6,8,0.5) 40%,rgba(6,6,8,0.97) 75%);
+      "></div>
+      <!-- Glow verde sutil en esquina izquierda -->
+      <div style="
+        position:absolute;top:-40px;left:-40px;
+        width:180px;height:180px;border-radius:50%;
+        background:radial-gradient(circle,rgba(0,255,136,0.12) 0%,transparent 70%);
+        pointer-events:none;
+      "></div>
+      <!-- Top accent line -->
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)"></div>
+      <!-- Text — lado derecho -->
+      <div style="
+        position:absolute;right:0;top:0;bottom:0;
+        display:flex;flex-direction:column;justify-content:center;
+        padding:0 22px;text-align:right;width:60%;
+      ">
+        <div style="
+          font-family:var(--mono);font-size:9px;color:var(--green);
+          letter-spacing:0.18em;text-transform:uppercase;margin-bottom:8px;
+        ">Fundador · MVX Picks</div>
+        <div style="
+          font-family:'Bebas Neue',sans-serif;
+          font-size:clamp(28px,7vw,42px);
+          color:#FFFFFF;letter-spacing:0.04em;line-height:0.95;
+          text-shadow:0 0 30px rgba(0,255,136,0.25),0 2px 20px rgba(0,0,0,0.9);
+        ">MR. MVX</div>
       </div>
     </div>
 
@@ -759,16 +781,16 @@ footer{background:#040406;border-top:1px solid var(--line);padding:36px 20px;tex
     </div>
     <div class="data-grid" style="margin-top:36px">
       <div class="data-card">
-        <div class="dc-label">Picks acertados</div>
+        <div class="dc-label">Picks acertados <span style="background:var(--green);color:#000;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:0.1em;vertical-align:middle">HOY</span></div>
         <div class="dc-val" id="dc-correct">284</div>
-        <div class="dc-sub">picks acertados · <span style="color:var(--yellow);font-size:11px">Mundial 2026</span></div>
+        <div class="dc-sub">de 330 picks · <span style="color:var(--yellow);font-size:11px">⚽ Mundial 2026</span></div>
         <div class="dc-bar-wrap">
           <div class="dc-bar-bg"><div class="dc-bar-fill" style="--w:86%;width:86%"></div></div>
           <div class="dc-bar-lbl"><span>0%</span><span style="color:var(--green);font-weight:600">86% · 284/330</span><span>100%</span></div>
         </div>
       </div>
       <div class="data-card">
-        <div class="dc-label">Rendimiento semanal</div>
+        <div class="dc-label">Rendimiento semanal <span style="background:var(--yellow);color:#000;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:0.1em;vertical-align:middle">HOY</span></div>
         <div class="dc-val" style="color:var(--yellow)">+22%</div>
         <div class="dc-sub">sobre capital invertido</div>
         <div class="dc-bar-wrap">
@@ -779,7 +801,7 @@ footer{background:#040406;border-top:1px solid var(--line);padding:36px 20px;tex
       <div class="data-card">
         <div class="dc-label">Picks totales publicados</div>
         <div class="dc-val" id="dc-total" style="color:var(--purple)">330</div>
-        <div class="dc-sub">picks publicados · <span style="color:var(--yellow);font-size:11px">Mundial 2026</span></div>
+        <div class="dc-sub">picks publicados <span style="background:rgba(123,47,255,0.3);color:var(--purple);font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:0.1em;vertical-align:middle">HOY</span> · <span style="color:var(--yellow);font-size:11px">⚽ Mundial 2026</span></div>
         <div class="dc-bar-wrap">
           <div class="dc-bar-bg"><div class="dc-bar-fill" style="--w:58%;width:58%;background:linear-gradient(90deg,#5500cc,var(--purple))"></div></div>
           <div class="dc-bar-lbl"><span>0</span><span style="color:var(--purple);font-weight:600" id="dc-total-lbl">330</span><span>104</span></div>
